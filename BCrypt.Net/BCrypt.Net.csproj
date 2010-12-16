@@ -53,7 +53,7 @@
 
     <Target Name="BuildZip">
         <!-- Track Version -->
-        <Version VersionFile="version.txt" BuildType="Automatic" RevisionType="Automatic" Major="0" Minor="1">
+        <Version VersionFile="version.txt" BuildType="Increment" RevisionType="Automatic" Major="0" Minor="1">
             <Output TaskParameter="Major" PropertyName="Major" />
             <Output TaskParameter="Minor" PropertyName="Minor" />
             <Output TaskParameter="Build" PropertyName="Build" />
@@ -69,7 +69,7 @@
         </ItemGroup>
         <Zip Files="@(ZipFiles)"
            WorkingDirectory="$(OutputPath)" 
-           ZipFileName="$(OutputPath)\Builds\$(AssemblyName)_b$(Build).zip"
+           ZipFileName="$(OutputPath)\Builds\bcryptnet.build$(Build).zip"
            ZipLevel="9" /> 
     </Target>
     

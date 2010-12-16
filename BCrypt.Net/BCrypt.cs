@@ -21,48 +21,45 @@ using System.Text;
 
 namespace BCrypt.Net
 {
-    /// <summary>
-    /// BCrypt implementation
-    /// </summary>
+    /// <summary>BCrypt implementation.</summary>
     /// <remarks>
     ///  <para>
-    ///   BCrypt implements OpenBSD-style Blowfish password hashing using the scheme described in "A
-    ///   Future-Adaptable Password Scheme" by Niels Provos and David Mazieres.
-    ///   </para>
+    ///        BCrypt implements OpenBSD-style Blowfish password hashing using the scheme described in
+    ///        <a href="http://www.usenix.org/event/usenix99/provos/provos_html/index.html">"A Future-
+    ///        Adaptable Password Scheme"</a> by Niels Provos and David Mazieres.
+    ///  </para>
     ///  <para>
-    ///   This password hashing system tries to thwart off-line password cracking using a
-    ///   computationally-intensive hashing algorithm, based on Bruce Schneier's Blowfish cipher. The
-    ///   work factor of the algorithm is parameterised, so it can be increased as computers get
-    ///   faster.
-    ///   </para>
+    ///        This password hashing system tries to thwart off-line password cracking using a
+    ///        computationally-intensive hashing algorithm, based on Bruce Schneier's Blowfish cipher.
+    ///        The work factor of the algorithm is parameterised, so it can be increased as computers
+    ///        get faster.
+    ///  </para>
     ///  <para>
-    ///   Usage is really simple. To hash a password for the first time, call the HashPassword method
-    ///   with a random salt, like this:
-    ///   </para>
-    ///   <code>
-    ///   string pw_hash = BCrypt.HashPassword(plain_password, BCrypt.GenerateSalt()); <br />
-    ///   </code>
+    ///        Usage is really simple. To hash a password for the first time, call the <see
+    ///        cref="HashPassword(string)"/> method with a random salt, like this:
+    ///  </para>
+    ///  <code>string pw_hash = BCrypt.HashPassword(plain_password);</code>
     ///  <para>
-    ///   To check whether a plaintext password matches one that has been hashed previously, use the
-    ///   CheckPassword method:
-    ///   </para>
-    ///   <code>
-    ///   if (BCrypt.CheckPassword(candidate_password, stored_hash))
-    ///       Console.WriteLine("It matches");
-    ///   else
-    ///       Console.WriteLine("It does not match");
-    ///   </code>
-    ///   <para>
-    ///   The <see cref="BCrypt.GenerateSalt()"/> method takes an optional parameter (log_rounds)
-    ///   that determines the computational complexity of the hashing:
-    ///   </para>
-    ///   <code>
-    ///   string strong_salt = BCrypt.GenerateSalt(10)<br />
-    ///   string stronger_salt = BCrypt.GenerateSalt(12)<br />
+    ///        To check whether a plaintext password matches one that has been hashed previously,
+    ///        use the <see cref="Verify"/> method:
+    ///  </para>
+    ///  <code>
+    ///     if (BCrypt.Verify(candidate_password, stored_hash))
+    ///         Console.WriteLine("It matches");
+    ///     else
+    ///         Console.WriteLine("It does not match");
     ///   </code>
     ///   <para>
-    ///   The amount of work increases exponentially (2**log_rounds), so each increment is twice as
-    ///   much work. The default log_rounds is 10, and the valid range is 4 to 31.
+    ///         The <see cref="GenerateSalt()"/> method takes an optional parameter (workFactor) that
+    ///         determines the computational complexity of the hashing:
+    ///   </para>
+    ///   <code>
+    ///     string strong_salt = BCrypt.GenerateSalt(10);
+    ///     string stronger_salt = BCrypt.GenerateSalt(12);
+    ///   </code>
+    ///   <para>
+    ///         The amount of work increases exponentially (2**log_rounds), so each increment is twice
+    ///         as much work. The default log_rounds is 10, and the valid range is 4 to 31.
     ///   </para>
     /// </remarks>
     public class BCrypt
@@ -477,11 +474,7 @@ namespace BCrypt.Net
             result.Append("$2");
             if (minor >= 'a')
                 result.Append(minor);
-            result.Append("$");
-            if (logRounds < 10)
-                result.Append("0");
-            result.Append(logRounds);
-            result.Append("$");
+            result.AppendFormat("${0:00}$", logRounds);
             result.Append(EncodeBase64(saltBytes, saltBytes.Length));
             result.Append(EncodeBase64(hashed, (_BfCryptCiphertext.Length * 4) - 1));
             return result.ToString();
@@ -503,11 +496,7 @@ namespace BCrypt.Net
             rng.GetBytes(rnd);
 
             StringBuilder rs = new StringBuilder();
-            rs.Append("$2a$");
-            if (workFactor < 10)
-                rs.Append("0");
-            rs.Append(workFactor);
-            rs.Append("$");
+            rs.AppendFormat("$2a${0:00}$", workFactor);
             rs.Append(EncodeBase64(rnd, rnd.Length));
             return rs.ToString();
         }
