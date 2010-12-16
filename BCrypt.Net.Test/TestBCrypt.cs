@@ -1,4 +1,20 @@
-﻿using System;
+﻿// 
+// Copyright (c) 2006 Damien Miller <djm@mindrot.org>
+// Copyright (c) 2010 Ryan D. Emerle
+// 
+// Permission to use, copy, modify, and distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+// ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+// ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+// OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+using System;
 using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
@@ -8,12 +24,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace BCrypt.Net.Test
 {
     /// <summary>
-    /// Summary description for UnitTest1
+    /// BCrypt tests
     /// </summary>
     [TestClass]
     public class TestBCrypt
     {
-        string[,] test_vectors = {
+        readonly string[,] _TestVectors = {
 			{ "",                                   "$2a$06$DCq7YPn5Rq63x1Lad4cll.",    "$2a$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s." },
 			{ "",                                   "$2a$08$HqWuK6/Ng6sg9gQzbLrgb.",    "$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye" },
 			{ "",                                   "$2a$10$k1wbIrmNyFAPwPVPSVa/ze",    "$2a$10$k1wbIrmNyFAPwPVPSVa/zecw2BCEnBwVS2GbrmgzxFUOqW9dk4TCW" },
@@ -44,11 +60,11 @@ namespace BCrypt.Net.Test
         {
             Trace.Write("BCrypt.hashpw(): ");
             var sw = Stopwatch.StartNew();
-            for (int i = 0; i < test_vectors.Length / 3; i++)
+            for (int i = 0; i < _TestVectors.Length / 3; i++)
             {
-                String plain = test_vectors[i, 0];
-                String salt = test_vectors[i, 1];
-                String expected = test_vectors[i, 2];
+                String plain = _TestVectors[i, 0];
+                String salt = _TestVectors[i, 1];
+                String expected = _TestVectors[i, 2];
                 String hashed = BCrypt.HashPassword(plain, salt);
                 Assert.AreEqual(hashed, expected);
                 Trace.Write(".");
@@ -67,9 +83,9 @@ namespace BCrypt.Net.Test
             for (int i = 4; i <= 12; i++)
             {
                 Trace.Write(" " + i + ":");
-                for (int j = 0; j < test_vectors.Length / 3; j++)
+                for (int j = 0; j < _TestVectors.Length / 3; j++)
                 {
-                    String plain = test_vectors[j, 0];
+                    String plain = _TestVectors[j, 0];
                     String salt = BCrypt.GenerateSalt(i);
                     String hashed1 = BCrypt.HashPassword(plain, salt);
                     String hashed2 = BCrypt.HashPassword(plain, hashed1);
@@ -87,9 +103,9 @@ namespace BCrypt.Net.Test
         public void TestGenerateSalt()
         {
             Trace.Write("BCrypt.gensalt(): ");
-            for (int i = 0; i < test_vectors.Length / 3; i++)
+            for (int i = 0; i < _TestVectors.Length / 3; i++)
             {
-                String plain = test_vectors[i, 0];
+                String plain = _TestVectors[i, 0];
                 String salt = BCrypt.GenerateSalt();
                 String hashed1 = BCrypt.HashPassword(plain, salt);
                 String hashed2 = BCrypt.HashPassword(plain, hashed1);
@@ -107,11 +123,11 @@ namespace BCrypt.Net.Test
         public void TestVerifyPasswordSuccess()
         {
             Trace.Write("BCrypt.checkpw w/ good passwords: ");
-            for (int i = 0; i < test_vectors.Length / 3; i++)
+            for (int i = 0; i < _TestVectors.Length / 3; i++)
             {
-                String plain = test_vectors[i, 0];
-                String expected = test_vectors[i, 2];
-                Assert.IsTrue(BCrypt.VerifyPassword(plain, expected));
+                String plain = _TestVectors[i, 0];
+                String expected = _TestVectors[i, 2];
+                Assert.IsTrue(BCrypt.Verify(plain, expected));
                 Trace.Write(".");
             }
             Trace.WriteLine("");
@@ -125,12 +141,12 @@ namespace BCrypt.Net.Test
         public void TestVerifyPasswordFailure()
         {
             Trace.Write("BCrypt.checkpw w/ bad passwords: ");
-            for (int i = 0; i < test_vectors.Length / 3; i++)
+            for (int i = 0; i < _TestVectors.Length / 3; i++)
             {
-                int broken_index = (i + 4) % (test_vectors.Length / 3);
-                String plain = test_vectors[i, 0];
-                String expected = test_vectors[broken_index, 2];
-                Assert.IsFalse(BCrypt.VerifyPassword(plain, expected));
+                int brokenIndex = (i + 4) % (_TestVectors.Length / 3);
+                String plain = _TestVectors[i, 0];
+                String expected = _TestVectors[brokenIndex, 2];
+                Assert.IsFalse(BCrypt.Verify(plain, expected));
                 Trace.Write(".");
             }
             Trace.WriteLine("");
@@ -147,11 +163,11 @@ namespace BCrypt.Net.Test
             String pw2 = "????????";
 
             String h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
-            Assert.IsFalse(BCrypt.VerifyPassword(pw2, h1));
+            Assert.IsFalse(BCrypt.Verify(pw2, h1));
             Trace.Write(".");
 
             String h2 = BCrypt.HashPassword(pw2, BCrypt.GenerateSalt());
-            Assert.IsFalse(BCrypt.VerifyPassword(pw1, h2));
+            Assert.IsFalse(BCrypt.Verify(pw1, h2));
             Trace.Write(".");
             Trace.WriteLine("");
         }
