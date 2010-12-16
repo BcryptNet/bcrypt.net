@@ -396,13 +396,13 @@ namespace BCrypt.Net
         ///  cref="BCrypt.GenerateSalt()"/>.
         /// </summary>
         /// <remarks>Just an alias for HashPassword.</remarks>
-        /// <param name="password">  The password to hash.</param>
+        /// <param name="source">  The string to hash.</param>
         /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
         ///                          factor therefore increases as 2**workFactor.</param>
         /// <returns>The hashed string.</returns>
-        public static string HashString(string password, int workFactor)
+        public static string HashString(string source, int workFactor)
         {
-            return HashPassword(password, GenerateSalt());
+            return HashPassword(source, GenerateSalt());
         }
 
         /// <summary>
@@ -437,24 +437,30 @@ namespace BCrypt.Net
         /// <returns>The hashed password</returns>
         public static string HashPassword(string input, string salt)
         {
+            if (input == null)
+                throw new ArgumentNullException("input");
+
+            if (string.IsNullOrEmpty(salt))
+                throw new ArgumentException("Invalid salt", "salt");
+
             // Determinthe starting offset and validate the salt
             int startingOffset;
             char minor = (char)0;
             if (salt[0] != '$' || salt[1] != '2')
-                throw new ArgumentException("Invalid salt version", "salt");
+                throw new SaltParseException("Invalid salt version");
             if (salt[2] == '$')
                 startingOffset = 3;
             else
             {
                 minor = salt[2];
                 if (minor != 'a' || salt[3] != '$')
-                    throw new ArgumentException("Invalid salt revision", "salt");
+                    throw new SaltParseException("Invalid salt revision");
                 startingOffset = 4;
             }
 
             // Extract number of rounds
             if (salt[startingOffset + 2] > '$')
-                throw new ArgumentException("Missing salt rounds", "salt");
+                throw new SaltParseException("Missing salt rounds");
 
             // Extract details from salt
             int logRounds = Convert.ToInt32(salt.Substring(startingOffset, 2));
@@ -489,6 +495,9 @@ namespace BCrypt.Net
         /// <returns>A base64 encoded salt value.</returns>
         public static string GenerateSalt(int workFactor)
         {
+            if (workFactor < 4 || workFactor > 31)
+                throw new ArgumentOutOfRangeException("workFactor", workFactor, "The work factor must be between 4 and 31 (inclusive)");
+
             byte[] rnd = new byte[BCRYPT_SALT_LEN];
             RandomNumberGenerator rng = RandomNumberGenerator.Create();
             rng.GetBytes(rnd);
@@ -575,46 +584,47 @@ namespace BCrypt.Net
         /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or
         ///                                     illegal values.</exception>
         /// <param name="encodedstring">The string to decode.</param>
-        /// <param name="maximumBytes"> An array containing the decoded bytes.</param>
+        /// <param name="maximumBytes"> The maximum bytes to decode.</param>
         /// <returns>The decoded byte array.</returns>
         private static byte[] DecodeBase64(string encodedstring, int maximumBytes)
         {
-            int offset = 0,
-                slen = encodedstring.Length,
-                olen = 0;
+            int position = 0,
+                sourceLength = encodedstring.Length,
+                outputLength = 0;
 
             if (maximumBytes <= 0)
                 throw new ArgumentException("Invalid maximum bytes value", "maximumBytes");
 
+            // TODO: update to use a List<byte> - it's only ever 16 bytes, so it's not a big deal
             StringBuilder rs = new StringBuilder();
-            while (offset < slen - 1 && olen < maximumBytes)
+            while (position < sourceLength - 1 && outputLength < maximumBytes)
             {
-                int c1 = Char64(encodedstring[offset++]);
-                int c2 = Char64(encodedstring[offset++]);
+                int c1 = Char64(encodedstring[position++]);
+                int c2 = Char64(encodedstring[position++]);
                 if (c1 == -1 || c2 == -1)
                     break;
 
                 rs.Append((char)((c1 << 2) | ((c2 & 0x30) >> 4)));
-                if (++olen >= maximumBytes || offset >= slen)
+                if (++outputLength >= maximumBytes || position >= sourceLength)
                     break;
 
-                int c3 = Char64(encodedstring[offset++]);
+                int c3 = Char64(encodedstring[position++]);
                 if (c3 == -1)
                     break;
 
                 rs.Append((char)(((c2 & 0x0f) << 4) | ((c3 & 0x3c) >> 2)));
-                if (++olen >= maximumBytes || offset >= slen)
+                if (++outputLength >= maximumBytes || position >= sourceLength)
                     break;
 
-                int c4 = Char64(encodedstring[offset++]);
+                int c4 = Char64(encodedstring[position++]);
                 rs.Append((char)(((c3 & 0x03) << 6) | c4));
 
-                ++olen;
+                ++outputLength;
             }
 
-            byte[] ret = new byte[olen];
-            for (offset = 0; offset < olen; offset++)
-                ret[offset] = (byte)rs[offset];
+            byte[] ret = new byte[outputLength];
+            for (position = 0; position < outputLength; position++)
+                ret[position] = (byte)rs[position];
             return ret;
         }
 
@@ -636,30 +646,33 @@ namespace BCrypt.Net
         /// <param name="offset">    The position in the array of the blocks.</param>
         private void Encipher(uint[] blockArray, int offset)
         {
-            uint round,
-                 n,
-                 block = blockArray[offset],
-                 r = blockArray[offset + 1];
-
-            block ^= _P[0];
-            for (round = 0; round <= BLOWFISH_NUM_ROUNDS - 2; )
+            unchecked
             {
-                // Feistel substitution on left word
-                n = _S[(block >> 24) & 0xff];
-                n += _S[0x100 | ((block >> 16) & 0xff)];
-                n ^= _S[0x200 | ((block >> 8) & 0xff)];
-                n += _S[0x300 | (block & 0xff)];
-                r ^= n ^ _P[++round];
+                uint round,
+                     n,
+                     block = blockArray[offset],
+                     r = blockArray[offset + 1];
 
-                // Feistel substitution on right word
-                n = _S[(r >> 24) & 0xff];
-                n += _S[0x100 | ((r >> 16) & 0xff)];
-                n ^= _S[0x200 | ((r >> 8) & 0xff)];
-                n += _S[0x300 | (r & 0xff)];
-                block ^= n ^ _P[++round];
+                block ^= _P[0];
+                for (round = 0; round <= BLOWFISH_NUM_ROUNDS - 2; )
+                {
+                    // Feistel substitution on left word
+                    n = _S[(block >> 24) & 0xff];
+                    n += _S[0x100 | ((block >> 16) & 0xff)];
+                    n ^= _S[0x200 | ((block >> 8) & 0xff)];
+                    n += _S[0x300 | (block & 0xff)];
+                    r ^= n ^ _P[++round];
+
+                    // Feistel substitution on right word
+                    n = _S[(r >> 24) & 0xff];
+                    n += _S[0x100 | ((r >> 16) & 0xff)];
+                    n ^= _S[0x200 | ((r >> 8) & 0xff)];
+                    n += _S[0x300 | (r & 0xff)];
+                    block ^= n ^ _P[++round];
+                }
+                blockArray[offset] = r ^ _P[BLOWFISH_NUM_ROUNDS + 1];
+                blockArray[offset + 1] = block;
             }
-            blockArray[offset] = r ^ _P[BLOWFISH_NUM_ROUNDS + 1];
-            blockArray[offset + 1] = block;
         }
 
         /// <summary>Cycically extract a word of key material.</summary>
@@ -763,7 +776,6 @@ namespace BCrypt.Net
             uint[] cdata = new uint[_BfCryptCiphertext.Length];
             Array.Copy(_BfCryptCiphertext, cdata, _BfCryptCiphertext.Length);
             int clen = cdata.Length;
-            byte[] ret;
 
             if (logRounds < 4 || logRounds > 31)
                 throw new ArgumentException("Bad number of rounds", "logRounds");
@@ -787,7 +799,7 @@ namespace BCrypt.Net
                     Encipher(cdata, j << 1);
             }
 
-            ret = new byte[clen * 4];
+            byte[] ret = new byte[clen * 4];
             for (int i = 0, j = 0; i < clen; i++)
             {
                 ret[j++] = (byte)((cdata[i] >> 24) & 0xff);
