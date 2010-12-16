@@ -53,19 +53,19 @@ namespace BCrypt.Net.Test
 		};
 
         /**
-         * Test method for 'BCrypt.HashPassword(String, String)'
+         * Test method for 'BCrypt.HashPassword(string, string)'
          */
         [TestMethod]
         public void TestHashPassword()
         {
-            Trace.Write("BCrypt.hashpw(): ");
+            Trace.Write("BCrypt.HashPassword(): ");
             var sw = Stopwatch.StartNew();
             for (int i = 0; i < _TestVectors.Length / 3; i++)
             {
-                String plain = _TestVectors[i, 0];
-                String salt = _TestVectors[i, 1];
-                String expected = _TestVectors[i, 2];
-                String hashed = BCrypt.HashPassword(plain, salt);
+                string plain = _TestVectors[i, 0];
+                string salt = _TestVectors[i, 1];
+                string expected = _TestVectors[i, 2];
+                string hashed = BCrypt.HashPassword(plain, salt);
                 Assert.AreEqual(hashed, expected);
                 Trace.Write(".");
             }
@@ -79,19 +79,35 @@ namespace BCrypt.Net.Test
         [TestMethod]
         public void TestGenerateSaltWithWorkFactor()
         {
-            Trace.Write("BCrypt.gensalt(log_rounds):");
+            Trace.Write("BCrypt.GenerateSalt(log_rounds):");
             for (int i = 4; i <= 12; i++)
             {
                 Trace.Write(" " + i + ":");
                 for (int j = 0; j < _TestVectors.Length / 3; j++)
                 {
-                    String plain = _TestVectors[j, 0];
-                    String salt = BCrypt.GenerateSalt(i);
-                    String hashed1 = BCrypt.HashPassword(plain, salt);
-                    String hashed2 = BCrypt.HashPassword(plain, hashed1);
+                    string plain = _TestVectors[j, 0];
+                    string salt = BCrypt.GenerateSalt(i);
+                    string hashed1 = BCrypt.HashPassword(plain, salt);
+                    string hashed2 = BCrypt.HashPassword(plain, hashed1);
                     Assert.AreEqual(hashed1, hashed2);
                     Trace.Write(".");
                 }
+            }
+            Trace.WriteLine("");
+        }
+
+        [TestMethod]
+        public void TestGenerateSaltWithMaxWorkFactor()
+        {
+            Trace.Write("BCrypt.GenerateSalt(31):");
+            for (int j = 0; j < _TestVectors.Length / 3; j++)
+            {
+                string plain = _TestVectors[j, 0];
+                string salt = BCrypt.GenerateSalt(31);
+                string hashed1 = BCrypt.HashPassword(plain, salt);
+                string hashed2 = BCrypt.HashPassword(plain, hashed1);
+                Assert.AreEqual(hashed1, hashed2);
+                Trace.Write(".");
             }
             Trace.WriteLine("");
         }
@@ -102,13 +118,13 @@ namespace BCrypt.Net.Test
         [TestMethod]
         public void TestGenerateSalt()
         {
-            Trace.Write("BCrypt.gensalt(): ");
+            Trace.Write("BCrypt.GenerateSalt(): ");
             for (int i = 0; i < _TestVectors.Length / 3; i++)
             {
-                String plain = _TestVectors[i, 0];
-                String salt = BCrypt.GenerateSalt();
-                String hashed1 = BCrypt.HashPassword(plain, salt);
-                String hashed2 = BCrypt.HashPassword(plain, hashed1);
+                string plain = _TestVectors[i, 0];
+                string salt = BCrypt.GenerateSalt();
+                string hashed1 = BCrypt.HashPassword(plain, salt);
+                string hashed2 = BCrypt.HashPassword(plain, hashed1);
                 Assert.AreEqual(hashed1, hashed2);
                 Trace.Write(".");
             }
@@ -116,17 +132,17 @@ namespace BCrypt.Net.Test
         }
 
         /**
-         * Test method for 'BCrypt.VerifyPassword(String, String)'
+         * Test method for 'BCrypt.VerifyPassword(string, string)'
          * expecting success
          */
         [TestMethod]
         public void TestVerifyPasswordSuccess()
         {
-            Trace.Write("BCrypt.checkpw w/ good passwords: ");
+            Trace.Write("BCrypt.Verify w/ good passwords: ");
             for (int i = 0; i < _TestVectors.Length / 3; i++)
             {
-                String plain = _TestVectors[i, 0];
-                String expected = _TestVectors[i, 2];
+                string plain = _TestVectors[i, 0];
+                string expected = _TestVectors[i, 2];
                 Assert.IsTrue(BCrypt.Verify(plain, expected));
                 Trace.Write(".");
             }
@@ -134,18 +150,18 @@ namespace BCrypt.Net.Test
         }
 
         /**
-         * Test method for 'BCrypt.VerifyPassword(String, String)'
+         * Test method for 'BCrypt.VerifyPassword(string, string)'
          * expecting failure
          */
         [TestMethod]
         public void TestVerifyPasswordFailure()
         {
-            Trace.Write("BCrypt.checkpw w/ bad passwords: ");
+            Trace.Write("BCrypt.Verify w/ bad passwords: ");
             for (int i = 0; i < _TestVectors.Length / 3; i++)
             {
                 int brokenIndex = (i + 4) % (_TestVectors.Length / 3);
-                String plain = _TestVectors[i, 0];
-                String expected = _TestVectors[brokenIndex, 2];
+                string plain = _TestVectors[i, 0];
+                string expected = _TestVectors[brokenIndex, 2];
                 Assert.IsFalse(BCrypt.Verify(plain, expected));
                 Trace.Write(".");
             }
@@ -158,15 +174,15 @@ namespace BCrypt.Net.Test
         [TestMethod]
         public void TestInternationalChars()
         {
-            Trace.Write("BCrypt.hashpw w/ international chars: ");
-            String pw1 = "ππππππππ";
-            String pw2 = "????????";
+            Trace.Write("BCrypt.HashPassword w/ international chars: ");
+            string pw1 = "ππππππππ";
+            string pw2 = "????????";
 
-            String h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
+            string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
             Assert.IsFalse(BCrypt.Verify(pw2, h1));
             Trace.Write(".");
 
-            String h2 = BCrypt.HashPassword(pw2, BCrypt.GenerateSalt());
+            string h2 = BCrypt.HashPassword(pw2, BCrypt.GenerateSalt());
             Assert.IsFalse(BCrypt.Verify(pw1, h2));
             Trace.Write(".");
             Trace.WriteLine("");

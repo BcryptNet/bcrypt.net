@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -769,9 +770,11 @@ namespace BCrypt.Net
             if (logRounds < 4 || logRounds > 31)
                 throw new ArgumentException("Bad number of rounds", "logRounds");
 
-            int rounds = 1 << logRounds;
             if (saltBytes.Length != BCRYPT_SALT_LEN)
                 throw new ArgumentException("Bad salt Length", "saltBytes");
+                        
+            uint rounds = 1u << logRounds;
+            Debug.Assert(rounds > 0, "Rounds must be > 0"); // We overflowed rounds at 31 - added safety check
 
             InitializeKey();
             EKSKey(saltBytes, inputBytes);
