@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 
+// namespace: BCrypt.Net
 namespace BCrypt.Net
 {
     /// <summary>BCrypt implementation.</summary>
@@ -59,11 +60,11 @@ namespace BCrypt.Net
     ///     string stronger_salt = BCrypt.GenerateSalt(12);
     ///   </code>
     ///   <para>
-    ///         The amount of work increases exponentially (2**log_rounds), so each increment is twice
-    ///         as much work. The default log_rounds is 10, and the valid range is 4 to 31.
+    ///         The amount of work increases exponentially (2^workFactor), so each increment is twice
+    ///         as much work. The default workFactor is 10, and the valid range is 4 to 31.
     ///   </para>
     /// </remarks>
-    public class BCrypt
+    public sealed class BCrypt
     {
         // BCrypt parameters
         private const int GENSALT_DEFAULT_LOG2_ROUNDS = 10;
@@ -396,11 +397,11 @@ namespace BCrypt.Net
         /// <remarks>Just an alias for HashPassword.</remarks>
         /// <param name="source">  The string to hash.</param>
         /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
-        ///                          factor therefore increases as 2**workFactor.</param>
+        ///                          factor therefore increases as 2^workFactor.</param>
         /// <returns>The hashed string.</returns>
         public static string HashString(string source, int workFactor)
         {
-            return HashPassword(source, GenerateSalt());
+            return HashPassword(source, GenerateSalt(workFactor));
         }
 
         /// <summary>
@@ -420,7 +421,7 @@ namespace BCrypt.Net
         /// </summary>
         /// <param name="input">     The password to hash.</param>
         /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
-        ///                          factor therefore increases as 2**workFactor.</param>
+        ///                          factor therefore increases as 2^workFactor.</param>
         /// <returns>The hashed password.</returns>
         public static string HashPassword(string input, int workFactor)
         {
@@ -636,48 +637,45 @@ namespace BCrypt.Net
         /// <param name="offset">    The position in the array of the blocks.</param>
         private void Encipher(uint[] blockArray, int offset)
         {
-            unchecked
-            {
-                uint round,
+            uint round,
                      n,
                      block = blockArray[offset],
                      r = blockArray[offset + 1];
 
-                block ^= _P[0];
-                for (round = 0; round <= BLOWFISH_NUM_ROUNDS - 2; )
-                {
-                    // Feistel substitution on left word
-                    n = _S[(block >> 24) & 0xff];
-                    n += _S[0x100 | ((block >> 16) & 0xff)];
-                    n ^= _S[0x200 | ((block >> 8) & 0xff)];
-                    n += _S[0x300 | (block & 0xff)];
-                    r ^= n ^ _P[++round];
+            block ^= _P[0];
+            for (round = 0; round <= BLOWFISH_NUM_ROUNDS - 2; )
+            {
+                // Feistel substitution on left word
+                n = _S[(block >> 24) & 0xff];
+                n += _S[0x100 | ((block >> 16) & 0xff)];
+                n ^= _S[0x200 | ((block >> 8) & 0xff)];
+                n += _S[0x300 | (block & 0xff)];
+                r ^= n ^ _P[++round];
 
-                    // Feistel substitution on right word
-                    n = _S[(r >> 24) & 0xff];
-                    n += _S[0x100 | ((r >> 16) & 0xff)];
-                    n ^= _S[0x200 | ((r >> 8) & 0xff)];
-                    n += _S[0x300 | (r & 0xff)];
-                    block ^= n ^ _P[++round];
-                }
-                blockArray[offset] = r ^ _P[BLOWFISH_NUM_ROUNDS + 1];
-                blockArray[offset + 1] = block;
+                // Feistel substitution on right word
+                n = _S[(r >> 24) & 0xff];
+                n += _S[0x100 | ((r >> 16) & 0xff)];
+                n ^= _S[0x200 | ((r >> 8) & 0xff)];
+                n += _S[0x300 | (r & 0xff)];
+                block ^= n ^ _P[++round];
             }
+            blockArray[offset] = r ^ _P[BLOWFISH_NUM_ROUNDS + 1];
+            blockArray[offset + 1] = block;
         }
 
         /// <summary>Cycically extract a word of key material.</summary>
         /// <param name="data">The string to extract the data from.</param>
-        /// <param name="off"> [in,out] The current offset.</param>
+        /// <param name="offset"> [in,out] The current offset.</param>
         /// <returns>The next word of material from data.</returns>
-        private static uint StreamToWord(byte[] data, ref int off)
+        private static uint StreamToWord(byte[] data, ref int offset)
         {
             int i;
             uint word = 0;
 
             for (i = 0; i < 4; i++)
             {
-                word = (word << 8) | (uint)(data[off] & 0xff);
-                off = (off + 1) % data.Length;
+                word = (word << 8) | (uint)(data[offset] & 0xff);
+                offset = (offset + 1) % data.Length;
             }
             return word;
         }
@@ -772,7 +770,7 @@ namespace BCrypt.Net
 
             if (saltBytes.Length != BCRYPT_SALT_LEN)
                 throw new ArgumentException("Bad salt Length", "saltBytes");
-                        
+
             uint rounds = 1u << logRounds;
             Debug.Assert(rounds > 0, "Rounds must be > 0"); // We overflowed rounds at 31 - added safety check
 
