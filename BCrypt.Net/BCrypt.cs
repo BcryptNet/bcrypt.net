@@ -643,24 +643,27 @@ namespace BCrypt.Net
                      r = blockArray[offset + 1];
 
             block ^= _P[0];
-            for (round = 0; round <= BLOWFISH_NUM_ROUNDS - 2; )
+            unchecked
             {
-                // Feistel substitution on left word
-                n = _S[(block >> 24) & 0xff];
-                n += _S[0x100 | ((block >> 16) & 0xff)];
-                n ^= _S[0x200 | ((block >> 8) & 0xff)];
-                n += _S[0x300 | (block & 0xff)];
-                r ^= n ^ _P[++round];
+                for (round = 0; round <= BLOWFISH_NUM_ROUNDS - 2; )
+                {
+                    // Feistel substitution on left word
+                    n = _S[(block >> 24) & 0xff];
+                    n += _S[0x100 | ((block >> 16) & 0xff)];
+                    n ^= _S[0x200 | ((block >> 8) & 0xff)];
+                    n += _S[0x300 | (block & 0xff)];
+                    r ^= n ^ _P[++round];
 
-                // Feistel substitution on right word
-                n = _S[(r >> 24) & 0xff];
-                n += _S[0x100 | ((r >> 16) & 0xff)];
-                n ^= _S[0x200 | ((r >> 8) & 0xff)];
-                n += _S[0x300 | (r & 0xff)];
-                block ^= n ^ _P[++round];
+                    // Feistel substitution on right word
+                    n = _S[(r >> 24) & 0xff];
+                    n += _S[0x100 | ((r >> 16) & 0xff)];
+                    n ^= _S[0x200 | ((r >> 8) & 0xff)];
+                    n += _S[0x300 | (r & 0xff)];
+                    block ^= n ^ _P[++round];
+                }
+                blockArray[offset] = r ^ _P[BLOWFISH_NUM_ROUNDS + 1];
+                blockArray[offset + 1] = block;
             }
-            blockArray[offset] = r ^ _P[BLOWFISH_NUM_ROUNDS + 1];
-            blockArray[offset + 1] = block;
         }
 
         /// <summary>Cycically extract a word of key material.</summary>
