@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("BCrypt.Net")]
 [assembly: AssemblyDescription("OpenBSD-style Blowfish password hashing library")]
 [assembly: AssemblyProduct("BCrypt.Net")]
-[assembly: AssemblyCopyright("Copyright © 2010, Ryan Emerle")]
+[assembly: AssemblyCopyright("Copyright © 2013, Ryan Emerle")]
 
 // Configuration
 [assembly: ComVisible(false)]

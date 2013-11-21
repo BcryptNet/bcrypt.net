@@ -1,6 +1,6 @@
 ﻿// 
 // Copyright (c) 2006 Damien Miller <djm@mindrot.org>
-// Copyright (c) 2010 Ryan D. Emerle
+// Copyright (c) 2013 Ryan D. Emerle
 // 
 // Permission to use, copy, modify, and distribute this software for any
 // purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
