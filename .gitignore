@@ -1,0 +1,7 @@
+*/bin/*
+*/obj/*
+*.user
+*.suo
+TestResults/*
+*.test*
+*.vsmdi
