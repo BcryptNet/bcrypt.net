@@ -508,6 +508,8 @@ namespace BCrypt.Net
             }
 
             byte[] rnd = new byte[BCryptSaltLen];
+            //RandomNumberGenerator.Create calls RandomNumberGenerator.Create("System.Security.Cryptography.RandomNumberGenerator"), which will create an instance of RNGCryptoServiceProvider.
+            //https://msdn.microsoft.com/en-us/library/42ks8fz1
             RandomNumberGenerator rng = RandomNumberGenerator.Create();
             rng.GetBytes(rnd);
 
@@ -842,7 +844,7 @@ namespace BCrypt.Net
             InitializeKey();
             EKSKey(saltBytes, inputBytes);
 
-            for (i = 0; i < rounds; i++)
+            for (i = 0; i != rounds; i++)
             {
                 Key(inputBytes);
                 Key(saltBytes);
