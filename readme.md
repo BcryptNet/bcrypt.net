@@ -1,6 +1,11 @@
 # bcrypt.net
 
-Porting of http://bcrypt.codeplex.com/ with missing fixes and features and better .net support.
+Porting of http://bcrypt.codeplex.com/ with missing fixes, features and better .net support.
+
+# Compiling
+
+You'll need at least VS2015 with the current SDK (check the global.json file for the current version);
+You can grab the version required from https://github.com/aspnet/Tooling/blob/master/known-issues.md#missing-sdk 
 
 ## Description
 

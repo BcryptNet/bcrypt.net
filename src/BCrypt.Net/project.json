@@ -1,0 +1,36 @@
+{
+    "title": "BCrypt.Net",
+    "version": "2.0.0-*",
+    "description": "BCrypt.Net",
+    "authors": [ "https://github.com/BcryptNet/bcrypt.net" ],
+    "packOptions": {
+        "summary": "BCrypt.Net .net Core Class Library",
+        "tags": [ "bcrypt", "BCrypt.Net", "cryptography" ],
+        "owners": [ "bcrypt.net" ],
+        "releaseNotes": "",
+        "projectUrl": "https://github.com/BcryptNet/bcrypt.net",
+        "requireLicenseAcceptance": false,
+        "repository": {
+            "type": "git",
+            "url": "https://github.com/BcryptNet/bcrypt.net"
+        }
+    },
+    "frameworks": {
+        "net20": {},
+        "net35": {},
+        "net40": {},
+        "net45": {},
+        "net451": {},
+        "net452": {},
+        "netstandard1.6": {
+            "dependencies": {
+                "Microsoft.CSharp": "4.0.1",
+                "System.Diagnostics.Debug": "4.0.11",
+                "System.Runtime.Extensions": "4.1.0",
+                "System.Security.Cryptography.Algorithms": "4.2.0"
+            }
+        }
+    },
+    "dependencies": {
+    }
+}
