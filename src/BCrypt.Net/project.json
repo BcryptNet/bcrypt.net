@@ -34,5 +34,9 @@
         }
     },
     "dependencies": {
+    },
+    "buildOptions": {
+        "optimize": true,
+        "define": [ "TRACE" ]
     }
 }
