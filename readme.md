@@ -50,3 +50,11 @@ Blowfish is notable among block ciphers for its expensive key set-up phase. It s
 Provos and Mazieres took advantage of this, and actually took it further. They developed a new key set-up algorithm for Blowfish, dubbing the resulting cipher "Eksblowfish" ("expensive key schedule Blowfish"). The key set-up begins with a modified form of the standard Blowfish key set-up, in which both the salt and password are used to set all sub-keys. Then there is a configurable number of rounds in which the standard Blowfish keying algorithm is applied, using alternately the salt and the password as the key, each round starting with the sub key state from the previous round. This is not cryptographically significantly stronger than the standard Blowfish key schedule; it's just very slow.
 
 The number of rounds of keying is a power of two, which is an input to the algorithm. The number is encoded in the textual hash.
+
+# Releases
+
+v2.0.0 -
+
+Fresh release packaged for the majority of .net & containing safe-equals to reduce the risks from timing attacks https://en.wikipedia.org/wiki/Timing_attack
+Technically the implementation details of BCrypt theoretically mitigate against a timing attacks, so this is simply implemented in the event that the salt is discovered.
+
