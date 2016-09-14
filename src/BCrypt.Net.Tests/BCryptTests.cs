@@ -80,7 +80,7 @@ namespace BCrypt.Net.Test
         public void TestGenerateSaltWithWorkFactor()
         {
             Trace.Write("BCrypt.GenerateSalt(log_rounds):");
-            for (int i = 4; i <= 12; i++)
+            for (int i = 4; i <= 10; i++)
             {
                 Trace.Write(" " + i + ":");
                 for (int j = 0; j < _testVectors.Length / 3; j++)
@@ -96,7 +96,7 @@ namespace BCrypt.Net.Test
             Trace.WriteLine("");
         }
 
-        [Test]
+        [Test, Ignore("This test takes a very long time to run as it uses the max workload")]
         public void TestGenerateSaltWithMaxWorkFactor()
         {
             Trace.Write("BCrypt.GenerateSalt(31):");
