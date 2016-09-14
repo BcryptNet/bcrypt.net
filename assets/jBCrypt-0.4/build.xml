@@ -1,0 +1,45 @@
+<project name="jBCrypt" default="dist" basedir=".">
+	<description>Buildfile for the jBCrypt project</description>
+
+	<property name="src" location="src"/>
+	<property name="test-src" location="test"/>
+	<property name="build" location="build"/>
+	<property name="test-build" location="test-build"/>
+	
+	<target name="init">
+		<mkdir dir="${build}"/>
+		<mkdir dir="${test-build}"/>
+	</target>
+	
+	<target name="clean">
+		<delete dir="${build}"/>
+		<delete dir="${test-build}"/>
+	</target>
+	
+	<target name="build" depends="init">
+		<javac target="1.6" srcdir="${src}" destdir="${build}"/>
+	</target>
+	
+	<target name="build-tests" depends="init, build">
+		<javac target="1.6" srcdir="${test-src}" destdir="${test-build}">
+			<classpath>
+				<pathelement path="${build}"/>
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="test" depends="build-tests">
+		<junit printsummary="on" showoutput="on">
+			<classpath>
+				<pathelement path="${build}"/>
+				<pathelement path="${test-build}"/>
+			</classpath>
+			
+			<test name="org.mindrot.jbcrypt.TestBCrypt"/>
+		</junit>
+	</target>
+	
+	<target name="dist" depends="build">
+		<jar destfile="jbcrypt.jar" basedir="${build}"/>
+	</target>
+</project>

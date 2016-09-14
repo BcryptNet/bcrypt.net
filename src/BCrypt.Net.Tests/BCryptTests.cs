@@ -188,5 +188,23 @@ namespace BCrypt.Net.Test
             Trace.Write(".");
             Trace.WriteLine("");
         }
+
+
+        [Test]
+        [TestCase("<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>")]
+        [TestCase("ππππππππ")]
+        [TestCase("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя")]
+        [TestCase("ÅÍÎÏ˝ÓÔÒÚÆ☃")]
+        [TestCase("사회과학원 어학연구소")]
+        [TestCase("ﾟ･✿ヾ╲(｡◕‿◕｡)╱✿･ﾟ")]
+        [TestCase("👾 🙇 💁 🙅 🙆 🙋 🙎 🙍")]
+        public void TestNaughtyStringsHash(string pw1)
+        {
+            Trace.Write("BCrypt.HashPassword with naughty strings: ");
+
+            string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
+            Assert.IsTrue(BCrypt.Verify(pw1, h1));
+            Trace.Write(".");
+        }
     }
 }
