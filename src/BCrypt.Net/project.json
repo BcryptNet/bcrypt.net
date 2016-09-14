@@ -1,13 +1,13 @@
 {
-    "title": "BCrypt.Net",
+    "title": "BCrypt.Net-Next",
     "version": "2.0.0-*",
-    "description": "BCrypt.Net",
+    "description": "BCrypt.Net, C# implementation of BCrypt, OpenBSD-style Blowfish password hashing",
     "authors": [ "https://github.com/BcryptNet/bcrypt.net" ],
     "packOptions": {
         "summary": "BCrypt.Net .net Core Class Library",
         "tags": [ "bcrypt", "BCrypt.Net", "cryptography", "hashing", "password", "security" ],
         "owners": [ "bcrypt.net" ],
-        "releaseNotes": "",
+        "releaseNotes": "Adds missing code to handle time based attacks; enhances for dotnet standard",
         "iconUrl": "https://raw.githubusercontent.com/BcryptNet/bcrypt.net/master/ico64.png",
         "projectUrl": "https://github.com/BcryptNet/bcrypt.net",
         "requireLicenseAcceptance": false,
