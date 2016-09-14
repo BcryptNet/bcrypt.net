@@ -827,10 +827,14 @@ namespace BCrypt.Net
             int clen = cdata.Length;
 
             if (logRounds < 4 || logRounds > 31)
+            {
                 throw new ArgumentException("Bad number of rounds", "logRounds");
+            }
 
             if (saltBytes.Length != BCryptSaltLen)
+            {
                 throw new ArgumentException("Bad salt Length", "saltBytes");
+            }
 
             uint rounds = 1u << logRounds;
             Debug.Assert(rounds > 0, "Rounds must be > 0"); // We overflowed rounds at 31 - added safety check
