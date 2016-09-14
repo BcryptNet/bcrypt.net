@@ -1,5 +1,6 @@
 {
     "title": "BCrypt.Net-Next",
+    "name": "BCrypt.Net-Next",
     "version": "2.0.0-*",
     "description": "BCrypt.Net, C# implementation of BCrypt, OpenBSD-style Blowfish password hashing",
     "authors": [ "https://github.com/BcryptNet/bcrypt.net" ],
@@ -36,7 +37,7 @@
     "dependencies": {
     },
     "buildOptions": {
-        "optimize": true,
-        "define": [ "TRACE" ]
+        "optimize": false,
+        "define": [ "DEBUG", "TRACE" ]
     }
 }
