@@ -172,10 +172,11 @@ namespace BCrypt.Net.Test
          * Test for correct hashing of non-US-ASCII passwords
          */
         [Test]
-        public void TestInternationalChars()
+        [TestCase("\u2605\u2605\u2605\u2605\u2605\u2605\u2605\u2605")]
+        [TestCase("ππππππππ")]
+        public void TestInternationalChars(string pw1)
         {
-            Trace.Write("BCrypt.HashPassword with international chars: ");
-            string pw1 = "ππππππππ";
+            Trace.Write("BCrypt.HashPassword with international chars: ");            
             string pw2 = "????????";
 
             string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
