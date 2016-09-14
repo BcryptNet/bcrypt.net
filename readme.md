@@ -1,6 +1,11 @@
 # bcrypt.net
 
-Porting of http://bcrypt.codeplex.com/ with missing fixes, features and better .net support.
+Porting of bcrypt.codeplex.com with missing fixes, features and better .net support.
+
+# Nuget 
+
+Download using nuget or Paket (https://fsprojects.github.io/Paket/)
+https://www.nuget.org/packages/BCrypt.Net-Next/
 
 ## Compiling
 
