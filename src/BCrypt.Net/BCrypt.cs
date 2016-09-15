@@ -19,6 +19,7 @@ IN THE SOFTWARE.
 
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -515,6 +516,7 @@ namespace BCrypt.Net
             return rs.ToString();
         }
 
+
         /// <summary>
         ///  Generate a salt for use with the <see cref="BCrypt.HashPassword(string,string)"/> method
         ///  selecting a reasonable default for the number of hashing rounds to apply.
@@ -537,28 +539,24 @@ namespace BCrypt.Net
             return SecureEquals(Encoding.UTF8.GetBytes(hash), Encoding.UTF8.GetBytes(HashPassword(text, hash)));
         }
 
-        private static readonly byte[] LargeJunkArray = new byte[1024 * 32];
-
-        internal static bool SecureEquals(byte[] original, byte[] potential)
+        // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+        private static bool SecureEquals(byte[] a, byte[] b)
         {
-            // Original array will never be more than 32K.
-            if (potential.Length > LargeJunkArray.Length)
+            if (a == null && b == null)
+            {
+                return true;
+            }
+            if (a == null || b == null || a.Length != b.Length)
             {
                 return false;
             }
-            byte[] copy = new byte[potential.Length];
-            int bytesFromOriginal = Math.Min(original.Length, copy.Length);
-            // Always copy the same amount of data
-            Array.Copy(original, 0, copy, 0, bytesFromOriginal);
-            Array.Copy(LargeJunkArray, 0, copy, bytesFromOriginal, copy.Length - bytesFromOriginal);
-
-            bool isEqual = original.Length == potential.Length;
-            for (int i = 0; i < copy.Length; i++)
+            var areSame = true;
+            for (var i = 0; i < a.Length; i++)
             {
-                isEqual = isEqual & (copy[i] == potential[i]);
+                areSame &= (a[i] == b[i]);
             }
-
-            return isEqual;
+            return areSame;
         }
 
 
@@ -865,5 +863,7 @@ namespace BCrypt.Net
             return ret;
         }
     }
+
+    
 }
 
