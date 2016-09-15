@@ -55,7 +55,7 @@ The number of rounds of keying is a power of two, which is an input to the algor
 
 https://github.com/BcryptNet/bcrypt.net/releases
 
-*v2.0.1 - *
+*v2.0.1 -*
 
 * Corrects usage of Secure random number generator
 * Change UTF8 handling to safer default (throwOnInvalidBytes: true)
