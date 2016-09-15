@@ -6,6 +6,7 @@
     "authors": [ "https://github.com/BcryptNet/bcrypt.net" ],
     "packOptions": {
         "summary": "BCrypt.Net .net Core Class Library",
+        "optimize": true,
         "tags": [ "bcrypt", "BCrypt.Net", "cryptography", "hashing", "password", "security" ],
         "owners": [ "bcrypt.net" ],
         "releaseNotes": "Corrects usage of Secure random number generator; change secure equals to match .net identity implmentation; inline vars in encipher method; change UTF8 handling to safer default",
