@@ -59,6 +59,7 @@ https://github.com/BcryptNet/bcrypt.net/releases
 
 * Corrects usage of Secure random number generator
 * Change UTF8 handling to safer default (throwOnInvalidBytes: true)
+ * .NET Encoding.UTF8 encoding instance does not raise exceptions used to encode bytes which cannot represent a valid encoding & will return the same 'unknown' character instead. This can cause entropy loss when converting from bytes to strings.
 * Change secure equals to match .net identity implementation
 * Inline vars in encipher method
 
