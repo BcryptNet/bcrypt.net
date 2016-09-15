@@ -30,14 +30,15 @@
                 "Microsoft.CSharp": "4.0.1",
                 "System.Diagnostics.Debug": "4.0.11",
                 "System.Runtime.Extensions": "4.1.0",
-                "System.Security.Cryptography.Algorithms": "4.2.0"
+                "System.Security.Cryptography.Algorithms": "4.2.0",
+                "System.Text.Encoding.Extensions": "4.0.11"
             }
         }
     },
     "dependencies": {
     },
     "buildOptions": {
-        "optimize": false,
-        "define": [ "DEBUG", "TRACE" ]
+        "define": [ "DEBUG", "TRACE" ],
+        "optimize": false
     }
 }
