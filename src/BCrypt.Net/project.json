@@ -1,14 +1,14 @@
 {
     "title": "BCrypt.Net-Next",
     "name": "BCrypt.Net-Next",
-    "version": "2.0.0-*",
+    "version": "2.0.1-*",
     "description": "BCrypt.Net, C# implementation of BCrypt, OpenBSD-style Blowfish password hashing",
     "authors": [ "https://github.com/BcryptNet/bcrypt.net" ],
     "packOptions": {
         "summary": "BCrypt.Net .net Core Class Library",
         "tags": [ "bcrypt", "BCrypt.Net", "cryptography", "hashing", "password", "security" ],
         "owners": [ "bcrypt.net" ],
-        "releaseNotes": "Adds missing code to handle time based attacks; enhances for dotnet standard",
+        "releaseNotes": "Corrects usage of Secure random number generator; change secure equals to match .net identity implmentation; inline vars in encipher method; change UTF8 handling to safer default",
         "iconUrl": "https://raw.githubusercontent.com/BcryptNet/bcrypt.net/master/ico64.png",
         "projectUrl": "https://github.com/BcryptNet/bcrypt.net",
         "requireLicenseAcceptance": false,
@@ -25,6 +25,15 @@
         "net45": {},
         "net451": {},
         "net452": {},
+        "netstandard1.3": {
+            "dependencies": {
+                "Microsoft.CSharp": "4.0.1",
+                "System.Diagnostics.Debug": "4.0.11",
+                "System.Runtime.Extensions": "4.1.0",
+                "System.Security.Cryptography.Algorithms": "4.2.0",
+                "System.Text.Encoding.Extensions": "4.0.11"
+            }
+        },
         "netstandard1.6": {
             "dependencies": {
                 "Microsoft.CSharp": "4.0.1",

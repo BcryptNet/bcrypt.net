@@ -73,7 +73,7 @@ namespace BCrypt.Net
         private const int GensaltDefaultLog2Rounds = 10;
         private const int BCryptSaltLen = 128 / 8; // 128 bits
 
-        private static readonly Encoding SafeUTF8 = new UTF8Encoding(false, true);
+        private static readonly Encoding SafeUTF8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         // Blowfish parameters
         private const int BlowfishNumRounds = 16;
