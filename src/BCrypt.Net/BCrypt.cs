@@ -73,6 +73,8 @@ namespace BCrypt.Net
         private const int GensaltDefaultLog2Rounds = 10;
         private const int BCryptSaltLen = 128 / 8; // 128 bits
 
+        private static readonly Encoding SafeUTF8 = new UTF8Encoding(false, true);
+
         // Blowfish parameters
         private const int BlowfishNumRounds = 16;
 
@@ -472,7 +474,7 @@ namespace BCrypt.Net
             int logRounds = Convert.ToInt32(salt.Substring(startingOffset, 2));
             string extractedSalt = salt.Substring(startingOffset + 3, 22);
 
-            byte[] inputBytes = Encoding.UTF8.GetBytes((input + (minor >= 'a' ? "\0" : "")));
+            byte[] inputBytes = SafeUTF8.GetBytes(input + (minor >= 'a' ? "\0" : ""));
             byte[] saltBytes = DecodeBase64(extractedSalt, BCryptSaltLen);
 
             BCrypt bCrypt = new BCrypt();
@@ -536,7 +538,7 @@ namespace BCrypt.Net
         /// <returns>true if the passwords match, false otherwise.</returns>
         public static bool Verify(string text, string hash)
         {
-            return SecureEquals(Encoding.UTF8.GetBytes(hash), Encoding.UTF8.GetBytes(HashPassword(text, hash)));
+            return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash)));
         }
 
         // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.
