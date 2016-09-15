@@ -53,7 +53,16 @@ The number of rounds of keying is a power of two, which is an input to the algor
 
 # Releases
 
-v2.0.0 -
+https://github.com/BcryptNet/bcrypt.net/releases
+
+*v2.0.1 - *
+
+* Corrects usage of Secure random number generator
+* Change UTF8 handling to safer default (throwOnInvalidBytes: true)
+* Change secure equals to match .net identity implementation
+* Inline vars in encipher method
+
+*v2.0.0 -*
 
 Fresh release packaged for the majority of .net & containing safe-equals to reduce the risks from timing attacks https://en.wikipedia.org/wiki/Timing_attack / https://cryptocoding.net/index.php/Coding_rules#Compare_secret_strings_in_constant_time
 Technically the implementation details of BCrypt theoretically mitigate against a timing attacks. But the Bcrypt.net official validation function was vulerable to timing attacks as it returned as soon as a non-matching byte was found in the hash comparison.
