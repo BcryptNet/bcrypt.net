@@ -683,8 +683,6 @@ namespace BCrypt.Net
         /// <param name="offset">    The position in the array of the blocks.</param>
         private void Encipher(uint[] blockArray, int offset)
         {
-            uint round;
-            uint n;
             uint block = blockArray[offset];
             uint r = blockArray[offset + 1];
 
@@ -692,10 +690,11 @@ namespace BCrypt.Net
 
             unchecked
             {
+                uint round;
                 for (round = 0; round <= BlowfishNumRounds - 2;)
                 {
                     // Feistel substitution on left word
-                    n = _s[(block >> 24) & 0xff];
+                    uint n = _s[(block >> 24) & 0xff];
                     n += _s[0x100 | ((block >> 16) & 0xff)];
                     n ^= _s[0x200 | ((block >> 8) & 0xff)];
                     n += _s[0x300 | (block & 0xff)];
