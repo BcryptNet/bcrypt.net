@@ -23,16 +23,29 @@
         "net20": {},
         "net35": {},
         "net40": {},
-        "net45": {},
-        "net451": {},
-        "net452": {},
+        "net45": {
+            "dependencies": {
+                "System.Text.RegularExpressions": "4.1.0"
+            }
+        },
+        "net451": {
+            "dependencies": {
+                "System.Text.RegularExpressions": "4.1.0"
+            }
+        },
+        "net452": {
+            "dependencies": {
+                "System.Text.RegularExpressions": "4.1.0"
+            }
+        },
         "netstandard1.3": {
             "dependencies": {
                 "Microsoft.CSharp": "4.0.1",
                 "System.Diagnostics.Debug": "4.0.11",
                 "System.Runtime.Extensions": "4.1.0",
                 "System.Security.Cryptography.Algorithms": "4.2.0",
-                "System.Text.Encoding.Extensions": "4.0.11"
+                "System.Text.Encoding.Extensions": "4.0.11",
+                "System.Text.RegularExpressions": "4.1.0"
             }
         },
         "netstandard1.6": {
@@ -41,7 +54,8 @@
                 "System.Diagnostics.Debug": "4.0.11",
                 "System.Runtime.Extensions": "4.1.0",
                 "System.Security.Cryptography.Algorithms": "4.2.0",
-                "System.Text.Encoding.Extensions": "4.0.11"
+                "System.Text.Encoding.Extensions": "4.0.11",
+                "System.Text.RegularExpressions": "4.1.0"
             }
         }
     },

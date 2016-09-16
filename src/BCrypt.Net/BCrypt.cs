@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 // namespace: BCrypt.Net
 namespace BCrypt.Net
@@ -409,6 +410,7 @@ namespace BCrypt.Net
         /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
         ///                          factor therefore increases as 2^workFactor.</param>
         /// <returns>The hashed string.</returns>
+        [Obsolete("Will be removed in later versions as it serves no purpose, use HashPassword", false)]
         public static string HashString(string source, int workFactor) => HashPassword(source, GenerateSalt(workFactor));
 
         /// <summary>
@@ -438,10 +440,14 @@ namespace BCrypt.Net
         public static string HashPassword(string input, string salt)
         {
             if (input == null)
+            {
                 throw new ArgumentNullException("input");
+            }
 
             if (string.IsNullOrEmpty(salt))
+            {
                 throw new ArgumentException("Invalid salt", "salt");
+            }
 
             // Determine the starting offset and validate the salt
             int startingOffset;
@@ -516,6 +522,38 @@ namespace BCrypt.Net
             rs.AppendFormat("$2a${0:00}$", workFactor);
             rs.Append(EncodeBase64(salt, salt.Length));
             return rs.ToString();
+        }
+
+        private static readonly Regex HashInformation = new Regex(@"^(?<salt>\$2a?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$");
+        private static readonly Regex SaltInformation = new Regex(@"^\$(?<version>2a?)\$(?<rounds>\d\d?)$");
+
+        /// <summary>
+        /// Takes a valid hash and outputs its component parts
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <param name="rawHash"></param>
+        /// <param name="salt"></param>
+        /// <param name="version"></param>
+        /// <param name="workfactor"></param>
+        public static void InterrogateHash(string hash, out string rawHash, out string salt, out string version, out int workfactor)
+        {
+            var hashInfo = HashInformation.Match(hash);
+
+            if (!hashInfo.Success)
+            {
+                throw new SaltParseException("Invalid Hash Format");
+            }
+
+            var saltInfo = SaltInformation.Match(hashInfo.Groups["salt"].Value);
+            if (!saltInfo.Success)
+            {
+                throw new SaltParseException("Invalid Salt Format");
+            }
+
+            rawHash = hashInfo.Groups["hash"].Value;
+            salt = hashInfo.Groups["salt"].Value;            
+            version = saltInfo.Groups["version"].Value;
+            workfactor = Convert.ToInt32(saltInfo.Groups["rounds"].Value);
         }
 
 
