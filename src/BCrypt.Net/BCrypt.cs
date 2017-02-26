@@ -2,7 +2,7 @@
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
-Copyright (c) 2016 Chris McKee (.Net-core port / patches)
+Copyright (c) 2016/2017 Chris McKee (.Net-core port / patches)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files 
 (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, 
@@ -524,8 +524,15 @@ namespace BCrypt.Net
             return rs.ToString();
         }
 
-        private static readonly Regex HashInformation = new Regex(@"^(?<salt>\$2a?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$");
-        private static readonly Regex SaltInformation = new Regex(@"^\$(?<version>2a?)\$(?<rounds>\d\d?)$");
+
+#if LEGACY
+        private static readonly Regex HashInformation = new Regex(@"^(?<salt>\$2a?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline);
+        private static readonly Regex SaltInformation = new Regex(@"^\$(?<version>2a?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline);
+#else
+        private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(300);
+        private static readonly Regex HashInformation = new Regex(@"^(?<salt>\$2a?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline, RegexTimeout);
+        private static readonly Regex SaltInformation = new Regex(@"^\$(?<version>2a?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline, RegexTimeout);
+#endif
 
         /// <summary>
         /// Takes a valid hash and outputs its component parts
@@ -901,8 +908,5 @@ namespace BCrypt.Net
             }
             return ret;
         }
-    }
-
-    
+    }   
 }
-

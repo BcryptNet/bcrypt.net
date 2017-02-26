@@ -4,13 +4,13 @@
     "dependencies": {
         "NUnit": "3.4.1",
         "dotnet-test-nunit": "3.4.0-beta-2",
-        "BCrypt.Net": "2.0.0-*"
+        "BCrypt.Net": "2.0.1-*"
     },
 
     "testRunner": "nunit",
 
     "frameworks": {
-        "netcoreapp1.0": {
+        "netcoreapp1.1": {
             "imports": "portable-net45+win8",
             "dependencies": {
                 "Microsoft.NETCore.App": {

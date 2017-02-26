@@ -1,0 +1,17 @@
+﻿{
+    "version": "1.0.0-*",
+
+    "dependencies": {
+        "BCrypt.Net-Next": "*",
+        "NETStandard.Library": "1.6.1",
+        "NUnit": "3.6.0",
+        "System.Diagnostics.TraceSource": "4.3.0"
+    },
+
+    "frameworks": {
+        "netstandard1.6": {
+           
+        }
+
+    }
+}
