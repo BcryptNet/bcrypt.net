@@ -24,7 +24,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-// namespace: BCrypt.Net
 namespace BCrypt.Net
 {
     /// <summary>BCrypt implementation.</summary>
@@ -653,8 +652,8 @@ namespace BCrypt.Net
         }
 
         /// <summary>
-        ///  Decode a string encoded using BCrypt's base64 scheme to a byte array. Note that this is *not*
-        ///  compatible with the standard MIME-base64 encoding.
+        ///  Decode a string encoded using BCrypt's base64 scheme to a byte array.
+        ///  Note that this is *not* compatible with the standard MIME-base64 encoding.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or
         ///                                     illegal values.</exception>
@@ -815,8 +814,8 @@ namespace BCrypt.Net
         }
 
         /// <summary>
-        ///  Perform the "enhanced key schedule" step described by Provos and Mazieres in "A Future-
-        ///  Adaptable Password Scheme" http://www.openbsd.org/papers/bcrypt-paper.ps.
+        ///  Perform the "enhanced key schedule" step described by Provos and Mazieres in 
+        ///  "A Future Adaptable Password Scheme" http://www.openbsd.org/papers/bcrypt-paper.ps.
         /// </summary>
         /// <param name="saltBytes"> Salt byte array.</param>
         /// <param name="inputBytes">Input byte array.</param>

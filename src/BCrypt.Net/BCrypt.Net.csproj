@@ -16,9 +16,7 @@
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/BcryptNet/bcrypt.net</RepositoryUrl>
     </PropertyGroup>
-
-
-
+    
     <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
         <Reference Include="System" />
     </ItemGroup>
