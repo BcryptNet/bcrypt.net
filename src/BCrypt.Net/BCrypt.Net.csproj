@@ -15,6 +15,10 @@
         <PackageLicenseUrl>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt,</PackageLicenseUrl>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/BcryptNet/bcrypt.net</RepositoryUrl>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <SignAssembly>True</SignAssembly>
+        <AssemblyOriginatorKeyFile>bcryptnext.pfx</AssemblyOriginatorKeyFile>
+        <DelaySign>False</DelaySign>
     </PropertyGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
@@ -93,6 +97,10 @@
         <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
         <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
         <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Properties\" />
     </ItemGroup>
 
 </Project>
