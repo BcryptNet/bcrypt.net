@@ -33,7 +33,7 @@ public class Benchmark
         {
             // Find an Init method taking string[], if any
             var initMethod = type.GetMethod("Init", publicStatic, null,
-                new[] {typeof(string[])},
+                new[] { typeof(string[]) },
                 null);
 
             // Find a parameterless Reset method, if any
@@ -69,7 +69,7 @@ public class Benchmark
             try
             {
                 if (initMethod != null)
-                    initMethod.Invoke(null, new object[] {args});
+                    initMethod.Invoke(null, new object[] { args });
             }
             catch (TargetInvocationException e)
             {
@@ -104,7 +104,7 @@ public class Benchmark
                     if (checkMethod != null)
                         checkMethod.Invoke(null, null);
 
-                    // If everything's worked, report the time taken, 
+                    // If everything's worked, report the time taken,
                     // nicely lined up (assuming no very long method names!)
                     Console.WriteLine("  {0,-20} {1}", method.Name, end - start);
                 }
@@ -115,6 +115,7 @@ public class Benchmark
                     Console.WriteLine("  {0}: Failed ({1})", method.Name, message);
                 }
         }
+        Console.ReadLine();
     }
 
     public class TestBcryptNetv2
@@ -623,18 +624,18 @@ public class Benchmark
                 "albert"
             };
 
-        static int iterations = 100000;
+        static int iterations = 1;
 
         [Benchmark]
         public static void Test()
         {
             int count = iterations;
-            for(int i = 0; i < count; i++)
-            foreach (var p in pass)
-            {
-                var x = BCrypt.Net.BCrypt.HashPassword(p, 4);
-                Debug.Assert(BCrypt.Net.BCrypt.Verify(p, x));
-            }
+            for (int i = 0; i < count; i++)
+                foreach (var p in pass)
+                {
+                    var x = BCrypt.Net.BCrypt.HashPassword(p, 10);
+                    Debug.Assert(BCrypt.Net.BCrypt.Verify(p, x));
+                }
         }
     }
 }

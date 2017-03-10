@@ -4,16 +4,16 @@ Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
 Copyright (c) 2016/2017 Chris McKee (.Net-core port / patches)
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files 
-(the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, 
-merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished 
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
+(the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
+merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished
 to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.
 */
 
@@ -21,7 +21,7 @@ IN THE SOFTWARE.
 using System.Diagnostics;
 using NUnit.Framework;
 
-namespace BCrypt.Net.Test
+namespace BCrypt.Net.UnitTests
 {
     /// <summary>
     /// BCrypt tests
@@ -50,7 +50,11 @@ namespace BCrypt.Net.Test
 			{ "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2a$08$Eq2r4G/76Wv39MzSX262hu",    "$2a$08$Eq2r4G/76Wv39MzSX262huzPz612MZiYHVUJe/OcOql2jo4.9UxTW" },
 			{ "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2a$10$LgfYWkbzEvQ4JakH7rOvHe",    "$2a$10$LgfYWkbzEvQ4JakH7rOvHe0y8pHKF9OaFgwUZ2q7W2FFZmZzJYlfS" },
 			{ "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2a$12$WApznUOJfkEGSmYRfnkrPO",    "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC" },
-		};
+
+            { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2b$12$WApznUOJfkEGSmYRfnkrPO",    "$2b$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC" },
+            { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2x$12$WApznUOJfkEGSmYRfnkrPO",    "$2x$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC" },
+            { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2y$12$WApznUOJfkEGSmYRfnkrPO",    "$2y$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC" },
+        };
 
         /**
          * Test method for 'BCrypt.HashPassword(string, string)'
@@ -176,7 +180,7 @@ namespace BCrypt.Net.Test
         [TestCase("ππππππππ")]
         public void TestInternationalChars(string pw1)
         {
-            Trace.Write("BCrypt.HashPassword with international chars: ");            
+            Trace.Write("BCrypt.HashPassword with international chars: ");
             string pw2 = "????????";
 
             string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
@@ -191,6 +195,7 @@ namespace BCrypt.Net.Test
 
 
         [Test]
+        [TestCase("RwiKnN>9xg3*C)1AZl.)y8f_:GCz,vt3T]PIV)[7kktZZQ)z1HI(gyrqgn6;gyb]eIP>r1f:<xw?R")]
         [TestCase("<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>")]
         [TestCase("ππππππππ")]
         [TestCase("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя")]
@@ -204,6 +209,10 @@ namespace BCrypt.Net.Test
 
             string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
             Assert.IsTrue(BCrypt.Verify(pw1, h1));
+
+            string h2 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt(), enhancedEntropy:true);
+            Assert.IsTrue(BCrypt.Verify(pw1, h2));
+
             Trace.Write(".");
         }
     }

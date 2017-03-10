@@ -7,6 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net", "BCrypt.Net\BC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net.UnitTests", "BCrypt.Net.UnitTests\BCrypt.Net.UnitTests.csproj", "{2078EB7B-7EDF-4B65-80F7-DB4D92E08CCD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{6F3D5F8B-CD73-474C-BA79-D4A17E9F106D}"
+	ProjectSection(SolutionItems) = preProject
+		..\readme.md = ..\readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

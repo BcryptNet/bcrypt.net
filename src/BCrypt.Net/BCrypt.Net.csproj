@@ -9,7 +9,7 @@
         <AssemblyName>BCrypt.Net-Next</AssemblyName>
         <PackageId>BCrypt.Net</PackageId>
         <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security</PackageTags>
-        <PackageReleaseNotes>Corrects usage of Secure random number generator; change secure equals to match .net identity implmentation; inline vars in encipher method; change UTF8 handling to safer default</PackageReleaseNotes>
+        <PackageReleaseNotes>Corrects usage of Secure random number generator; change secure equals to match .net identity implmentation; inline vars in encipher method; change UTF8 handling to safer default. Adds enhancements around range validation. Adds bcrypt revision handling for compatibility. Adds SHA384 to keys greater than max BCrypt key size of 72 to increase entropy. SHA-384 is the best hash in the SHA2 hash family: it is as fast as SHA-512 on 64-bit platforms but, unlike SHA-512 or SHA-256, its truncated design serves as an effective defense against length extension attacks.</PackageReleaseNotes>
         <PackageIconUrl>https://raw.githubusercontent.com/BcryptNet/bcrypt.net/master/ico64.png</PackageIconUrl>
         <PackageProjectUrl>https://github.com/BcryptNet/bcrypt.net</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt,</PackageLicenseUrl>
@@ -17,8 +17,9 @@
         <RepositoryUrl>https://github.com/BcryptNet/bcrypt.net</RepositoryUrl>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <SignAssembly>True</SignAssembly>
-        <AssemblyOriginatorKeyFile>bcryptnext.pfx</AssemblyOriginatorKeyFile>
+        <AssemblyOriginatorKeyFile>bcrypt.sig.pfx</AssemblyOriginatorKeyFile>
         <DelaySign>False</DelaySign>
+        <Version>2.0.4</Version>
     </PropertyGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
@@ -38,7 +39,6 @@
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
         <Reference Include="System" />
-        <Reference Include="Microsoft.CSharp" />
     </ItemGroup>
 
     <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' ">
@@ -52,23 +52,21 @@
     <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
         <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
         <Reference Include="System" />
-        <Reference Include="Microsoft.CSharp" />
     </ItemGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
         <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
         <Reference Include="System" />
-        <Reference Include="Microsoft.CSharp" />
     </ItemGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
         <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
         <Reference Include="System" />
-        <Reference Include="Microsoft.CSharp" />
     </ItemGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
         <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
+        <PackageReference Include="System.Net.Primitives" Version="4.3.0" />
         <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
         <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
         <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
@@ -77,6 +75,7 @@
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
         <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
+        <PackageReference Include="System.Net.Primitives" Version="4.3.0" />
         <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
         <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
         <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
@@ -85,6 +84,7 @@
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6.1' ">
         <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
+        <PackageReference Include="System.Net.Primitives" Version="4.3.0" />
         <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
         <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
         <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
@@ -93,6 +93,7 @@
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
         <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
+        <PackageReference Include="System.Net.Primitives" Version="4.3.0" />
         <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
         <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
         <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
