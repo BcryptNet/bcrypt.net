@@ -1,9 +1,8 @@
-﻿namespace DotNet4
+﻿namespace DotNetCore
 {
     using System;
-    using System.Diagnostics;
     using BCrypt.Net;
-    using System.Text.RegularExpressions;
+    using System.Diagnostics;
 
     class Program
     {
@@ -39,10 +38,9 @@
             {
                 var hashInfo = BCrypt.InterrogateHash(_testVectors[ji, 2]);
                 Console.WriteLine("{0}, {1}", hashInfo.WorkFactor, hashInfo.Version);
-
             }
 
-            Trace.Write("BCrypt.HashPassword(): ");
+            Console.WriteLine("BCrypt.HashPassword(): ");
             var sw = Stopwatch.StartNew();
             for (int i = 0; i < _testVectors.Length / 3; i++)
             {
@@ -50,11 +48,11 @@
                 string salt = _testVectors[i, 1];
                 string expected = _testVectors[i, 2];
                 string hashed = BCrypt.HashPassword(plain, salt);
-                Console.Write(hashed == expected);
-                Trace.Write(".");
+                Console.Write(hashed == expected ? "T" : "F");
             }
-            Trace.WriteLine(sw.ElapsedMilliseconds);
-            Trace.WriteLine("---");
+            Console.WriteLine("---");
+            Console.WriteLine(sw.ElapsedMilliseconds);
+            Console.WriteLine("---");
 
             Console.ReadKey();
         }

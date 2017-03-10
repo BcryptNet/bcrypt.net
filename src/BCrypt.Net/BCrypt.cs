@@ -525,12 +525,12 @@ namespace BCrypt.Net
 
 
 #if LEGACY
-        private static readonly Regex HashInformation = new Regex(@"^(?<salt>\$2a?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline);
-        private static readonly Regex SaltInformation = new Regex(@"^\$(?<version>2a?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline);
+        private static readonly Regex HashInformation = new Regex(@"^(?<settings>\$2[a-z]{1}?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline);
+        private static readonly Regex SettingsInformation = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline);
 #else
         private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(300);
-        private static readonly Regex HashInformation = new Regex(@"^(?<salt>\$2a?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline, RegexTimeout);
-        private static readonly Regex SaltInformation = new Regex(@"^\$(?<version>2a?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline, RegexTimeout);
+        private static readonly Regex HashInformation = new Regex(@"^(?<settings>\$2[a-z]{1}?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline, RegexTimeout);
+        private static readonly Regex SettingsInformation = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline, RegexTimeout);
 #endif
 
         /// <summary>
@@ -541,25 +541,34 @@ namespace BCrypt.Net
         /// <param name="salt"></param>
         /// <param name="version"></param>
         /// <param name="workfactor"></param>
-        public static void InterrogateHash(string hash, out string rawHash, out string salt, out string version, out int workfactor)
+        /// <exception cref="HashInformationException"></exception>
+        public static HashInformation InterrogateHash(string hash)
         {
-            var hashInfo = HashInformation.Match(hash);
-
-            if (!hashInfo.Success)
+            try
             {
-                throw new SaltParseException("Invalid Hash Format");
-            }
+                var hashInfo = HashInformation.Match(hash);
 
-            var saltInfo = SaltInformation.Match(hashInfo.Groups["salt"].Value);
-            if (!saltInfo.Success)
+                if (!hashInfo.Success)
+                {
+                    throw new SaltParseException("Invalid Hash Format");
+                }
+
+                var saltInfo = SettingsInformation.Match(hashInfo.Groups["settings"].Value);
+                if (!saltInfo.Success)
+                {
+                    throw new SaltParseException("Invalid Settings Format");
+                }
+
+                return new HashInformation(hashInfo.Groups["settings"].Value,
+                                            saltInfo.Groups["version"].Value,
+                                            saltInfo.Groups["rounds"].Value,
+                                            hashInfo.Groups["hash"].Value);
+
+            }
+            catch(Exception ex)
             {
-                throw new SaltParseException("Invalid Salt Format");
+                throw new HashInformationException("Error handling string interrogation", ex);
             }
-
-            rawHash = hashInfo.Groups["hash"].Value;
-            salt = hashInfo.Groups["salt"].Value;            
-            version = saltInfo.Groups["version"].Value;
-            workfactor = Convert.ToInt32(saltInfo.Groups["rounds"].Value);
         }
 
 

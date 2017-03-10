@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BenchmarkBcryptNet", "Bench
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNet4", "DotNet4\DotNet4.csproj", "{E965ECD6-AE94-4458-81CE-1EA6699D416D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore", "DotNetCore\DotNetCore.csproj", "{1475B4C5-26A7-4A1E-873D-53C3C6069084}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{E965ECD6-AE94-4458-81CE-1EA6699D416D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E965ECD6-AE94-4458-81CE-1EA6699D416D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E965ECD6-AE94-4458-81CE-1EA6699D416D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1475B4C5-26A7-4A1E-873D-53C3C6069084}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1475B4C5-26A7-4A1E-873D-53C3C6069084}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1475B4C5-26A7-4A1E-873D-53C3C6069084}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1475B4C5-26A7-4A1E-873D-53C3C6069084}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
