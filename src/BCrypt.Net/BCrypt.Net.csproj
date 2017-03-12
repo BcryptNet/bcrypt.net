@@ -5,7 +5,7 @@
         <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
         <VersionPrefix>2.0.2</VersionPrefix>
         <Authors>https://github.com/BcryptNet/bcrypt.net</Authors>
-        <TargetFrameworks>net20;net35;net40;net45;net451;net452;net462;netstandard1.3;netstandard1.6;netstandard1.6;netcoreapp1.0</TargetFrameworks>
+        <TargetFrameworks>net20;net35;net40;net45;net451;net452;net462;netstandard1.3;netstandard1.6;netcoreapp1.0;netcoreapp1.1</TargetFrameworks>
         <AssemblyName>BCrypt.Net-Next</AssemblyName>
         <PackageId>BCrypt.Net</PackageId>
         <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security</PackageTags>
@@ -17,7 +17,7 @@
         <RepositoryUrl>https://github.com/BcryptNet/bcrypt.net</RepositoryUrl>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <SignAssembly>True</SignAssembly>
-        <AssemblyOriginatorKeyFile>bcrypt.sig.pfx</AssemblyOriginatorKeyFile>
+        <AssemblyOriginatorKeyFile>bcrypt.net.snk.pfx</AssemblyOriginatorKeyFile>
         <DelaySign>False</DelaySign>
         <Version>2.0.4</Version>
     </PropertyGroup>
@@ -43,6 +43,10 @@
 
     <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' ">
         <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net20|AnyCPU'">
+      <DocumentationFile>bin\Debug\BCrypt.Net-Next.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
@@ -82,7 +86,8 @@
         <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
     </ItemGroup>
 
-    <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6.1' ">
+
+    <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
         <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
         <PackageReference Include="System.Net.Primitives" Version="4.3.0" />
         <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />

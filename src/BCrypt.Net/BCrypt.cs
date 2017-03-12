@@ -505,7 +505,7 @@ namespace BCrypt.Net
 
             byte[] inputBytes = SafeUTF8.GetBytes(inputKey + (minor >= 'a' ? Nul : EmptyString));
 
-            if (enhancedEntropy && inputKey.Length > 72)
+            if (enhancedEntropy)
             {
                 inputBytes = SHA384.Create().ComputeHash(inputBytes);
             }
@@ -613,14 +613,24 @@ namespace BCrypt.Net
 
         /// <summary>
         ///  Verifies that the hash of the given <paramref name="text"/> matches the provided
-        ///  <paramref name="hash"/>
+        ///  <paramref name="hash"/>; the string will undergo SHA384 hashing to maintain the enhanced entropy work done during hashing
         /// </summary>
         /// <param name="text">The text to verify.</param>
         /// <param name="hash"> The previously-hashed password.</param>
         /// <returns>true if the passwords match, false otherwise.</returns>
-        public static bool Verify(string text, string hash)
+        public static bool EnhancedVerify(string text, string hash) => Verify(text, hash, true);
+
+        /// <summary>
+        ///  Verifies that the hash of the given <paramref name="text"/> matches the provided
+        ///  <paramref name="hash"/>
+        /// </summary>
+        /// <param name="text">The text to verify.</param>
+        /// <param name="hash"> The previously-hashed password.</param>
+        /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make use of available entropy prior to bcrypt hashing</param>
+        /// <returns>true if the passwords match, false otherwise.</returns>
+        public static bool Verify(string text, string hash, bool enhancedEntropy = false)
         {
-            return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash)));
+            return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash, enhancedEntropy)));
         }
 
         // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.

@@ -12,8 +12,7 @@ Package: https://www.nuget.org/packages/BCrypt.Net-Next/
 
 ## Compiling
 
-You'll need at least VS2015 with the current SDK (check the global.json file for the current version);
-You can grab the version required from https://github.com/aspnet/Tooling/blob/master/known-issues.md#missing-sdk 
+You'll need at least VS2017 with the current SDK https://www.microsoft.com/net/download;
 
 The nuget packages can be built by running `buildfornuget.cmd`
 or 
@@ -25,8 +24,8 @@ dotnet pack .\src\BCrypt.Net --configuration Release
 
 ## Tests
 
-You can run the tests from the main folder by typing `dotnet test .\src\BCrypt.Net.Tests\`
-It's ill advised to just run the tests like this as the `TestGenerateSaltWithMaxWorkFactor` takes a long time to complete. This may be altered in later versions to be ignored (manual run).
+You can run the tests from the main folder by typing `dotnet test .\src\BCrypt.Net.UnitTests\`
+Running `TestGenerateSaltWithMaxWorkFactor` will take significant time.
 
 ## Description
 
@@ -59,7 +58,7 @@ $2a$ – The current key used to identify this scheme.
        crafted password strings.
 $2b$ – Used by some recent implementations which include a mitigation to a wraparound problem. 
        Previous versions of the algorithm have a problem with long passwords. By design, long passwords 
-       are truncated at 72 characters, but there is an 8-bit wraparound problem[17] with certain password 
+       are truncated at 72 characters, but there is an 8-bit wraparound problem with certain password 
        lengths resulting in weak hashes.
 $2x$ – Post-2011 bug discovery, old hashes can be renamed to be $2x$ to indicate that they were generated with 
        the broken algorithm. These hashes are still weak, but at least it's clear which algorithm was used to 
