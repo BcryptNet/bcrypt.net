@@ -19,14 +19,13 @@ IN THE SOFTWARE.
 
 
 using System.Diagnostics;
-using NUnit.Framework;
+using Xunit;
 
 namespace BCrypt.Net.UnitTests
 {
     /// <summary>
     /// BCrypt tests
     /// </summary>
-    [TestFixture]
     public class BCryptTests
     {
         readonly string[,] _testVectors = {
@@ -59,7 +58,7 @@ namespace BCrypt.Net.UnitTests
         /**
          * Test method for 'BCrypt.HashPassword(string, string)'
          */
-        [Test]
+        [Fact()]
         public void TestHashPassword()
         {
             Trace.Write("BCrypt.HashPassword(): ");
@@ -80,7 +79,7 @@ namespace BCrypt.Net.UnitTests
         /**
          * Test method for 'BCrypt.GenerateSalt(int)'
          */
-        [Test]
+        [Fact()]
         public void TestGenerateSaltWithWorkFactor()
         {
             Trace.Write("BCrypt.GenerateSalt(log_rounds):");
@@ -93,14 +92,14 @@ namespace BCrypt.Net.UnitTests
                     string salt = BCrypt.GenerateSalt(i);
                     string hashed1 = BCrypt.HashPassword(plain, salt);
                     string hashed2 = BCrypt.HashPassword(plain, hashed1);
-                    Assert.AreEqual(hashed1, hashed2);
+                    Assert.Equal(hashed1, hashed2);
                     Trace.Write(".");
                 }
             }
             Trace.WriteLine("");
         }
 
-        [Test, Ignore("This test takes a very long time to run as it uses the max workload")]
+        [Fact(Skip = "This test takes a very long time to run as it uses the max workload")]
         public void TestGenerateSaltWithMaxWorkFactor()
         {
             Trace.Write("BCrypt.GenerateSalt(31):");
@@ -110,7 +109,7 @@ namespace BCrypt.Net.UnitTests
                 string salt = BCrypt.GenerateSalt(31);
                 string hashed1 = BCrypt.HashPassword(plain, salt);
                 string hashed2 = BCrypt.HashPassword(plain, hashed1);
-                Assert.AreEqual(hashed1, hashed2);
+                Assert.Equal(hashed1, hashed2);
                 Trace.Write(".");
             }
             Trace.WriteLine("");
@@ -119,7 +118,7 @@ namespace BCrypt.Net.UnitTests
         /**
          * Test method for 'BCrypt.GenerateSalt()'
          */
-        [Test]
+        [Fact()]
         public void TestGenerateSalt()
         {
             Trace.Write("BCrypt.GenerateSalt():");
@@ -129,7 +128,7 @@ namespace BCrypt.Net.UnitTests
                 string salt = BCrypt.GenerateSalt();
                 string hashed1 = BCrypt.HashPassword(plain, salt);
                 string hashed2 = BCrypt.HashPassword(plain, hashed1);
-                Assert.AreEqual(hashed1, hashed2);
+                Assert.Equal(hashed1, hashed2);
                 Trace.Write(".");
             }
             Trace.WriteLine("");
@@ -139,7 +138,7 @@ namespace BCrypt.Net.UnitTests
          * Test method for 'BCrypt.VerifyPassword(string, string)'
          * expecting success
          */
-        [Test]
+        [Fact()]
         public void TestVerifyPasswordSuccess()
         {
             Trace.Write("BCrypt.Verify with good passwords:");
@@ -147,7 +146,7 @@ namespace BCrypt.Net.UnitTests
             {
                 string plain = _testVectors[i, 0];
                 string expected = _testVectors[i, 2];
-                Assert.IsTrue(BCrypt.Verify(plain, expected));
+                Assert.True(BCrypt.Verify(plain, expected));
                 Trace.Write(".");
             }
             Trace.WriteLine("");
@@ -157,7 +156,7 @@ namespace BCrypt.Net.UnitTests
          * Test method for 'BCrypt.VerifyPassword(string, string)'
          * expecting failure
          */
-        [Test]
+        [Fact()]
         public void TestVerifyPasswordFailure()
         {
             Trace.Write("BCrypt.Verify with bad passwords: ");
@@ -166,7 +165,8 @@ namespace BCrypt.Net.UnitTests
                 int brokenIndex = (i + 4) % (_testVectors.Length / 3);
                 string plain = _testVectors[i, 0];
                 string expected = _testVectors[brokenIndex, 2];
-                Assert.IsFalse(BCrypt.Verify(plain, expected));
+                var res = BCrypt.Verify(plain, expected);
+                Assert.False(res);
                 Trace.Write(".");
             }
             Trace.WriteLine("");
@@ -175,43 +175,43 @@ namespace BCrypt.Net.UnitTests
         /**
          * Test for correct hashing of non-US-ASCII passwords
          */
-        [Test]
-        [TestCase("\u2605\u2605\u2605\u2605\u2605\u2605\u2605\u2605")]
-        [TestCase("ππππππππ")]
+        [Theory()]
+        [InlineData("\u2605\u2605\u2605\u2605\u2605\u2605\u2605\u2605")]
+        [InlineData("ππππππππ")]
         public void TestInternationalChars(string pw1)
         {
             Trace.Write("BCrypt.HashPassword with international chars: ");
             string pw2 = "????????";
 
             string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
-            Assert.IsFalse(BCrypt.Verify(pw2, h1));
+            Assert.False(BCrypt.Verify(pw2, h1));
             Trace.Write(".");
 
             string h2 = BCrypt.HashPassword(pw2, BCrypt.GenerateSalt());
-            Assert.IsFalse(BCrypt.Verify(pw1, h2));
+            Assert.False(BCrypt.Verify(pw1, h2));
             Trace.Write(".");
             Trace.WriteLine("");
         }
 
 
-        [Test]
-        [TestCase("RwiKnN>9xg3*C)1AZl.)y8f_:GCz,vt3T]PIV)[7kktZZQ)z1HI(gyrqgn6;gyb]eIP>r1f:<xw?R")]
-        [TestCase("<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>")]
-        [TestCase("ππππππππ")]
-        [TestCase("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя")]
-        [TestCase("ÅÍÎÏ˝ÓÔÒÚÆ☃")]
-        [TestCase("사회과학원 어학연구소")]
-        [TestCase("ﾟ･✿ヾ╲(｡◕‿◕｡)╱✿･ﾟ")]
-        [TestCase("👾 🙇 💁 🙅 🙆 🙋 🙎 🙍")]
+        [Theory()]
+        [InlineData("RwiKnN>9xg3*C)1AZl.)y8f_:GCz,vt3T]PIV)[7kktZZQ)z1HI(gyrqgn6;gyb]eIP>r1f:<xw?R")]
+        [InlineData("<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>")]
+        [InlineData("ππππππππ")]
+        [InlineData("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя")]
+        [InlineData("ÅÍÎÏ˝ÓÔÒÚÆ☃")]
+        [InlineData("사회과학원 어학연구소")]
+        [InlineData("ﾟ･✿ヾ╲(｡◕‿◕｡)╱✿･ﾟ")]
+        [InlineData("👾 🙇 💁 🙅 🙆 🙋 🙎 🙍")]
         public void TestNaughtyStringsHash(string pw1)
         {
             Trace.Write("BCrypt.HashPassword with naughty strings: ");
 
             string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
-            Assert.IsTrue(BCrypt.Verify(pw1, h1));
+            Assert.True(BCrypt.Verify(pw1, h1));
 
-            string h2 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt(), enhancedEntropy:true);
-            Assert.IsTrue(BCrypt.Verify(pw1, h2));
+            string h2 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt(), enhancedEntropy: true);
+            Assert.True(BCrypt.Verify(pw1, h2, true));
 
             Trace.Write(".");
         }
