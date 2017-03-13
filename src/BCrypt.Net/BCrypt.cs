@@ -18,7 +18,6 @@ IN THE SOFTWARE.
 */
 
 using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -528,7 +527,7 @@ namespace BCrypt.Net
         {
             if (workFactor < MinRounds || workFactor > MaxRounds)
             {
-                throw new ArgumentOutOfRangeException(nameof(workFactor), workFactor, "The work factor must be between " + MinRounds + " and " + MaxRounds + " (inclusive)");
+                throw new ArgumentOutOfRangeException(nameof(workFactor), workFactor, $"The work factor must be between {MinRounds} and {MaxRounds} (inclusive)");
             }
 
             if (bcryptMinorRevision != 'a' && bcryptMinorRevision != 'b' && bcryptMinorRevision != 'x' && bcryptMinorRevision != 'y')
@@ -857,6 +856,7 @@ namespace BCrypt.Net
         /// </summary>
         /// <param name="saltBytes"> Salt byte array.</param>
         /// <param name="inputBytes">Input byte array.</param>
+        // ReSharper disable once InconsistentNaming
         private void EKSKey(byte[] saltBytes, byte[] inputBytes)
         {
             int i;

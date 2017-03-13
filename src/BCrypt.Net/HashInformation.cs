@@ -1,9 +1,12 @@
-﻿namespace BCrypt.Net
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace BCrypt.Net
 {
     /// <summary>
     /// HashInformation : A value object that contains the results of interrogating a hash
     /// Namely its settings (2a$10 for example); version (2a); workfactor (log rounds), and the raw hash returned
     /// </summary>
+    [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
     public sealed class HashInformation
     {
         /// <summary>Constructor. </summary>

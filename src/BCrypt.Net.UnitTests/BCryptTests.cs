@@ -18,6 +18,7 @@ IN THE SOFTWARE.
 */
 
 
+using System;
 using System.Diagnostics;
 using Xunit;
 
@@ -74,7 +75,7 @@ namespace BCrypt.Net.UnitTests
                         salt = _testVectors[i, 1].Replace("2a", "2" + Revisions[r]);
 
                         string hashed = BCrypt.HashPassword(plain, salt);
-                                              
+
 
                         var d = hashed.StartsWith("$2" + Revisions[r]);
                         Assert.True(d);
@@ -276,6 +277,29 @@ namespace BCrypt.Net.UnitTests
             Assert.True(BCrypt.Verify(pw1, h2, true));
 
             Trace.Write(".");
+        }
+
+        [Fact]
+        public void CalculatePerformantWorkload()
+        {
+            var cost = 16;
+            var timeTarget = 100; // Milliseconds
+            long timeTaken;
+            do
+            {
+                var sw = Stopwatch.StartNew();
+
+                BCrypt.HashPassword("RwiKnN>9xg3*C)1AZl.)y8f_:GCz,vt3T]PI", workFactor: cost);
+
+                sw.Stop();
+                timeTaken = sw.ElapsedMilliseconds;
+
+                cost -= 1;
+
+            } while ((timeTaken) >= timeTarget);
+
+            Debug.WriteLine("Appropriate Cost Found: "+cost);
+
         }
     }
 }
