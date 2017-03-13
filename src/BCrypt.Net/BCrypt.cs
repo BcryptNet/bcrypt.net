@@ -914,7 +914,7 @@ namespace BCrypt.Net
 
             if (workFactor < MinRounds || workFactor > MaxRounds)
             {
-                throw new ArgumentException("Bad number of rounds", "logRounds");
+                throw new ArgumentException("Bad number of rounds", "workFactor");
             }
 
             if (saltBytes.Length != BCryptSaltLen)
@@ -923,7 +923,12 @@ namespace BCrypt.Net
             }
 
             uint rounds = 1u << workFactor;
-            Debug.Assert(rounds > 0, "Rounds must be > 0"); // We overflowed rounds at 31 - added safety check
+
+            // We overflowed rounds at 31 - added safety check
+            if (rounds < 1)
+            {
+                throw new ArgumentException("Bad number of rounds", "workFactor");
+            }
 
             InitializeKey();
             EKSKey(saltBytes, inputBytes);

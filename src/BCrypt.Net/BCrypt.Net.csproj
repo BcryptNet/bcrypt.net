@@ -20,6 +20,8 @@
         <AssemblyOriginatorKeyFile>bcrypt.net.snk.pfx</AssemblyOriginatorKeyFile>
         <DelaySign>False</DelaySign>
         <Version>2.0.4</Version>
+        <AssemblyVersion>2.0.2.0</AssemblyVersion>
+        <FileVersion>2.0.2.0</FileVersion>
     </PropertyGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">

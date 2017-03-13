@@ -74,6 +74,7 @@ namespace BCrypt.Net.UnitTests
                         salt = _testVectors[i, 1].Replace("2a", "2" + Revisions[r]);
 
                         string hashed = BCrypt.HashPassword(plain, salt);
+                                              
 
                         var d = hashed.StartsWith("$2" + Revisions[r]);
                         Assert.True(d);

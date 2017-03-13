@@ -10,6 +10,51 @@ Download using nuget or Paket (https://fsprojects.github.io/Paket/)
 
 Package: https://www.nuget.org/packages/BCrypt.Net-Next/
 
+
+# How to use
+
+The simpelest usage is as follows...
+
+To Hash a password:
+
+`string passwordHash =  BCrypt.HashPassword("my password");`
+
+To Verify a password against a hash (assuming you've stored the hash and retrieved from storage for verification):
+
+`BCrypt.Verify("my password", passwordHash);`
+
+This short on hashing will generate a salt automatically for you with the work factor (2^number of rounds) set to 10 (which matches the default across most implementation and is currently viewed as a good level of security/risk).
+To save you the maths a small table covering the itterations is provided below. The minimum allowed in this library is 4 for compatibility, the maximum is 31 (at 31 your processor will be wishing for death).
+
+```
+| Cost | Iterations        |
+|------|-------------------|
+|  8   |    256 iterations |
+|  9   |    512 iterations |
+| 10   |  1,024 iterations |
+| 11   |  2,048 iterations |
+| 12   |  4,096 iterations |
+| 13   |  8,192 iterations |
+| 14   | 16,384 iterations |
+| 15   | 32,768 iterations |
+| 16   | 65,536 iterations |
+etc
+```
+
+
+
+## Enhanced Entropy 
+
+The recommended 56 byte password limit (including null termination byte) for bcrypt relates to the 448 bit limit of the Blowfish key; Any 
+bytes beyond that limit are not fully mixed into the hash, as such making the 72 byte absolute limit on bcrypt passwords less relevant 
+considering what actual effect on the resulting hash by those bytes.
+
+```
+string passwordHash = BCrypt.HashPassword("my password", enhancedEntropy: true);
+
+BCrypt.EnhancedVerify("my password", passwordHash)
+```
+
 ## Compiling
 
 You'll need at least VS2017 with the current SDK https://www.microsoft.com/net/download;
@@ -109,6 +154,15 @@ A future release of Solar's bcrypt code should also support 'b'.
 # Releases
 
 https://github.com/BcryptNet/bcrypt.net/releases
+
+*v2.0.2 -*
+
+* Adds enhanced mode; enhanced hashing allows you to opt-in to ensuring optimal entropy on your users passwords by first making use of the fast SHA384 algorithm before BCrypt hashes the password.
+* VS2017 RTW changes
+* Cleaned up xml-doc for intellisense
+* Increased compatibility by allowing BCrypt revisions from other frameworks/languages to be validated and generated whilst maintaining compatibility.
+* Added Hash interrogation to allow a hash to be passed in and its component parts be returned.
+ * Added timeouts to regex and set compiler flags for msbuild so < .net 4.5 (where timeouts were added to regex) we use old regex method.
 
 *v2.0.1 -*
 
