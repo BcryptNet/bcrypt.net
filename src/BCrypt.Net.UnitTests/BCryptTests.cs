@@ -52,7 +52,7 @@ namespace BCrypt.Net.UnitTests
             { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2a$12$WApznUOJfkEGSmYRfnkrPO",    "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC" },
         };
 
-        char[] Revisions = new char[] { 'a', 'x', 'y', 'b' };
+        readonly char[] _revisions = new char[] { 'a', 'x', 'y', 'b' };
 
         /**
          * Test method for 'BCrypt.HashPassword(string, string)'
@@ -62,7 +62,7 @@ namespace BCrypt.Net.UnitTests
         {
             Trace.Write("BCrypt.HashPassword(): ");
             var sw = Stopwatch.StartNew();
-            for (var r = 0; r < Revisions.Length; r++)
+            for (var r = 0; r < _revisions.Length; r++)
             {
                 for (int i = 0; i < _testVectors.Length / 3; i++)
                 {
@@ -72,12 +72,12 @@ namespace BCrypt.Net.UnitTests
                     if (r > 0)
                     {
                         //Check hash that goes in one end comes out the next the same
-                        salt = _testVectors[i, 1].Replace("2a", "2" + Revisions[r]);
+                        salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
 
                         string hashed = BCrypt.HashPassword(plain, salt);
 
 
-                        var d = hashed.StartsWith("$2" + Revisions[r]);
+                        var d = hashed.StartsWith("$2" + _revisions[r]);
                         Assert.True(d);
                         Trace.WriteLine(hashed);
                     }
@@ -109,7 +109,7 @@ namespace BCrypt.Net.UnitTests
         {
             Trace.Write("BCrypt.HashPassword(): ");
             var sw = Stopwatch.StartNew();
-            for (var r = 0; r < Revisions.Length; r++)
+            for (var r = 0; r < _revisions.Length; r++)
             {
                 for (int i = 0; i < _testVectors.Length / 3; i++)
                 {
@@ -117,11 +117,11 @@ namespace BCrypt.Net.UnitTests
                     string salt;
 
                     //Check hash that goes in one end comes out the next the same
-                    salt = _testVectors[i, 1].Replace("2a", "2" + Revisions[r]);
+                    salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
 
                     string hashed = BCrypt.HashPassword(plain, salt, enhancedEntropy: true);
 
-                    var revCheck = hashed.StartsWith("$2" + Revisions[r]);
+                    var revCheck = hashed.StartsWith("$2" + _revisions[r]);
 
                     Assert.True(revCheck);
 
@@ -278,6 +278,22 @@ namespace BCrypt.Net.UnitTests
 
             Trace.Write(".");
         }
+
+
+        [Theory()]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworks(bool enhanced)
+        {
+            string password =  "\01234567"; // can cause zero bytes long (an empty password) for bcrypt passphrase.
+            string hash = BCrypt.HashPassword(password, BCrypt.GenerateSalt(), enhanced);
+            var t1 = BCrypt.Verify(password, hash, enhanced);
+            var t2 = BCrypt.Verify("1234567", hash, enhanced);
+            Assert.True(t1, "Null terminator should validate if part of passphrase");
+            Assert.False(t2, "Null terminator shouldnt alter passphrase");
+
+        }
+
 
         [Fact]
         public void CalculatePerformantWorkload()
