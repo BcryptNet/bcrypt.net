@@ -2,7 +2,7 @@
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
-Copyright (c) 2016/2017 Chris McKee (.Net-core port / patches)
+Copyright (c) 2016/2017 Chris McKee (.Net-core port / patches / new features)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -17,8 +17,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OU
 IN THE SOFTWARE.
 */
 
-
-using System;
 using System.Diagnostics;
 using Xunit;
 
@@ -136,6 +134,88 @@ namespace BCrypt.Net.UnitTests
 
             Trace.WriteLine(sw.ElapsedMilliseconds);
             Trace.WriteLine("");
+        }
+
+        [Fact()]
+        public void TestValidateAndReplace()
+        {
+            for (int i = 0; i < _testVectors.Length / 3; i++)
+            {
+                string currentKey = _testVectors[i, 0];
+                string salt=_testVectors[i, 1];
+                string currentHash=_testVectors[i, 2];
+
+                string newPassword = "my new password";
+                string hashed = BCrypt.HashPassword(currentKey, salt);
+                var d = hashed == currentHash;
+
+                var newHash = BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword);
+
+                var newPassValid = BCrypt.Verify(newPassword, newHash);
+
+                Assert.True(newPassValid);
+
+                Trace.Write(".");
+            }
+
+        }
+
+        [Fact()]
+        public void TestValidateAndReplaceWithWorkload()
+        {
+            for (int i = 0; i < 6 / 3; i++)
+            {
+                string currentKey = _testVectors[i, 0];
+                string salt = _testVectors[i, 1];
+                string currentHash = _testVectors[i, 2];
+
+                string newPassword = "my new password";
+                string hashed = BCrypt.HashPassword(currentKey, salt);
+                var d = hashed == currentHash;
+
+                var newHash = BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 11);
+
+                var newPassValid = BCrypt.Verify(newPassword, newHash);
+
+                Assert.True(newPassValid);
+                Assert.True(newHash.Contains("$11$"));
+
+                Trace.Write(".");
+            }
+
+        }
+
+        [Fact()]
+        public void TestValidateAndReplaceWithWorkloadSmallerThanCurrentEndsWithSameWorkLoadAsOriginalHash()
+        {
+           
+                string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
+                string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
+                string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC";
+
+                string newPassword = "my new password";
+                string hashed = BCrypt.HashPassword(currentKey, salt);
+                var d = hashed == currentHash;
+
+                Assert.True(BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 5).Contains("$12$"));
+                
+                Trace.Write(".");            
+        }
+
+        [Fact()]
+        public void TestValidateAndReplaceWithForceAndWorkloadSmallerThanCurrentEndsWithRequestedWorkLoad()
+        {
+
+            string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
+            string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
+            string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC";
+
+            string newPassword = "my new password";
+            string hashed = BCrypt.HashPassword(currentKey, salt);
+            var d = hashed == currentHash;
+            var replHash = BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 5, forceWorkFactor: true);
+            Assert.True(replHash.Contains("$05$"));
+            Trace.Write(".");
         }
 
 
@@ -285,10 +365,10 @@ namespace BCrypt.Net.UnitTests
         [InlineData(true)]
         public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworks(bool enhanced)
         {
-            string password =  "\01234567"; // can cause zero bytes long (an empty password) for bcrypt passphrase.
+            string password = "\01234567"; // can cause zero bytes long (an empty password) for bcrypt passphrase.
             string hash = BCrypt.HashPassword(password, BCrypt.GenerateSalt(), enhanced);
             var t1 = BCrypt.Verify(password, hash, enhanced);
-            var t2 = BCrypt.Verify("1234567", hash, enhanced);
+            var t2 = BCrypt.Verify("\0", hash, enhanced);            
             Assert.True(t1, "Null terminator should validate if part of passphrase");
             Assert.False(t2, "Null terminator shouldnt alter passphrase");
 
@@ -304,8 +384,8 @@ namespace BCrypt.Net.UnitTests
             do
             {
                 var sw = Stopwatch.StartNew();
-                for(var i = 0; i < 5; i++)
-                BCrypt.HashPassword("RwiKnN>9xg3*C)1AZl.", workFactor: cost);
+                for (var i = 0; i < 5; i++)
+                    BCrypt.HashPassword("RwiKnN>9xg3*C)1AZl.", workFactor: cost);
 
                 sw.Stop();
                 timeTaken = sw.ElapsedMilliseconds / 5;
@@ -314,7 +394,7 @@ namespace BCrypt.Net.UnitTests
 
             } while ((timeTaken) >= timeTarget);
 
-            Debug.WriteLine("Appropriate Cost Found: "+cost);
+            Debug.WriteLine("Appropriate Cost Found: " + cost);
 
         }
     }
