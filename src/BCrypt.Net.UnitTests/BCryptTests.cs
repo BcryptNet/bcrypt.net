@@ -295,7 +295,7 @@ namespace BCrypt.Net.UnitTests
         }
 
 
-        [Fact]
+        [Fact(Skip = "Ignore example code")]
         public void CalculatePerformantWorkload()
         {
             var cost = 16;
@@ -304,11 +304,11 @@ namespace BCrypt.Net.UnitTests
             do
             {
                 var sw = Stopwatch.StartNew();
-
-                BCrypt.HashPassword("RwiKnN>9xg3*C)1AZl.)y8f_:GCz,vt3T]PI", workFactor: cost);
+                for(var i = 0; i < 5; i++)
+                BCrypt.HashPassword("RwiKnN>9xg3*C)1AZl.", workFactor: cost);
 
                 sw.Stop();
-                timeTaken = sw.ElapsedMilliseconds;
+                timeTaken = sw.ElapsedMilliseconds / 5;
 
                 cost -= 1;
 
