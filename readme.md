@@ -200,14 +200,17 @@ A future release of Solar's bcrypt code should also support 'b'.
 
 https://github.com/BcryptNet/bcrypt.net/releases
 
-*v2.0.2 -*
+*v2.1.0 -*
 
 * Adds enhanced mode; enhanced hashing allows you to opt-in to ensuring optimal entropy on your users passwords by first making use of the fast SHA384 algorithm before BCrypt hashes the password.
-* VS2017 RTW changes
-* Cleaned up xml-doc for intellisense
-* Increased compatibility by allowing BCrypt revisions from other frameworks/languages to be validated and generated whilst maintaining compatibility.
 * Added Hash interrogation to allow a hash to be passed in and its component parts be returned.
  * Added timeouts to regex and set compiler flags for msbuild so < .net 4.5 (where timeouts were added to regex) we use old regex method.
+* Alter safe equals from ceq/and to xor/and/ceq moving the check outside of the loop to mitigate against branch prediction causing a timing leak
+* Add new method `PasswordNeedsReshash(string hash, int newMinimumWorkLoad)` as a helper method for developers to use when logging a user in to increase legacy workloads
+* Add `ValidateAndReplacePassword` method to allow inline password validation and replacement. Throws `BcryptAuthenticationException` in the event of authentication failure.
+* Cleaned up xml-doc for intellisense
+* Increased compatibility by allowing BCrypt revisions from other frameworks/languages to be validated and generated whilst maintaining compatibility.
+* VS2017 RTW changes
 
 *v2.0.1 -*
 

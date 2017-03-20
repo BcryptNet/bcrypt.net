@@ -43,7 +43,7 @@ namespace BCrypt.Net
     ///  </para>
     ///  <code>string pw_hash = BCrypt.HashPassword(plain_password);</code>
     ///  <para>
-    ///         To hash a password using SHA384 pre-hashing for increased entropy call <see cref="BCrypt.EnhancedHashPassword(string)"/> 
+    ///         To hash a password using SHA384 pre-hashing for increased entropy call <see cref="BCrypt.EnhancedHashPassword(string)"/>
     ///         (which will generate a random salt and hash at default cost), like this:
     ///  </para>
     ///  <code>string pw_hash = Bcrypt.EnhancedHashPassword(plain_password);</code>
@@ -406,7 +406,7 @@ namespace BCrypt.Net
         private uint[] _s;
 
         /// <summary>
-        /// Validate existing hash and password, 
+        /// Validate existing hash and password,
         /// </summary>
         /// <param name="currentKey">Current password / string</param>
         /// <param name="currentHash">Current hash to validate password against</param>
@@ -415,8 +415,12 @@ namespace BCrypt.Net
         ///                          factor therefore increases as 2^workFactor. Default is 10</param>
         /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make
         /// use of available entropy prior to bcrypt hashing</param>
-        /// <param name="forceWorkFactor">By default this method will not accept a work factor lower 
+        /// <param name="forceWorkFactor">By default this method will not accept a work factor lower
         /// than the one set in the current hash and will set the new workfactot to match.</param>
+        /// <exception cref="BcryptAuthenticationException">returned if the users hash and current pass doesn't validate</exception>
+        /// <exception cref="SaltParseException">returned if the salt is invalid in any way</exception>
+        /// <exception cref="ArgumentException">returned if thehash is invalid</exception>
+        /// <exception cref="ArgumentNullException">returned if the user hash is null</exception>
         /// <returns>New hash of new password</returns>
         public static string ValidateAndReplacePassword(string currentKey, string currentHash, string newKey, int workFactor = DefaultRounds, bool enhancedEntropy = false, bool forceWorkFactor = false)
         {
@@ -476,7 +480,7 @@ namespace BCrypt.Net
 
                 return HashPassword(newKey, GenerateSalt(workFactor), enhancedEntropy);
             }
-            throw new Exception("Current credentials could not be authenticated");
+            throw new BcryptAuthenticationException("Current credentials could not be authenticated");
         }
 
         /// <summary>
@@ -535,6 +539,7 @@ namespace BCrypt.Net
         /// <param name="salt">    the salt to hash with (best generated using BCrypt.gensalt).</param>
         /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make use of available entropy prior to bcrypt hashing</param>
         /// <returns>The hashed password</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="inputKey"/> is null.</exception>
         /// <exception cref="SaltParseException">Thrown when the <paramref name="salt"/> could not pe parsed.</exception>
         public static string HashPassword(string inputKey, string salt, bool enhancedEntropy)
         {
@@ -647,6 +652,7 @@ namespace BCrypt.Net
         /// <param name="hash">full bcrypt hash</param>
         /// <param name="newMinimumWorkLoad">target workload</param>
         /// <returns>true if new work factor is higher than the one in the hash</returns>
+        /// <exception cref="ArgumentException">throws if the current hash workload (logrounds) can not be parsed</exception>
         public static bool PasswordNeedsReshash(string hash, int newMinimumWorkLoad)
         {
             var hashInfo = InterrogateHash(hash);
