@@ -3,25 +3,31 @@
     <PropertyGroup>
         <Description>BCrypt.Net, C# implementation of BCrypt, OpenBSD-style Blowfish password hashing</Description>
         <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
-        <VersionPrefix>2.0.2</VersionPrefix>
-        <Authors>https://github.com/BcryptNet/bcrypt.net</Authors>
-        <TargetFrameworks>net20;net35;net40;net45;net451;net452;net462;netstandard1.3;netstandard1.6;netcoreapp1.0;netcoreapp1.1</TargetFrameworks>
         <AssemblyName>BCrypt.Net-Next</AssemblyName>
-        <PackageId>BCrypt.Net</PackageId>
-        <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security</PackageTags>
-        <PackageReleaseNotes>Corrects usage of Secure random number generator; change secure equals to match .net identity implmentation; inline vars in encipher method; change UTF8 handling to safer default. Adds enhancements around range validation. Adds bcrypt revision handling for compatibility. Adds SHA384 to keys greater than max BCrypt key size of 72 to increase entropy. SHA-384 is the best hash in the SHA2 hash family: it is as fast as SHA-512 on 64-bit platforms but, unlike SHA-512 or SHA-256, its truncated design serves as an effective defense against length extension attacks.</PackageReleaseNotes>
+
+        <VersionPrefix>2.1.0</VersionPrefix>
+        <Version>2.1.0</Version>
+        <AssemblyVersion>2.1.0.0</AssemblyVersion>
+        <FileVersion>2.1.0.0</FileVersion>
+
+        <Authors>https://github.com/BcryptNet/bcrypt.net/graphs/contributors</Authors>
+
+        <TargetFrameworks>net20;net35;net40;net45;net451;net452;net462;netstandard1.3;netstandard1.6;netcoreapp1.0;netcoreapp1.1</TargetFrameworks>
+
+        <PackageId>BCrypt.Net-Next</PackageId>
+        <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security,hash;crypto;blowfish</PackageTags>
+        <PackageReleaseNotes>See https://github.com/BcryptNet/bcrypt.net/releases </PackageReleaseNotes>
         <PackageIconUrl>https://raw.githubusercontent.com/BcryptNet/bcrypt.net/master/ico64.png</PackageIconUrl>
         <PackageProjectUrl>https://github.com/BcryptNet/bcrypt.net</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt,</PackageLicenseUrl>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/BcryptNet/bcrypt.net</RepositoryUrl>
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
         <SignAssembly>True</SignAssembly>
         <AssemblyOriginatorKeyFile>bcrypt.net.snk.pfx</AssemblyOriginatorKeyFile>
         <DelaySign>False</DelaySign>
-        <Version>2.0.4</Version>
-        <AssemblyVersion>2.0.2.0</AssemblyVersion>
-        <FileVersion>2.0.2.0</FileVersion>
     </PropertyGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
@@ -48,7 +54,7 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net20|AnyCPU'">
-      <DocumentationFile>bin\Debug\BCrypt.Net-Next.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\BCrypt.Net-Next.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
