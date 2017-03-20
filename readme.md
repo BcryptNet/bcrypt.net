@@ -13,7 +13,7 @@ Package: https://www.nuget.org/packages/BCrypt.Net-Next/
 
 # How to use
 
-The simpelest usage is as follows...
+The simplest usage is as follows...
 
 To Hash a password:
 
