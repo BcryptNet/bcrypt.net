@@ -6,7 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BCrypt.Net" Version="2.0.4" />
+    <PackageReference Include="BCrypt.Net-Next" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BCrypt.Net-Next">
+      <HintPath>..\packages\BCrypt.Net-Next.2.1.0\lib\net462\BCrypt.Net-Next.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
