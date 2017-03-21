@@ -200,6 +200,9 @@ A future release of Solar's bcrypt code should also support 'b'.
 
 https://github.com/BcryptNet/bcrypt.net/releases
 
+*v2.1.1 -*
+* Minor csproj changes / typo
+
 *v2.1.0 -*
 
 * Adds enhanced mode; enhanced hashing allows you to opt-in to ensuring optimal entropy on your users passwords by first making use of the fast SHA384 algorithm before BCrypt hashes the password.

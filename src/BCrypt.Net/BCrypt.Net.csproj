@@ -6,21 +6,27 @@
         <AssemblyName>BCrypt.Net-Next</AssemblyName>
 
         <VersionPrefix>2.1.0</VersionPrefix>
-        <Version>2.1.0</Version>
-        <AssemblyVersion>2.1.0.0</AssemblyVersion>
-        <FileVersion>2.1.0.0</FileVersion>
+        <Version>2.1.1</Version>
+        <AssemblyVersion>2.1.1.0</AssemblyVersion>
+        <FileVersion>2.1.1.0</FileVersion>
 
         <Authors>https://github.com/BcryptNet/bcrypt.net/graphs/contributors</Authors>
 
         <TargetFrameworks>net20;net35;net40;net45;net451;net452;net462;netstandard1.3;netstandard1.6;netcoreapp1.0;netcoreapp1.1</TargetFrameworks>
 
         <PackageId>BCrypt.Net-Next</PackageId>
+        <Title>BCrypt.Net - Next</Title>
+        <Authors>Chris McKee, Ryan D. Emerl, Damien Miller</Authors>
+        <Copyright>2006-2017 Chris McKee, Ryan D. Emerl, Damien Miller</Copyright>
+        <Description>A fixed, enhanced and namespace compatible version of BCrypt.Net port of jBCrypt implemented in C#. It uses a variant of the Blowfish encryption algorithm’s keying schedule, and introduces a work factor, which allows you to determine how expensive the hash function will be, allowing the algorithm to be "future-proof".</Description>
+        <Summary>A fixed, enhanced and namespace compatible version of BCrypt.Net port of jBCrypt implemented in C#.</Summary>
         <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security,hash;crypto;blowfish</PackageTags>
         <PackageReleaseNotes>See https://github.com/BcryptNet/bcrypt.net/releases </PackageReleaseNotes>
         <PackageIconUrl>https://raw.githubusercontent.com/BcryptNet/bcrypt.net/master/ico64.png</PackageIconUrl>
         <PackageProjectUrl>https://github.com/BcryptNet/bcrypt.net</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt,</PackageLicenseUrl>
+        <PackageLicenseUrl>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt</PackageLicenseUrl>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/BcryptNet/bcrypt.net</RepositoryUrl>
