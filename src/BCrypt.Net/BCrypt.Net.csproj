@@ -62,6 +62,10 @@
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net20|AnyCPU'">
         <DocumentationFile>bin\Debug\BCrypt.Net-Next.xml</DocumentationFile>
     </PropertyGroup>
+     
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <DocumentationFile>bin\Release\BCrypt.Net-Next.xml</DocumentationFile>
+    </PropertyGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
         <Reference Include="System" />
