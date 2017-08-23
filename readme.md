@@ -79,7 +79,7 @@ and a simple benchmark you can run by creating a console program, adding this BC
 
     } while ((timeTaken) >= timeTarget);
 
-    Console.WriteLine("Appropriate Cost Found: "+cost);
+    Console.WriteLine("Appropriate Cost Found: " + (cost + 1));
     Console.ReadLine();
 ```
 
