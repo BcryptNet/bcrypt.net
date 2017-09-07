@@ -653,7 +653,7 @@ namespace BCrypt.Net
         /// <param name="newMinimumWorkLoad">target workload</param>
         /// <returns>true if new work factor is higher than the one in the hash</returns>
         /// <exception cref="ArgumentException">throws if the current hash workload (logrounds) can not be parsed</exception>
-        public static bool PasswordNeedsReshash(string hash, int newMinimumWorkLoad)
+        public static bool PasswordNeedsRehash(string hash, int newMinimumWorkLoad)
         {
             var hashInfo = InterrogateHash(hash);
             int currentWorkLoad;
