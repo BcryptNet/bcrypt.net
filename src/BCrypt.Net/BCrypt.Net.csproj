@@ -16,7 +16,7 @@
     <IncludeSource>true</IncludeSource>
 
     <PackageId>BCrypt.Net-Next</PackageId>
-    <Title>BCrypt.Net - Next</Title>
+    <Title>BCrypt .Net</Title>
     <Authors>Chris McKee, Ryan D. Emerl, Damien Miller</Authors>
     <Copyright>2006-2017 Chris McKee, Ryan D. Emerl, Damien Miller</Copyright>
     <Summary>BCrypt.Net, C# implementation of BCrypt, OpenBSD-style Blowfish password hashing</Summary>
@@ -45,10 +45,6 @@
     <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\BCrypt.Net-Next.xml</DocumentationFile>
-  </PropertyGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net20|net35|net40|net45'">
     <Reference Include="System" />
   </ItemGroup>
@@ -66,6 +62,10 @@
     <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\BCrypt.Net-Next.xml</DocumentationFile>
+  </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />
