@@ -200,6 +200,11 @@ A future release of Solar's bcrypt code should also support 'b'.
 
 https://github.com/BcryptNet/bcrypt.net/releases
 
+*v2.1.2 -*
+* NetStandard2 and Net 4.7 addition
+* Correct typo in `PasswordNeedsReshash` to `PasswordNeedsRehash`
+* Consolidate config changes
+
 *v2.1.1 -*
 * Minor csproj changes / typo
 

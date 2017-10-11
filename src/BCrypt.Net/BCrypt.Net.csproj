@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>BCrypt.Net, C# implementation of BCrypt, OpenBSD-style Blowfish password hashing</Description>
     <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next</AssemblyName>
 
@@ -11,7 +10,7 @@
     <FileVersion>2.1.2.0</FileVersion>
 
     <Authors>https://github.com/BcryptNet/bcrypt.net/graphs/contributors</Authors>
-    <TargetFrameworks>netstandard2.0;netstandard1.6;netstandard1.3;net20;net35;net40;net45;net451;net452;net462</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard1.6;netstandard1.3;net20;net35;net40;net45;net451;net452;net462;net47</TargetFrameworks>
     <OutputTypeEx>Library</OutputTypeEx>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSource>true</IncludeSource>
@@ -20,10 +19,10 @@
     <Title>BCrypt.Net - Next</Title>
     <Authors>Chris McKee, Ryan D. Emerl, Damien Miller</Authors>
     <Copyright>2006-2017 Chris McKee, Ryan D. Emerl, Damien Miller</Copyright>
-    <Summary>A fixed, enhanced and namespace compatible version of BCrypt.Net port of jBCrypt implemented in C#.</Summary>
+    <Summary>BCrypt.Net, C# implementation of BCrypt, OpenBSD-style Blowfish password hashing</Summary>
     <Description>A fixed, enhanced and namespace compatible version of BCrypt.Net port of jBCrypt implemented in C#. It uses a variant of the Blowfish encryption algorithm’s keying schedule, and introduces a work factor, which allows you to determine how expensive the hash function will be, allowing the algorithm to be "future-proof".</Description>
     <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security,hash;crypto;blowfish</PackageTags>
-    <PackageReleaseNotes>See https://github.com/BcryptNet/bcrypt.net/releases </PackageReleaseNotes>
+    <PackageReleaseNotes>See https://github.com/BcryptNet/bcrypt.net/releases</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/BcryptNet/bcrypt.net/master/ico64.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/BcryptNet/bcrypt.net</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt</PackageLicenseUrl>
@@ -36,9 +35,11 @@
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net20' ">
     <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
+    <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net35'">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net35' ">
     <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
+    <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net35'">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net40' ">
     <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
@@ -52,7 +53,7 @@
     <Reference Include="System" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net451|net452|net462'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net451|net452|net462|net47'">
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
     <Reference Include="System" />
   </ItemGroup>
