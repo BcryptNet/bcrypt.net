@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNet2", "DotNet2\DotNet2.csproj", "{B16CEA46-AD1F-4CCA-A7E7-618054771916}"
 EndProject
@@ -9,7 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BenchmarkBcryptNet", "Bench
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNet4", "DotNet4\DotNet4.csproj", "{E965ECD6-AE94-4458-81CE-1EA6699D416D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore", "DotNetCore\DotNetCore.csproj", "{1475B4C5-26A7-4A1E-873D-53C3C6069084}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore", "DotNetCore\DotNetCore.csproj", "{1475B4C5-26A7-4A1E-873D-53C3C6069084}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore2", "DotNetCore2\DotNetCore2.csproj", "{3A4420F0-BE42-47AA-9ED2-A8DD927703E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,8 +35,15 @@ Global
 		{1475B4C5-26A7-4A1E-873D-53C3C6069084}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1475B4C5-26A7-4A1E-873D-53C3C6069084}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1475B4C5-26A7-4A1E-873D-53C3C6069084}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A4420F0-BE42-47AA-9ED2-A8DD927703E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A4420F0-BE42-47AA-9ED2-A8DD927703E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A4420F0-BE42-47AA-9ED2-A8DD927703E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A4420F0-BE42-47AA-9ED2-A8DD927703E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BB432A86-EA89-4A01-8932-B7853B837328}
 	EndGlobalSection
 EndGlobal
