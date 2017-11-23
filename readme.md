@@ -4,14 +4,13 @@ Porting of bcrypt.codeplex.com with enhanced security, missing fixes, features a
 
 # Nuget  
 
-[![NuGet](https://img.shields.io/nuget/v/BCrypt.Net-Next.svg?style=flat-square)](https://www.nuget.org/packages/BCrypt.Net-Next)
-[![NuGet Signed Package](https://img.shields.io/nuget/v/BCrypt.Net-Next.StrongName.svg?style=flat-square)](https://www.nuget.org/packages/BCrypt.Net-Next.StrongName)
-
 Download using nuget or Paket (https://fsprojects.github.io/Paket/)
 
 Package: https://www.nuget.org/packages/BCrypt.Net-Next/
+[![NuGet](https://img.shields.io/nuget/v/BCrypt.Net-Next.svg?style=flat-square)](https://www.nuget.org/packages/BCrypt.Net-Next)
 
 Signed Package - https://www.nuget.org/packages/BCrypt.Net-Next.StrongName/
+[![NuGet Signed Package](https://img.shields.io/nuget/v/BCrypt.Net-Next.StrongName.svg?style=plastic)](https://www.nuget.org/packages/BCrypt.Net-Next.StrongName)
 
 
 # How to use
