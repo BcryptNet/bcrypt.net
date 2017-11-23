@@ -1,0 +1,41 @@
+<Project>
+  <PropertyGroup>
+    <VersionPrefix>2.1.0</VersionPrefix>
+
+    <Copyright>2006-2017 Chris McKee, Ryan D. Emerl, Damien Miller</Copyright>
+    <Authors>https://github.com/BcryptNet/bcrypt.net/graphs/contributors</Authors>
+
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyOriginatorKeyFile>../BCrypt.Net.StrongName/bcrypt.snk</AssemblyOriginatorKeyFile>
+
+    <PackageId>$(AssemblyName)</PackageId>
+
+    <PackageReleaseNotes>See https://github.com/BcryptNet/bcrypt.net/releases</PackageReleaseNotes>
+    <PackageIconUrl>https://raw.githubusercontent.com/BcryptNet/bcrypt.net/master/ico64.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/BcryptNet/bcrypt.net</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt</PackageLicenseUrl>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security,hash;crypto;blowfish</PackageTags>
+
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/BcryptNet/bcrypt.net</RepositoryUrl>
+
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <IncludeSymbols>false</IncludeSymbols>
+    <xUnitVersion>2.3.1</xUnitVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40' OR  '$(TargetFramework)' == 'net45' OR '$(TargetFramework)' == 'net451'">
+    <Reference Include="System.Core" Pack="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SourceLink.Create.GitHub" Version="2.1.2" PrivateAssets="All" />
+    <DotNetCliToolReference Include="dotnet-sourcelink" Version="2.1.2" />
+    <DotNetCliToolReference Include="dotnet-sourcelink-git" Version="2.1.2" />
+  </ItemGroup>
+</Project>

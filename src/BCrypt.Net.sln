@@ -1,16 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 15.0.26228.4
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net", "BCrypt.Net\BCrypt.Net.csproj", "{CD69F016-5940-4FCA-BCA1-9D1D87C6F873}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net.UnitTests", "BCrypt.Net.UnitTests\BCrypt.Net.UnitTests.csproj", "{2078EB7B-7EDF-4B65-80F7-DB4D92E08CCD}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{6F3D5F8B-CD73-474C-BA79-D4A17E9F106D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build-tools", "build-tools", "{6F3D5F8B-CD73-474C-BA79-D4A17E9F106D}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		build.cmd = build.cmd
+		build.ps1 = build.ps1
+		Directory.build.props = Directory.build.props
 		..\readme.md = ..\readme.md
+		semver.txt = semver.txt
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net.StrongName", "BCrypt.Net.StrongName\BCrypt.Net.StrongName.csproj", "{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,8 +53,23 @@ Global
 		{2078EB7B-7EDF-4B65-80F7-DB4D92E08CCD}.Release|x64.Build.0 = Release|Any CPU
 		{2078EB7B-7EDF-4B65-80F7-DB4D92E08CCD}.Release|x86.ActiveCfg = Release|Any CPU
 		{2078EB7B-7EDF-4B65-80F7-DB4D92E08CCD}.Release|x86.Build.0 = Release|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Debug|x64.Build.0 = Debug|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Debug|x86.Build.0 = Debug|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Release|x64.ActiveCfg = Release|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Release|x64.Build.0 = Release|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Release|x86.ActiveCfg = Release|Any CPU
+		{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D5ADD1E2-61BB-4575-B5D8-78FB549A4DBC}
 	EndGlobalSection
 EndGlobal
