@@ -416,7 +416,7 @@ namespace BCrypt.Net
         /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make
         /// use of available entropy prior to bcrypt hashing</param>
         /// <param name="forceWorkFactor">By default this method will not accept a work factor lower
-        /// than the one set in the current hash and will set the new workfactot to match.</param>
+        /// than the one set in the current hash and will set the new workfactor to match.</param>
         /// <exception cref="BcryptAuthenticationException">returned if the users hash and current pass doesn't validate</exception>
         /// <exception cref="SaltParseException">returned if the salt is invalid in any way</exception>
         /// <exception cref="ArgumentException">returned if thehash is invalid</exception>
