@@ -1,7 +1,7 @@
 language: csharp
 solution: src/BCrypt.Net.sln
 mono: none
-dotnet: 2.0.6
+dotnet: 2.1.4
 script:
  - dotnet restore
  - xbuild /p:Configuration=Release src/BCrypt.Net.sln
