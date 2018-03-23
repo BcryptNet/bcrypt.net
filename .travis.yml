@@ -4,4 +4,4 @@ mono: none
 dotnet: 2.1.4
 script:
  - dotnet restore
- - xbuild /p:Configuration=Release src/BCrypt.Net.sln
+ - dotnet xunit /p:Configuration=Release src/BCrypt.Net.sln
