@@ -58,6 +58,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="..\BCrypt.Net\Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\BCrypt.Net\Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Update="SourceLink.Create.GitHub" Version="2.8.0" />
   </ItemGroup>
 

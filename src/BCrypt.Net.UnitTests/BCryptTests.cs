@@ -1,4 +1,4 @@
-/*
+﻿/*
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
@@ -19,6 +19,7 @@ IN THE SOFTWARE.
 
 using System;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using Xunit;
 
@@ -144,8 +145,8 @@ namespace BCrypt.Net.UnitTests
             for (int i = 0; i < _testVectors.Length / 3; i++)
             {
                 string currentKey = _testVectors[i, 0];
-                string salt=_testVectors[i, 1];
-                string currentHash=_testVectors[i, 2];
+                string salt = _testVectors[i, 1];
+                string currentHash = _testVectors[i, 2];
 
                 string newPassword = "my new password";
                 string hashed = BCrypt.HashPassword(currentKey, salt);
@@ -191,17 +192,17 @@ namespace BCrypt.Net.UnitTests
         public void TestValidateAndReplaceWithWorkloadSmallerThanCurrentEndsWithSameWorkLoadAsOriginalHash()
         {
 
-                string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
-                string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
-                string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC";
+            string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
+            string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
+            string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC";
 
-                string newPassword = "my new password";
-                string hashed = BCrypt.HashPassword(currentKey, salt);
-                var d = hashed == currentHash;
+            string newPassword = "my new password";
+            string hashed = BCrypt.HashPassword(currentKey, salt);
+            var d = hashed == currentHash;
 
-                Assert.True(BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 5).Contains("$12$"));
+            Assert.True(BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 5).Contains("$12$"));
 
-                Trace.Write(".");
+            Trace.Write(".");
         }
 
         [Fact()]
@@ -393,11 +394,68 @@ namespace BCrypt.Net.UnitTests
 
             var t1 = BCrypt.Verify(leader, hash, enhanced);
             Assert.False(t1, "Null should be treated as part of password as per spec");
+            Assert.False(BCrypt.Verify("", hash, enhanced), "Null should be treated as part of password as per spec");
 
         }
 
         private static readonly Encoding SafeUTF8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
+
+        [Fact]
+        public void LeadingByteDoesntTruncateHash()
+        {
+            var b = new BCrypt();
+            var s = BCrypt.GenerateSalt();
+            var extractedSalt = s.Substring(7, 22);
+
+            var passA = SafeUTF8.GetBytes("\0 password");
+            var passB = SafeUTF8.GetBytes("\0");
+
+            byte[] saltBytes = BCrypt.DecodeBase64(extractedSalt, 128 / 8);
+
+            var bytesAreValid = BytesAreValid(passA);
+            Assert.False(bytesAreValid, "Hash contains null bytes");
+
+            var hashA = b.CryptRaw(passA, saltBytes, 4);
+            var hashAVerification = b.CryptRaw(passA, saltBytes, 4);
+            Assert.True(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashAVerification), "These should match as this is how validation works");
+
+            var hashB = b.CryptRaw(passB, saltBytes, 4);
+            var hashBVerification = b.CryptRaw(passB, saltBytes, 4);
+            Assert.True(Convert.ToBase64String(hashB) == Convert.ToBase64String(hashBVerification), "These should match as this is how validation works, this is skipping the password");
+
+            Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldnt match as we hash the whole strings bytes, including the null byte");
+        }
+
+        [Fact]
+        public void LeadingByteDoesntTruncateHashSHA()
+        {
+            var b = new BCrypt();
+            var s = BCrypt.GenerateSalt();
+            var extractedSalt = s.Substring(7, 22);
+
+            var passA = SafeUTF8.GetBytes("d27a37");
+            var passB = new byte[] {0};
+
+            byte[] saltBytes = BCrypt.DecodeBase64(extractedSalt, 128 / 8);
+
+            byte[] enhancedBytes = SHA384.Create().ComputeHash(passA);
+            byte[] enhancedBytesB = SHA384.Create().ComputeHash(passB);
+
+            var bytesAreValid = BytesAreValid(enhancedBytes);
+            Assert.False(bytesAreValid, "Hash contains null bytes");
+
+            var hashA = b.CryptRaw(enhancedBytes, saltBytes, 4);
+            var hashAVerification = b.CryptRaw(enhancedBytes, saltBytes, 4);
+            Assert.True(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashAVerification), "These should match as this is how validation works");
+
+            var hashB = b.CryptRaw(enhancedBytesB, saltBytes, 4);
+            var hashBVerification = b.CryptRaw(enhancedBytesB, saltBytes, 4);
+            Assert.True(Convert.ToBase64String(hashB) == Convert.ToBase64String(hashBVerification), "These should match as this is how validation works");
+
+
+            Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldnt match as we hash the whole strings bytes, including the null byte");
+        }
 
         private bool BytesAreValid(byte[] bytes)
         {

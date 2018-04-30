@@ -53,10 +53,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Update="SourceLink.Create.GitHub" Version="2.8.0" />
   </ItemGroup>
 

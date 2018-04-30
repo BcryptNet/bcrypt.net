@@ -817,7 +817,7 @@ namespace BCrypt.Net
         /// <param name="encodedstring">The string to decode.</param>
         /// <param name="maximumBytes"> The maximum bytes to decode.</param>
         /// <returns>The decoded byte array.</returns>
-        private static byte[] DecodeBase64(string encodedstring, int maximumBytes)
+        internal static byte[] DecodeBase64(string encodedstring, int maximumBytes)
         {
             int position = 0;
             int sourceLength = encodedstring.Length;
@@ -1016,7 +1016,7 @@ namespace BCrypt.Net
         /// <param name="saltBytes"> The salt byte array to hash with.</param>
         /// <param name="workFactor"> The binary logarithm of the number of rounds of hashing to apply.</param>
         /// <returns>A byte array containing the hashed result.</returns>
-        private byte[] CryptRaw(byte[] inputBytes, byte[] saltBytes, int workFactor)
+        internal byte[] CryptRaw(byte[] inputBytes, byte[] saltBytes, int workFactor)
         {
             int i;
             int j;
