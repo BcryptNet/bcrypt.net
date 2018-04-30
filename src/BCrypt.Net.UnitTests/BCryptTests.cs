@@ -1,4 +1,4 @@
-﻿/*
+/*
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
@@ -17,7 +17,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OU
 IN THE SOFTWARE.
 */
 
+using System;
 using System.Diagnostics;
+using System.Text;
 using Xunit;
 
 namespace BCrypt.Net.UnitTests
@@ -188,7 +190,7 @@ namespace BCrypt.Net.UnitTests
         [Fact()]
         public void TestValidateAndReplaceWithWorkloadSmallerThanCurrentEndsWithSameWorkLoadAsOriginalHash()
         {
-           
+
                 string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
                 string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
                 string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC";
@@ -198,8 +200,8 @@ namespace BCrypt.Net.UnitTests
                 var d = hashed == currentHash;
 
                 Assert.True(BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 5).Contains("$12$"));
-                
-                Trace.Write(".");            
+
+                Trace.Write(".");
         }
 
         [Fact()]
@@ -360,12 +362,13 @@ namespace BCrypt.Net.UnitTests
         }
 
 
+
         [Theory()]
         [InlineData(false, "password\0defgreallylongpassword")]
-        [InlineData(false, "password\x00defgreallylongpassword")]
+        [InlineData(false, "password\x00 xdefgreallylongpassword")]
         [InlineData(false, "password\x00 defgreallylongpassword")]
         [InlineData(true, "password\0defgreallylongpassword")]
-        [InlineData(true, "password\x00defgreallylongpassword")]
+        [InlineData(true, "password\x00 xdefgreallylongpassword")]
         [InlineData(true, "password\x00 defgreallylongpassword")]
         public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworks(bool enhanced, string password)
         {
@@ -378,6 +381,30 @@ namespace BCrypt.Net.UnitTests
             Assert.False(t2, "Null terminator shouldnt alter passphrase");
         }
 
+        [Theory()]
+        [InlineData(false, "\0 defgreallylongpassword", "\0")]
+        [InlineData(true, "\0 defgreallylongpassword", "\0")]
+        public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworksSetB(bool enhanced, string password, string leader)
+        {
+            var x = BCrypt.GenerateSalt();
+            string hash = BCrypt.HashPassword(password, x, enhanced);
+
+            Assert.False(BytesAreValid(SafeUTF8.GetBytes(password)));
+
+            var t1 = BCrypt.Verify(leader, hash, enhanced);
+            Assert.False(t1, "Null should be treated as part of password as per spec");
+
+        }
+
+        private static readonly Encoding SafeUTF8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+
+
+        private bool BytesAreValid(byte[] bytes)
+        {
+            if (bytes == null) return false;
+
+            return !Array.Exists(bytes, x => x == 0);
+        }
 
         [Fact(Skip = "Ignore example code")]
         public void CalculatePerformantWorkload()
