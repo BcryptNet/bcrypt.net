@@ -361,17 +361,21 @@ namespace BCrypt.Net.UnitTests
 
 
         [Theory()]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworks(bool enhanced)
+        [InlineData(false, "password\0defgreallylongpassword")]
+        [InlineData(false, "password\x00defgreallylongpassword")]
+        [InlineData(false, "password\x00 defgreallylongpassword")]
+        [InlineData(true, "password\0defgreallylongpassword")]
+        [InlineData(true, "password\x00defgreallylongpassword")]
+        [InlineData(true, "password\x00 defgreallylongpassword")]
+        public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworks(bool enhanced, string password)
         {
-            string password = "\01234567"; // can cause zero bytes long (an empty password) for bcrypt passphrase.
-            string hash = BCrypt.HashPassword(password, BCrypt.GenerateSalt(), enhanced);
+            var x = BCrypt.GenerateSalt();
+            string hash = BCrypt.HashPassword(password, x, enhanced);
+
             var t1 = BCrypt.Verify(password, hash, enhanced);
-            var t2 = BCrypt.Verify("\0", hash, enhanced);            
+            var t2 = BCrypt.Verify("password", hash, enhanced);
             Assert.True(t1, "Null terminator should validate if part of passphrase");
             Assert.False(t2, "Null terminator shouldnt alter passphrase");
-
         }
 
 
