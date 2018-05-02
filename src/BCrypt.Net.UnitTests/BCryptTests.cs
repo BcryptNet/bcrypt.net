@@ -480,6 +480,7 @@ namespace BCrypt.Net.UnitTests
             return !Array.Exists(bytes, x => x == 0);
         }
 
+
         [Fact(Skip = "Ignore example code")]
         public void CalculatePerformantWorkload()
         {

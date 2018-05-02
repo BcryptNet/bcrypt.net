@@ -537,11 +537,12 @@ namespace BCrypt.Net
         /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
         /// <param name="inputKey">The password or string to hash.</param>
         /// <param name="salt">    the salt to hash with (best generated using BCrypt.gensalt).</param>
-        /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make use of available entropy prior to bcrypt hashing</param>
+        /// <param name="enhancedEntropy">Set to true,the string will undergo hashing (defaults to SHA384 then base64 encoding) to make use of available entropy prior to bcrypt hashing</param>
+        /// <param name="hashType">Configurable hash type for enhanced entropy</param>
         /// <returns>The hashed password</returns>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="inputKey"/> is null.</exception>
         /// <exception cref="SaltParseException">Thrown when the <paramref name="salt"/> could not pe parsed.</exception>
-        public static string HashPassword(string inputKey, string salt, bool enhancedEntropy)
+        public static string HashPassword(string inputKey, string salt, bool enhancedEntropy, HashType hashType = HashType.Legacy384)
         {
             if (inputKey == null)
             {
@@ -595,7 +596,7 @@ namespace BCrypt.Net
 
             if (enhancedEntropy)
             {
-                inputBytes = SHA384.Create().ComputeHash(inputBytes);
+                inputBytes = EnhancedHash(inputBytes, hashType);
             }
 
             byte[] saltBytes = DecodeBase64(extractedSalt, BCryptSaltLen);
@@ -613,6 +614,35 @@ namespace BCrypt.Net
             return result.ToString();
         }
 
+        /// <summary>
+        /// Hashes key, base64 encodes before returning byte array
+        /// </summary>
+        /// <param name="inputBytes"></param>
+        /// <param name="hashType"></param>
+        /// <returns></returns>
+        private static byte[] EnhancedHash(byte[] inputBytes, HashType hashType)
+        {
+            switch (hashType)
+            {
+                case HashType.SHA256:
+                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA256.Create().ComputeHash(inputBytes)));
+                    break;
+                case HashType.SHA384:
+                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA384.Create().ComputeHash(inputBytes)));
+                    break;
+                case HashType.SHA512:
+                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA512.Create().ComputeHash(inputBytes)));
+                    break;
+                case HashType.Legacy384:
+                    inputBytes = SHA384.Create().ComputeHash(inputBytes);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(hashType), hashType, null);
+            }
+
+            return inputBytes;
+        }
+
 
         /// <summary>
         ///  Generate a salt for use with the <see cref="BCrypt.HashPassword(string, string)"/> method.
@@ -622,6 +652,7 @@ namespace BCrypt.Net
         /// <param name="bcryptMinorRevision"></param>
         /// <exception cref="ArgumentOutOfRangeException">Work factor must be between 4 and 31</exception>
         /// <returns>A base64 encoded salt value.</returns>
+        /// <exception cref="ArgumentException">BCrypt Revision should be a, b, x or y</exception>
         public static string GenerateSalt(int workFactor, char bcryptMinorRevision = DefaultHashVersion)
         {
             if (workFactor < MinRounds || workFactor > MaxRounds)
@@ -653,6 +684,7 @@ namespace BCrypt.Net
         /// <param name="newMinimumWorkLoad">target workload</param>
         /// <returns>true if new work factor is higher than the one in the hash</returns>
         /// <exception cref="ArgumentException">throws if the current hash workload (logrounds) can not be parsed</exception>
+        /// <exception cref="HashInformationException"></exception>
         public static bool PasswordNeedsRehash(string hash, int newMinimumWorkLoad)
         {
             var hashInfo = InterrogateHash(hash);
@@ -737,6 +769,8 @@ namespace BCrypt.Net
         /// <param name="hash"> The previously-hashed password.</param>
         /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make use of available entropy prior to bcrypt hashing</param>
         /// <returns>true if the passwords match, false otherwise.</returns>
+        /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
+        /// <exception cref="SaltParseException">Thrown when the salt could not pe parsed.</exception>
         public static bool Verify(string text, string hash, bool enhancedEntropy = false)
         {
             return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash, enhancedEntropy)));
