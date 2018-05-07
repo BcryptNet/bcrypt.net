@@ -55,6 +55,22 @@ namespace BCrypt.Net.UnitTests
 
         readonly char[] _revisions = new char[] { 'a', 'x', 'y', 'b' };
 
+        /*
+         * Test to confirm correctness of input key truncation https://github.com/BcryptNet/bcrypt.net/issues/18
+         * Test vars from https://security.stackexchange.com/questions/39849/does-bcrypt-have-a-maximum-password-length/39851#39851
+         */
+        [Fact()]
+        public void BCryptMaintainsLengthRestrictionsFromPaper()
+        {
+            Trace.Write("BCrypt.HashPassword(): ");
+            var inBounds = "testtdsdddddddddddddddddddddddddddddddddddddddddddddddsddddddddddddddddd"; //72char
+            var exceedsBounds = "testtdsdddddddddddddddddddddddddddddddddddddddddddddddsdddddddddddddddddd"; //73char
+            var hashPassword = BCrypt.HashPassword(inBounds);
+            var exceedsBoundsShouldValidate = BCrypt.Verify(exceedsBounds, hashPassword);
+            Assert.True(exceedsBoundsShouldValidate);
+        }
+
+
         /**
          * Test method for 'BCrypt.HashPassword(string, string)'
          */
@@ -435,7 +451,7 @@ namespace BCrypt.Net.UnitTests
             var extractedSalt = s.Substring(7, 22);
 
             var passA = SafeUTF8.GetBytes("d27a37");
-            var passB = new byte[] {0};
+            var passB = new byte[] { 0 };
 
             byte[] saltBytes = BCrypt.DecodeBase64(extractedSalt, 128 / 8);
 
