@@ -4,6 +4,8 @@ Porting of bcrypt.codeplex.com with enhanced security, missing fixes, features a
 
 [![Build status](https://ci.appveyor.com/api/projects/status/me6tlh95u59jl17d/branch/master?svg=true)](https://ci.appveyor.com/project/ChrisMcKee/bcrypt-net/branch/master)
 
+[![SonarCloud](https://sonarcloud.io/api/project_badges/quality_gate?project=bcryptnet)]()
+
 # Nuget  
 
 Download using nuget or Paket (https://fsprojects.github.io/Paket/)
