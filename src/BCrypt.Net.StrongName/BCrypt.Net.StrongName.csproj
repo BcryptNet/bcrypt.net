@@ -4,7 +4,7 @@
     <AssemblyTitle>BCrypt.Net-Next.StrongName</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next.StrongName</AssemblyName>
 
-    <TargetFrameworks>netstandard2.0;netstandard1.6;netstandard1.3;net20;net35;net40;net45;net451;net452;net462;net47</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard1.6;netstandard1.3;net20;net35;net40;net45;net451;net452;net462;net47;net472</TargetFrameworks>
     <OutputTypeEx>Library</OutputTypeEx>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSource>true</IncludeSource>
@@ -43,7 +43,7 @@
     <Reference Include="System" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net451|net452|net462|net47'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net451|net452|net462|net47|net472'">
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
     <Reference Include="System" />
   </ItemGroup>
@@ -66,7 +66,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="SourceLink.Create.GitHub" Version="2.8.0" />
+    <PackageReference Update="SourceLink.Create.GitHub" Version="2.8.3" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">

@@ -717,7 +717,7 @@ namespace BCrypt.Net
         private static readonly Regex HashInformation = new Regex(@"^(?<settings>\$2[a-z]{1}?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline);
         private static readonly Regex SettingsInformation = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline);
 #else
-        private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(300);
+        private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(30);
         private static readonly Regex HashInformation = new Regex(@"^(?<settings>\$2[a-z]{1}?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline, RegexTimeout);
         private static readonly Regex SettingsInformation = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline, RegexTimeout);
 #endif
