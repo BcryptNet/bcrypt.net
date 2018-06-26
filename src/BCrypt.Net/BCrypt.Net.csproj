@@ -15,7 +15,7 @@
     <Copyright>2006-2018 Chris McKee, Ryan D. Emerl, Damien Miller</Copyright>
     <Summary>BCrypt.Net, C# implementation of BCrypt, OpenBSD-style Blowfish password hashing</Summary>
     <Description>A fixed, enhanced and namespace compatible version of BCrypt.Net port of jBCrypt implemented in C#. It uses a variant of the Blowfish encryption algorithm’s keying schedule, and introduces a work factor, which allows you to determine how expensive the hash function will be, allowing the algorithm to be "future-proof".</Description>
-    <Version>2.1.3</Version>
+    <Version>3.0.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net20' ">

@@ -492,6 +492,7 @@ namespace BCrypt.Net
         ///                          factor therefore increases as 2^workFactor. Default is 10</param>
         /// <returns>The hashed string.</returns>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
+        [Obsolete("Replace with HashPassword, this method will be removed at a later date")]
         public static string HashString(string inputKey, int workFactor = DefaultRounds) => HashPassword(inputKey, GenerateSalt(workFactor));
 
         /// <summary>
@@ -557,7 +558,7 @@ namespace BCrypt.Net
         /// <returns>The hashed password</returns>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="inputKey"/> is null.</exception>
         /// <exception cref="SaltParseException">Thrown when the <paramref name="salt"/> could not be parsed.</exception>
-        public static string HashPassword(string inputKey, string salt, bool enhancedEntropy, HashType hashType = HashType.Legacy384)
+        public static string HashPassword(string inputKey, string salt, bool enhancedEntropy, HashType hashType = HashType.SHA384)
         {
             if (inputKey == null)
             {
