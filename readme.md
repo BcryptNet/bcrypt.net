@@ -205,7 +205,7 @@ A future release of Solar's bcrypt code should also support 'b'.
 
 # Releases
 
-https://github.com/BcryptNet/bcrypt.net/releases
+v2.1.3+ release notes are here https://github.com/BcryptNet/bcrypt.net/releases
 
 *v2.1.3 -*
 * Update test SDK
