@@ -82,6 +82,8 @@ namespace BCrypt.Net
 
         private static readonly Encoding SafeUTF8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
+        private const HashType DefaultEnhancedHashType = HashType.SHA384;
+
         // Blowfish parameters
         private const int BlowfishNumRounds = 16;
 
@@ -448,7 +450,7 @@ namespace BCrypt.Net
         /// <exception cref="ArgumentNullException">returned if the user hash is null</exception>
         /// <returns>New hash of new password</returns>
         public static string ValidateAndReplacePassword(string currentKey, string currentHash, bool currentKeyEnhancedEntropy, HashType oldHashType,
-            string newKey, bool newKeyEnhancedEntropy = false, HashType newHashType = HashType.SHA384, int workFactor = DefaultRounds, bool forceWorkFactor = false)
+            string newKey, bool newKeyEnhancedEntropy = false, HashType newHashType = DefaultEnhancedHashType, int workFactor = DefaultRounds, bool forceWorkFactor = false)
         {
             if (currentKey == null)
             {
@@ -595,7 +597,7 @@ namespace BCrypt.Net
         /// <returns>The hashed password</returns>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="inputKey"/> is null.</exception>
         /// <exception cref="SaltParseException">Thrown when the <paramref name="salt"/> could not be parsed.</exception>
-        public static string HashPassword(string inputKey, string salt, bool enhancedEntropy, HashType hashType = HashType.SHA384)
+        public static string HashPassword(string inputKey, string salt, bool enhancedEntropy, HashType hashType = DefaultEnhancedHashType)
         {
             if (inputKey == null)
             {
@@ -818,7 +820,7 @@ namespace BCrypt.Net
         /// <param name="hash"> The previously-hashed password.</param>
         /// <param name="hashType">HashType used (default SHA384)</param>
         /// <returns>true if the passwords match, false otherwise.</returns>
-        public static bool EnhancedVerify(string text, string hash, HashType hashType = HashType.SHA384) => Verify(text, hash, true, hashType);
+        public static bool EnhancedVerify(string text, string hash, HashType hashType = DefaultEnhancedHashType) => Verify(text, hash, true, hashType);
 
         /// <summary>
         ///  Verifies that the hash of the given <paramref name="text"/> matches the provided
@@ -831,7 +833,7 @@ namespace BCrypt.Net
         /// <returns>true if the passwords match, false otherwise.</returns>
         /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
-        public static bool Verify(string text, string hash, bool enhancedEntropy = false, HashType hashType = HashType.SHA384)
+        public static bool Verify(string text, string hash, bool enhancedEntropy = false, HashType hashType = DefaultEnhancedHashType)
         {
             return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash, enhancedEntropy, hashType)));
         }
