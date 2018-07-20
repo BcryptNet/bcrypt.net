@@ -405,6 +405,7 @@ namespace BCrypt.Net
         private uint[] _p;
         private uint[] _s;
 
+
         /// <summary>
         /// Validate existing hash and password,
         /// </summary>
@@ -412,9 +413,7 @@ namespace BCrypt.Net
         /// <param name="currentHash">Current hash to validate password against</param>
         /// <param name="newKey">NEW password / string to be hashed</param>
         /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
-        ///                          factor therefore increases as 2^workFactor. Default is 10</param>
-        /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make
-        /// use of available entropy prior to bcrypt hashing</param>
+        ///                          factor therefore increases as 2^workFactor. Default is 11</param>
         /// <param name="forceWorkFactor">By default this method will not accept a work factor lower
         /// than the one set in the current hash and will set the new workfactor to match.</param>
         /// <exception cref="BcryptAuthenticationException">returned if the users hash and current pass doesn't validate</exception>
@@ -422,7 +421,34 @@ namespace BCrypt.Net
         /// <exception cref="ArgumentException">returned if thehash is invalid</exception>
         /// <exception cref="ArgumentNullException">returned if the user hash is null</exception>
         /// <returns>New hash of new password</returns>
-        public static string ValidateAndReplacePassword(string currentKey, string currentHash, string newKey, int workFactor = DefaultRounds, bool enhancedEntropy = false, bool forceWorkFactor = false)
+        public static string ValidateAndReplacePassword(string currentKey, string currentHash, string newKey, int workFactor = DefaultRounds, bool forceWorkFactor = false) =>
+            ValidateAndReplacePassword(currentKey, currentHash, false, HashType.None, newKey, false, HashType.None, workFactor, forceWorkFactor);
+
+
+        /// <summary>
+        /// Validate existing hash and password,
+        /// </summary>
+        /// <param name="currentKey">Current password / string</param>
+        /// <param name="currentHash">Current hash to validate password against</param>
+        /// <param name="currentKeyEnhancedEntropy">Set to true,the string will undergo SHA384 hashing to make
+        /// use of available entropy prior to bcrypt hashing</param>
+        /// <param name="oldHashType">HashType used (default SHA384)</param>
+        ///
+        /// <param name="newKey">NEW password / string to be hashed</param>
+        /// <param name="newKeyEnhancedEntropy">Set to true,the string will undergo SHA384 hashing to make
+        /// use of available entropy prior to bcrypt hashing</param>
+        /// <param name="newHashType">HashType to use (default SHA384)</param>
+        /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
+        ///                          factor therefore increases as 2^workFactor. Default is 11</param>
+        /// <param name="forceWorkFactor">By default this method will not accept a work factor lower
+        /// than the one set in the current hash and will set the new workfactor to match.</param>
+        /// <exception cref="BcryptAuthenticationException">returned if the users hash and current pass doesn't validate</exception>
+        /// <exception cref="SaltParseException">returned if the salt is invalid in any way</exception>
+        /// <exception cref="ArgumentException">returned if thehash is invalid</exception>
+        /// <exception cref="ArgumentNullException">returned if the user hash is null</exception>
+        /// <returns>New hash of new password</returns>
+        public static string ValidateAndReplacePassword(string currentKey, string currentHash, bool currentKeyEnhancedEntropy, HashType oldHashType,
+            string newKey, bool newKeyEnhancedEntropy = false, HashType newHashType = HashType.SHA384, int workFactor = DefaultRounds, bool forceWorkFactor = false)
         {
             if (currentKey == null)
             {
@@ -434,7 +460,7 @@ namespace BCrypt.Net
                 throw new ArgumentException("Invalid Hash", nameof(currentHash));
             }
 
-            if (Verify(currentKey, currentHash, enhancedEntropy))
+            if (Verify(currentKey, currentHash, currentKeyEnhancedEntropy, oldHashType))
             {
                 // Determine the starting offset and validate the salt
                 int startingOffset;
@@ -478,7 +504,7 @@ namespace BCrypt.Net
                     workFactor = currentWorkFactor;
                 }
 
-                return HashPassword(newKey, GenerateSalt(workFactor), enhancedEntropy);
+                return HashPassword(newKey, GenerateSalt(workFactor), newKeyEnhancedEntropy, newHashType);
             }
             throw new BcryptAuthenticationException("Current credentials could not be authenticated");
         }
@@ -489,7 +515,7 @@ namespace BCrypt.Net
         /// <remarks>Just an alias for HashPassword.</remarks>
         /// <param name="inputKey">  The string to hash.</param>
         /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
-        ///                          factor therefore increases as 2^workFactor. Default is 10</param>
+        ///                          factor therefore increases as 2^workFactor. Default is 11</param>
         /// <returns>The hashed string.</returns>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         [Obsolete("Replace with HashPassword, this method will be removed at a later date")]
@@ -530,12 +556,23 @@ namespace BCrypt.Net
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         public static string EnhancedHashPassword(string inputKey, int workFactor, HashType hashType) => HashPassword(inputKey, GenerateSalt(workFactor), true, hashType);
 
+
+        /// <summary>
+        ///  Pre-hash a password with SHA384 then using the OpenBSD BCrypt scheme and a salt generated by <see cref="BCrypt.GenerateSalt()"/>.
+        /// </summary>
+        /// <param name="inputKey">The password to hash.</param>
+        /// <param name="workFactor">Defaults to 11</param>
+        /// <param name="hashType">Configurable hash type for enhanced entropy</param>
+        /// <returns>The hashed password.</returns>
+        /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
+        public static string EnhancedHashPassword(string inputKey, HashType hashType, int workFactor = DefaultRounds) => HashPassword(inputKey, GenerateSalt(workFactor), true, hashType);
+
         /// <summary>
         ///  Hash a password using the OpenBSD BCrypt scheme and a salt generated by <see cref="BCrypt.GenerateSalt(int,char)"/> using the given <paramref name="workFactor"/>.
         /// </summary>
         /// <param name="inputKey">     The password to hash.</param>
         /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
-        ///                          factor therefore increases as 2^workFactor. Default is 10</param>
+        ///                          factor therefore increases as 2^workFactor. Default is 11</param>
         /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make use of available entropy prior to bcrypt hashing</param>
         /// <returns>The hashed password.</returns>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
@@ -568,6 +605,11 @@ namespace BCrypt.Net
             if (string.IsNullOrEmpty(salt))
             {
                 throw new ArgumentException("Invalid salt", nameof(salt));
+            }
+
+            if (enhancedEntropy && hashType == HashType.None)
+            {
+                throw new ArgumentException("Invalid HashType, You can't have an enhanced hash with type none. HashType.None is used for internal clarity only.", nameof(hashType));
             }
 
             // Determine the starting offset and validate the salt
@@ -774,8 +816,9 @@ namespace BCrypt.Net
         /// </summary>
         /// <param name="text">The text to verify.</param>
         /// <param name="hash"> The previously-hashed password.</param>
+        /// <param name="hashType">HashType used (default SHA384)</param>
         /// <returns>true if the passwords match, false otherwise.</returns>
-        public static bool EnhancedVerify(string text, string hash) => Verify(text, hash, true);
+        public static bool EnhancedVerify(string text, string hash, HashType hashType = HashType.SHA384) => Verify(text, hash, true, hashType);
 
         /// <summary>
         ///  Verifies that the hash of the given <paramref name="text"/> matches the provided
@@ -784,12 +827,13 @@ namespace BCrypt.Net
         /// <param name="text">The text to verify.</param>
         /// <param name="hash"> The previously-hashed password.</param>
         /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make use of available entropy prior to bcrypt hashing</param>
+        /// <param name="hashType">HashType used (default SHA384)</param>
         /// <returns>true if the passwords match, false otherwise.</returns>
         /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
-        public static bool Verify(string text, string hash, bool enhancedEntropy = false)
+        public static bool Verify(string text, string hash, bool enhancedEntropy = false, HashType hashType = HashType.SHA384)
         {
-            return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash, enhancedEntropy)));
+            return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash, enhancedEntropy, hashType)));
         }
 
         // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.

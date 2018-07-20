@@ -156,6 +156,40 @@ namespace BCrypt.Net.UnitTests
         }
 
         [Fact()]
+        public void TestHashPasswordEnhancedWithHashType()
+        {
+            Trace.Write("BCrypt.HashPassword(): ");
+            var sw = Stopwatch.StartNew();
+            for (var r = 0; r < _revisions.Length; r++)
+            {
+                for (int i = 0; i < _testVectors.Length / 3; i++)
+                {
+                    string plain = _testVectors[i, 0];
+                    string salt;
+
+                    //Check hash that goes in one end comes out the next the same
+                    salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
+
+                    string hashed = BCrypt.HashPassword(plain, salt, true, HashType.SHA256);
+
+                    var revCheck = hashed.StartsWith("$2" + _revisions[r]);
+
+                    Assert.True(revCheck);
+
+                    var validateHashCheck = BCrypt.EnhancedVerify(plain, hashed, HashType.SHA256);
+                    Assert.True(validateHashCheck);
+
+                    Trace.WriteLine(hashed);
+
+                    Trace.Write(".");
+                }
+            }
+
+            Trace.WriteLine(sw.ElapsedMilliseconds);
+            Trace.WriteLine("");
+        }
+
+        [Fact()]
         public void TestValidateAndReplace()
         {
             for (int i = 0; i < _testVectors.Length / 3; i++)
@@ -177,6 +211,24 @@ namespace BCrypt.Net.UnitTests
                 Trace.Write(".");
             }
 
+        }
+
+
+        [Theory()]
+        [InlineData("\u2605\u2605\u2605\u2605\u2605\u2605\u2605\u2605")]
+        [InlineData("ππππππππ")]
+        public void TestValidateAndReplaceEnhanced(string pass)
+        {
+                string newPassword = "my new password";
+                string hashed = BCrypt.EnhancedHashPassword(pass, HashType.SHA256);
+
+                var newHash = BCrypt.ValidateAndReplacePassword(pass, hashed, true, HashType.SHA256, newPassword, true, HashType.SHA512);
+
+                var newPassValid = BCrypt.EnhancedVerify(newPassword, newHash, HashType.SHA512);
+
+                Assert.True(newPassValid);
+
+                Trace.Write(".");
         }
 
         [Fact()]

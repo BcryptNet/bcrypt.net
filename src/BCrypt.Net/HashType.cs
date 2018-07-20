@@ -7,6 +7,7 @@
     /// </summary>
     public enum HashType
     {
+        None = -1,
         SHA256 = 0,
         SHA384 = 1,
         SHA512 = 2,
