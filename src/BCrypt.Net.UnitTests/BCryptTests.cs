@@ -2,7 +2,7 @@
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
-Copyright (c) 2016/2017 Chris McKee (.Net-core port / patches / new features)
+Copyright (c) 2016/2019 Chris McKee (.Net-core port / patches / new features)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -249,7 +249,7 @@ namespace BCrypt.Net.UnitTests
                 var newPassValid = BCrypt.Verify(newPassword, newHash);
 
                 Assert.True(newPassValid);
-                Assert.True(newHash.Contains("$11$"));
+                Assert.Contains("$11$", newHash);
 
                 Trace.Write(".");
             }
@@ -268,7 +268,7 @@ namespace BCrypt.Net.UnitTests
             string hashed = BCrypt.HashPassword(currentKey, salt);
             var d = hashed == currentHash;
 
-            Assert.True(BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 5).Contains("$12$"));
+            Assert.Contains("$12$", BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 5));
 
             Trace.Write(".");
         }
@@ -285,7 +285,7 @@ namespace BCrypt.Net.UnitTests
             string hashed = BCrypt.HashPassword(currentKey, salt);
             var d = hashed == currentHash;
             var replHash = BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 5, forceWorkFactor: true);
-            Assert.True(replHash.Contains("$05$"));
+            Assert.Contains("$05$", replHash);
             Trace.Write(".");
         }
 
@@ -521,7 +521,6 @@ namespace BCrypt.Net.UnitTests
             var hashBVerification = b.CryptRaw(enhancedBytesB, saltBytes, 4);
             Assert.True(Convert.ToBase64String(hashB) == Convert.ToBase64String(hashBVerification), "These should match as this is how validation works");
 
-
             Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldnt match as we hash the whole strings bytes, including the null byte");
         }
 
@@ -533,7 +532,7 @@ namespace BCrypt.Net.UnitTests
         }
 
 
-        [Fact(Skip = "Ignore example code")]
+        [Fact(Skip = "Ignore; this is example code")]
         public void CalculatePerformantWorkload()
         {
             var cost = 16;
@@ -543,7 +542,9 @@ namespace BCrypt.Net.UnitTests
             {
                 var sw = Stopwatch.StartNew();
                 for (var i = 0; i < 5; i++)
+                {
                     BCrypt.HashPassword("RwiKnN>9xg3*C)1AZl.", workFactor: cost);
+                }
 
                 sw.Stop();
                 timeTaken = sw.ElapsedMilliseconds / 5;
@@ -553,7 +554,19 @@ namespace BCrypt.Net.UnitTests
             } while ((timeTaken) >= timeTarget);
 
             Debug.WriteLine("Appropriate Cost Found: " + cost);
-
         }
+
+        [Fact(Skip = "Ignore; this is example code")]
+        public void CreateEnhancedHashAndValidateIt()
+        {
+            const string myPassword = "IPAHJipdfh80adyf80aegh80gfrh";
+
+            var enhancedHashPassword = BCrypt.EnhancedHashPassword(myPassword, hashType: HashType.SHA384);
+
+            var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword, hashType:HashType.SHA384);
+
+            Assert.True(validatePassword);
+        }
+
     }
 }

@@ -46,11 +46,11 @@ namespace BCrypt.Net
     ///         To hash a password using SHA384 pre-hashing for increased entropy call <see cref="BCrypt.EnhancedHashPassword(string)"/>
     ///         (which will generate a random salt and hash at default cost), like this:
     ///  </para>
-    ///  <code>string pw_hash = Bcrypt.EnhancedHashPassword(plain_password);</code>
+    ///  <code>string pw_hash = BCrypt.EnhancedHashPassword(plain_password);</code>
     ///  <para>
     ///        To check whether a plaintext password matches one that has been hashed previously,
-    ///        use the <see cref="BCrypt.Verify(string, string, bool)"/> method:
-    ///        (To validate an enhanced hash you can pass true as the last parameter of Verify or use  <see cref="BCrypt.EnhancedVerify(string, string)"/>)
+    ///        use the <see cref="BCrypt.Verify(string, string, bool, HashType)"/> method:
+    ///        (To validate an enhanced hash you can pass true as the last parameter of Verify or use  <see cref="BCrypt.EnhancedVerify(string, string, HashType)"/>)
     ///  </para>
     ///  <code>
     ///     if (BCrypt.Verify(candidate_password, stored_hash))
@@ -324,7 +324,7 @@ namespace BCrypt.Net
             0xa8b6e37e, 0xc3293d46, 0x48de5369, 0x6413e680,
             0xa2ae0810, 0xdd6db224, 0x69852dfd, 0x09072166,
             0xb39a460a, 0x6445c0dd, 0x586cdecf, 0x1c20c8ae,
-            0x5bbef7dd, 0x1b588d40, 0xccd2017f, 0x6bb4e3bb,
+            0x5bbef7dd, 0x1b588d40, 0xccd2019f, 0x6bb4e3bb,
             0xdda26a7e, 0x3a59ff45, 0x3e350a44, 0xbcb4cdd5,
             0x72eacea8, 0xfa6484bb, 0x8d6612ae, 0xbf3c6f47,
             0xd29be463, 0x542f5d9e, 0xaec2771b, 0xf64e6370,
@@ -417,10 +417,10 @@ namespace BCrypt.Net
         /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
         ///                          factor therefore increases as 2^workFactor. Default is 11</param>
         /// <param name="forceWorkFactor">By default this method will not accept a work factor lower
-        /// than the one set in the current hash and will set the new workfactor to match.</param>
+        /// than the one set in the current hash and will set the new work-factor to match.</param>
         /// <exception cref="BcryptAuthenticationException">returned if the users hash and current pass doesn't validate</exception>
         /// <exception cref="SaltParseException">returned if the salt is invalid in any way</exception>
-        /// <exception cref="ArgumentException">returned if thehash is invalid</exception>
+        /// <exception cref="ArgumentException">returned if the hash is invalid</exception>
         /// <exception cref="ArgumentNullException">returned if the user hash is null</exception>
         /// <returns>New hash of new password</returns>
         public static string ValidateAndReplacePassword(string currentKey, string currentHash, string newKey, int workFactor = DefaultRounds, bool forceWorkFactor = false) =>
@@ -443,10 +443,10 @@ namespace BCrypt.Net
         /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
         ///                          factor therefore increases as 2^workFactor. Default is 11</param>
         /// <param name="forceWorkFactor">By default this method will not accept a work factor lower
-        /// than the one set in the current hash and will set the new workfactor to match.</param>
+        /// than the one set in the current hash and will set the new work-factor to match.</param>
         /// <exception cref="BcryptAuthenticationException">returned if the users hash and current pass doesn't validate</exception>
         /// <exception cref="SaltParseException">returned if the salt is invalid in any way</exception>
-        /// <exception cref="ArgumentException">returned if thehash is invalid</exception>
+        /// <exception cref="ArgumentException">returned if the hash is invalid</exception>
         /// <exception cref="ArgumentNullException">returned if the user hash is null</exception>
         /// <returns>New hash of new password</returns>
         public static string ValidateAndReplacePassword(string currentKey, string currentHash, bool currentKeyEnhancedEntropy, HashType oldHashType,
@@ -583,7 +583,7 @@ namespace BCrypt.Net
         /// <summary>Hash a password using the OpenBSD BCrypt scheme.</summary>
         /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
         /// <param name="inputKey">The password or string to hash.</param>
-        /// <param name="salt">    the salt to hash with (best generated using BCrypt.gensalt).</param>
+        /// <param name="salt">    the salt to hash with (best generated using <see cref="BCrypt.GenerateSalt()"/>).</param>
         /// <returns>The hashed password</returns>
         /// <exception cref="SaltParseException">Thrown when the <paramref name="salt"/> could not be parsed.</exception>
         public static string HashPassword(string inputKey, string salt) => HashPassword(inputKey, salt, false);
@@ -591,7 +591,7 @@ namespace BCrypt.Net
         /// <summary>Hash a password using the OpenBSD BCrypt scheme.</summary>
         /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
         /// <param name="inputKey">The password or string to hash.</param>
-        /// <param name="salt">    the salt to hash with (best generated using BCrypt.gensalt).</param>
+        /// <param name="salt">    the salt to hash with (best generated using <see cref="BCrypt.GenerateSalt()"/>).</param>
         /// <param name="enhancedEntropy">Set to true,the string will undergo hashing (defaults to SHA384 then base64 encoding) to make use of available entropy prior to bcrypt hashing</param>
         /// <param name="hashType">Configurable hash type for enhanced entropy</param>
         /// <returns>The hashed password</returns>
@@ -1011,7 +1011,7 @@ namespace BCrypt.Net
             }
         }
 
-        /// <summary>Cycically extract a word of key material.</summary>
+        /// <summary>Cyclically extract a word of key material.</summary>
         /// <param name="data">The string to extract the data from.</param>
         /// <param name="offset"> [in,out] The current offset.</param>
         /// <returns>The next word of material from data.</returns>
