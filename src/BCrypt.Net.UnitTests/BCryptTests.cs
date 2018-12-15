@@ -55,6 +55,12 @@ namespace BCrypt.Net.UnitTests
 
         readonly char[] _revisions = new char[] { 'a', 'x', 'y', 'b' };
 
+        [Fact]
+        public void GithubIssue()
+        {
+            Assert.True(BCrypt.Verify("root", "$2a$11$QyLpYkKKG9oNIl2rbZ9X0OgxxbWYZjPZUFN/kuJ4DDywo20WgK3iu"));
+        }
+
         /*
          * Test to confirm correctness of input key truncation https://github.com/BcryptNet/bcrypt.net/issues/18
          * Test vars from https://security.stackexchange.com/questions/39849/does-bcrypt-have-a-maximum-password-length/39851#39851

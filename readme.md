@@ -1,3 +1,5 @@
+# NOTICE 3.1.1 IS BROKEN, USE 3.1.2
+
 # bcrypt.net - next
 
 Porting of bcrypt.codeplex.com with enhanced security, missing fixes, features and better .net support.
