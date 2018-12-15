@@ -1,4 +1,4 @@
-# NOTICE 3.1.1 IS BROKEN, USE 3.1.2
+# NOTICE 3.1.1 IS BROKEN, USE 3.1.2   https://github.com/BcryptNet/bcrypt.net/issues/24
 
 # bcrypt.net - next
 
