@@ -5,6 +5,7 @@ namespace BCrypt.Net
     /// <summary>
     /// Exception used to signal errors that occur during use of the hash information methods
     /// </summary>
+    [Serializable]
     public sealed class HashInformationException : Exception
     {
         /// <summary>

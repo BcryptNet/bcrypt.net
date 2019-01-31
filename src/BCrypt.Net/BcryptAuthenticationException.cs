@@ -4,6 +4,7 @@ namespace BCrypt.Net
 {
     /// <inheritdoc />
     /// <summary>Exception for signalling hash validation errors. </summary>
+    [Serializable]
     public class BcryptAuthenticationException : Exception
     {
         /// <inheritdoc />
