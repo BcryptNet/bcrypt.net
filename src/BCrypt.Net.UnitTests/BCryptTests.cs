@@ -55,6 +55,27 @@ namespace BCrypt.Net.UnitTests
 
         readonly char[] _revisions = new char[] { 'a', 'x', 'y', 'b' };
 
+
+        private string TwoPointZeroVersionPass64 = "585292059d6b430b931e77f046bb20cca5f99e9adc8a4359aadd93afa03e60c3";
+        private string[] TwoPointZeroVersionGeneratedHashes64 = new[]
+        {
+            "$2a$10$J5oWpzAvyvvK1ysM/wcKXuckwyEVUTq9Df7tI04EMgT.ATijICPX.",
+            "$2a$11$pTBrApS6R/DagcVWzqsm9eYgYwVC.SKQtd1Gn0tb2ELB22oN9YTKC",
+            "$2a$12$e7SAgkale3XLk2jS7Lk76O01i40r1kIgzkLq57r3LwirZKTwje/fK",
+            "$2a$13$Owd2BeweO9xkA0yKusVNkek/dYTPeGoLC1lIwP6kC.zljqqn1ZPb.",
+            "$2a$14$mWrqIvvpaVbsUvt2UJjdqeD0dYVUyuhw4/L3nAsEioWQHrTfnJ.jS"
+        };
+
+        [Fact]
+        public void TestV2Hashes()
+        {
+            for (var i = 0; i < TwoPointZeroVersionGeneratedHashes64.Length; i++)
+            {
+                var bRet = BCrypt.Verify(TwoPointZeroVersionPass64, TwoPointZeroVersionGeneratedHashes64[i]);
+                Assert.True(bRet);
+            }
+        }
+
         [Fact]
         public void GithubIssue()
         {
