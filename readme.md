@@ -191,7 +191,7 @@ $2y$ – Post Post-2011 bug discovery, $2y$ may be used to unambiguously use the
        produce the same result as using $2a$.
 ```
 
-First and foremost this library originated as a port of jBCrypt from `mindrot`, ans subsequently the bcrypt revision
+First and foremost this library originated as a port of jBCrypt from `mindrot`, and subsequently the bcrypt revision
 was set to match, which in this case is `$2a$`.
 This has been changed as handling only the single revision causes issues cross-platform with implementations that moved
 altered their revision to handle migrations and other issues.
