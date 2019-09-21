@@ -22,7 +22,7 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssemblyOriginatorKeyFile>../bcrypt.pfx</AssemblyOriginatorKeyFile>
 
-    <Version>3.1.3</Version>
+    <Version>3.2.0</Version>
     <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security,hash;crypto;blowfish;gdpr</PackageTags>
   </PropertyGroup>
 
