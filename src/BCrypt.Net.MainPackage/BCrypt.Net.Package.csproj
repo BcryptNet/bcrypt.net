@@ -4,7 +4,7 @@
     <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next</AssemblyName>
 
-    <TargetFrameworks>netstandard2.0;net20;net35;net40;net452;net462;net472</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net20;net35;net40;net452;net462;net472</TargetFrameworks>
     <OutputTypeEx>Library</OutputTypeEx>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSource>true</IncludeSource>
