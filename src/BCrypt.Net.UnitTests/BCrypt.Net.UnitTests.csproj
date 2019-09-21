@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>BCrypt.Net.UnitTests</AssemblyName>
     <PackageId>BCrypt.Net.UnitTests</PackageId>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
