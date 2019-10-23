@@ -19,6 +19,8 @@ IN THE SOFTWARE.
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -407,6 +409,296 @@ namespace BCrypt.Net
         private uint[] _p;
         private uint[] _s;
 
+        // <summary>SecureString support for inputKey</summary>
+        // <remarks>
+        // <para>
+        // SecureString is an arguably poorly implemented idea as .Net created it and sometimes requires us to use it but lacks
+        // support in man places where it would be useful, and it can be useful; like moving passwords around.
+        // So, what we are supposed to know is that moving the clear text version of the SecureString into a managed string opens
+        // up the possibility of putting a copy into memory out of our control - and we pretty much have to put it in a managed
+        // string to do anything with it!  So, the trick is to pin a managed string to take it away from the GC so as to not inadvertently
+        // makes copies, use it, then wipe it out before letting GC have it back.  Basically narrow the clear text window.
+        // </para>
+        // <para>
+        // Look for the "SecureString COMMENT"s where I make some observations.
+        // </para>
+        // Oh, and this whole thing isn't supposed to be super fast, so, there's that.
+        // <para>
+        // </para>
+        // </remarks>
+
+        #region SecureString support for inputKey
+
+        /// <summary>
+        ///  Verifies that the hash of the given <paramref name="text"/> matches the provided
+        ///  <paramref name="hash"/>; the string will undergo SHA384 hashing to maintain the enhanced entropy work done during hashing
+        /// </summary>
+        /// <param name="text">The text to verify.</param>
+        /// <param name="hash"> The previously-hashed password.</param>
+        /// <param name="hashType">HashType used (default SHA384)</param>
+        /// <returns>true if the passwords match, false otherwise.</returns>
+        public static bool EnhancedVerify(SecureString text, string hash, HashType hashType = DefaultEnhancedHashType) => Verify(text, hash, true, hashType);
+
+        /// <summary>
+        ///  Verifies that the hash of the given <paramref name="text"/> matches the provided
+        ///  <paramref name="hash"/>
+        /// </summary>
+        /// <param name="text">The text to verify.</param>
+        /// <param name="hash"> The previously-hashed password.</param>
+        /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make use of available entropy prior to bcrypt hashing</param>
+        /// <param name="hashType">HashType used (default SHA384)</param>
+        /// <returns>true if the passwords match, false otherwise.</returns>
+        /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
+        /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
+        public static bool Verify(SecureString text, string hash, bool enhancedEntropy = false, HashType hashType = DefaultEnhancedHashType)
+            => VerifyHashes(hash, HashPassword(text, hash, enhancedEntropy, hashType));
+
+
+        /// <summary>
+        /// Validate existing hash and password,
+        /// </summary>
+        /// <param name="currentKey">Current password / string</param>
+        /// <param name="currentHash">Current hash to validate password against</param>
+        /// <param name="newKey">NEW password / string to be hashed</param>
+        /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
+        ///                          factor therefore increases as 2^workFactor. Default is 11</param>
+        /// <param name="forceWorkFactor">By default this method will not accept a work factor lower
+        /// than the one set in the current hash and will set the new work-factor to match.</param>
+        /// <exception cref="BcryptAuthenticationException">returned if the users hash and current pass doesn't validate</exception>
+        /// <exception cref="SaltParseException">returned if the salt is invalid in any way</exception>
+        /// <exception cref="ArgumentException">returned if the hash is invalid</exception>
+        /// <exception cref="ArgumentNullException">returned if the user hash is null</exception>
+        /// <returns>New hash of new password</returns>
+        public static string ValidateAndReplacePassword(SecureString currentKey, string currentHash, SecureString newKey, int workFactor = DefaultRounds, bool forceWorkFactor = false) =>
+            ValidateAndReplacePassword(currentKey, currentHash, false, HashType.None, newKey, false, HashType.None, workFactor, forceWorkFactor);
+
+
+        /// <summary>
+        /// Validate existing hash and password,
+        /// </summary>
+        /// <param name="currentKey">Current password / string</param>
+        /// <param name="currentHash">Current hash to validate password against</param>
+        /// <param name="currentKeyEnhancedEntropy">Set to true,the string will undergo SHA384 hashing to make
+        /// use of available entropy prior to bcrypt hashing</param>
+        /// <param name="oldHashType">HashType used (default SHA384)</param>
+        ///
+        /// <param name="newKey">NEW password / string to be hashed</param>
+        /// <param name="newKeyEnhancedEntropy">Set to true,the string will undergo SHA384 hashing to make
+        /// use of available entropy prior to bcrypt hashing</param>
+        /// <param name="newHashType">HashType to use (default SHA384)</param>
+        /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
+        ///                          factor therefore increases as 2^workFactor. Default is 11</param>
+        /// <param name="forceWorkFactor">By default this method will not accept a work factor lower
+        /// than the one set in the current hash and will set the new work-factor to match.</param>
+        /// <exception cref="BcryptAuthenticationException">returned if the users hash and current pass doesn't validate</exception>
+        /// <exception cref="SaltParseException">returned if the salt is invalid in any way</exception>
+        /// <exception cref="ArgumentException">returned if the hash is invalid</exception>
+        /// <exception cref="ArgumentNullException">returned if the user hash is null</exception>
+        /// <returns>New hash of new password</returns>
+        public static string ValidateAndReplacePassword(SecureString currentKey, string currentHash, bool currentKeyEnhancedEntropy, HashType oldHashType,
+            SecureString newKey, bool newKeyEnhancedEntropy = false, HashType newHashType = DefaultEnhancedHashType, int workFactor = DefaultRounds, bool forceWorkFactor = false)
+        {
+            return SandboxSecureString(
+                currentKey,
+                currentClear =>
+                {
+                    return SandboxSecureString(
+                        newKey,
+                        newClear =>
+                        {
+                            return ValidateAndReplacePassword(
+                                currentClear,
+                                currentHash,
+                                currentKeyEnhancedEntropy,
+                                oldHashType,
+                                newClear,
+                                newKeyEnhancedEntropy,
+                                newHashType,
+                                workFactor,
+                                forceWorkFactor);
+                        });
+                });
+        }
+
+        /// <summary>
+        ///  Hash a password using the OpenBSD BCrypt scheme and a salt generated by <see cref="BCrypt.GenerateSalt()"/>.
+        /// </summary>
+        /// <param name="inputKey">The password to hash.</param>
+        /// <returns>The hashed password.</returns>
+        /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
+        public static string HashPassword(SecureString inputKey) => HashPassword(inputKey, GenerateSalt());
+
+        /// <summary>
+        ///  Pre-hash a password with SHA384 then using the OpenBSD BCrypt scheme and a salt generated by <see cref="BCrypt.GenerateSalt()"/>.
+        /// </summary>
+        /// <param name="inputKey">The password to hash.</param>
+        /// <returns>The hashed password.</returns>
+        /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
+        public static string EnhancedHashPassword(SecureString inputKey) => HashPassword(inputKey, GenerateSalt(), true);
+
+        /// <summary>
+        ///  Pre-hash a password with SHA384 then using the OpenBSD BCrypt scheme and a salt generated by <see cref="BCrypt.GenerateSalt()"/>.
+        /// </summary>
+        /// <param name="inputKey">The password to hash.</param>
+        /// <param name="workFactor"></param>
+        /// <returns>The hashed password.</returns>
+        /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
+        public static string EnhancedHashPassword(SecureString inputKey, int workFactor) => HashPassword(inputKey, GenerateSalt(workFactor), true);
+
+        /// <summary>
+        ///  Pre-hash a password with SHA384 then using the OpenBSD BCrypt scheme and a salt generated by <see cref="BCrypt.GenerateSalt()"/>.
+        /// </summary>
+        /// <param name="inputKey">The password to hash.</param>
+        /// <param name="workFactor"></param>
+        /// <param name="hashType">Configurable hash type for enhanced entropy</param>
+        /// <returns>The hashed password.</returns>
+        /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
+        public static string EnhancedHashPassword(SecureString inputKey, int workFactor, HashType hashType) => HashPassword(inputKey, GenerateSalt(workFactor), true, hashType);
+
+        /// <summary>
+        ///  Pre-hash a password with SHA384 then using the OpenBSD BCrypt scheme and a salt generated by <see cref="BCrypt.GenerateSalt()"/>.
+        /// </summary>
+        /// <param name="inputKey">The password to hash.</param>
+        /// <param name="workFactor">Defaults to 11</param>
+        /// <param name="hashType">Configurable hash type for enhanced entropy</param>
+        /// <returns>The hashed password.</returns>
+        /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
+        public static string EnhancedHashPassword(SecureString inputKey, HashType hashType, int workFactor = DefaultRounds) => HashPassword(inputKey, GenerateSalt(workFactor), true, hashType);
+
+        /// <summary>
+        ///  Hash a password using the OpenBSD BCrypt scheme and a salt generated by <see cref="BCrypt.GenerateSalt(int,char)"/> using the given <paramref name="workFactor"/>.
+        /// </summary>
+        /// <param name="inputKey">     The password to hash.</param>
+        /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
+        ///                          factor therefore increases as 2^workFactor. Default is 11</param>
+        /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make use of available entropy prior to bcrypt hashing</param>
+        /// <returns>The hashed password.</returns>
+        /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
+        public static string HashPassword(SecureString inputKey, int workFactor, bool enhancedEntropy = false) => HashPassword(inputKey, GenerateSalt(workFactor), enhancedEntropy);
+
+        /// <summary>Hash a password using the OpenBSD BCrypt scheme.</summary>
+        /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
+        /// <param name="inputKey">The password or string to hash.</param>
+        /// <param name="salt">    the salt to hash with (best generated using <see cref="BCrypt.GenerateSalt()"/>).</param>
+        /// <returns>The hashed password</returns>
+        /// <exception cref="SaltParseException">Thrown when the <paramref name="salt"/> could not be parsed.</exception>
+        public static string HashPassword(SecureString inputKey, string salt) => HashPassword(inputKey, salt, false);
+
+        /// <summary>Hash a password using the OpenBSD BCrypt scheme.</summary>
+        /// <remarks>
+        /// based on an answer by sclarke81 in https://stackoverflow.com/questions/818704/how-to-convert-securestring-to-system-string
+        /// Yes, the SecureString becomes a managed string, but we are managing its lifetime in memory.
+        /// </remarks>
+        /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
+        /// <param name="inputKey">The password or string to hash.</param>
+        /// <param name="salt">    the salt to hash with (best generated using <see cref="BCrypt.GenerateSalt()"/>).</param>
+        /// <param name="enhancedEntropy">Set to true,the string will undergo hashing (defaults to SHA384 then base64 encoding) to make use of available entropy prior to bcrypt hashing</param>
+        /// <param name="hashType">Configurable hash type for enhanced entropy</param>
+        /// <returns>The hashed password</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="inputKey"/> is null.</exception>
+        /// <exception cref="SaltParseException">Thrown when the <paramref name="salt"/> could not be parsed.</exception>
+        public static string HashPassword(SecureString inputKey, string salt, bool enhancedEntropy, HashType hashType = DefaultEnhancedHashType)
+        {
+            return SandboxSecureString(
+                inputKey,
+                clearText =>
+                {
+                    return HashPassword(clearText, salt, enhancedEntropy, hashType);
+                });
+        }
+
+        // .net 2.0 safe - basically Func<byte[], string>
+        private delegate string UseSandboxedSecureString(string inputKey);
+
+        private static string SandboxSecureString(SecureString inputKey, UseSandboxedSecureString func)
+        {
+            if (inputKey == null)
+            {
+                throw new ArgumentNullException(nameof(inputKey));
+            }
+
+            int length = inputKey.Length;
+            IntPtr sourceStringPointer = IntPtr.Zero;
+
+            // Create an empty string of the correct size and pin it so that the GC can't move it around.
+            string insecureString = new string('\0', length);
+            var insecureStringHandler = GCHandle.Alloc(insecureString, GCHandleType.Pinned);
+
+            IntPtr insecureStringPointer = insecureStringHandler.AddrOfPinnedObject();
+
+            try
+            {
+                // Create an unmanaged copy of the secure string.
+                sourceStringPointer = Marshal.SecureStringToBSTR(inputKey);
+
+                // Use the pointers to copy from the unmanaged to managed string.
+                for (int i = 0; i < inputKey.Length; i++)
+                {
+                    short unicodeChar = Marshal.ReadInt16(sourceStringPointer, i * 2);
+                    Marshal.WriteInt16(insecureStringPointer, i * 2, unicodeChar);
+                }
+
+                return func(insecureString);
+            }
+            finally
+            {
+                // Zero the managed string so that the string is erased. Then unpin it to allow the
+                // GC to take over.
+                Marshal.Copy(new byte[length * 2], 0, insecureStringPointer, length * 2);
+                insecureStringHandler.Free();
+
+                // Zero and free the unmanaged string.
+                Marshal.ZeroFreeBSTR(sourceStringPointer);
+            }
+        }
+
+        // .net 2.0 safe - basically Func<byte[], string>
+        private delegate string PerformHashDelegate(byte[] inputBytes);
+
+        /// <summary>Do our own managing of a utf8 copy of the password text.</summary>
+        /// <param name="inputKey">The password or string to hash.</param>
+        /// <param name="addendum">added to the end of inputKey</param>
+        /// <param name="func">function called with pinned utf8</param>
+        /// <returns>func result</returns>
+        private unsafe static string SandboxUTF8Copy(string inputKey, string addendum, PerformHashDelegate func)
+        {
+            var maxBytes = SafeUTF8.GetMaxByteCount(inputKey.Length + addendum.Length);
+            var utf8Buffer = Marshal.AllocHGlobal(maxBytes);
+            var utf8Pointer = (byte*)utf8Buffer.ToPointer();
+            var inputKeyHandler = GCHandle.Alloc(inputKey, GCHandleType.Pinned);
+            var inputKeyPointer = (char*)inputKeyHandler.AddrOfPinnedObject().ToPointer();
+            var addendumHandler = GCHandle.Alloc(addendum, GCHandleType.Pinned);
+            var addendumPointer = (char*)addendumHandler.AddrOfPinnedObject().ToPointer();
+
+            try
+            {
+                var utf8Bytes = Encoding.UTF8.GetBytes(inputKeyPointer, inputKey.Length, utf8Pointer, maxBytes);
+                utf8Bytes += Encoding.UTF8.GetBytes(addendumPointer, addendum.Length, utf8Pointer + utf8Bytes, maxBytes - utf8Bytes);
+
+                var result = new byte[utf8Bytes];
+                var utf8BytesPin = GCHandle.Alloc(result, GCHandleType.Pinned);
+                try
+                {
+                    Marshal.Copy(utf8Buffer, result, 0, utf8Bytes);
+                    Marshal.Copy(new byte[maxBytes], 0, utf8Buffer, maxBytes);
+
+                    return func(result);
+                }
+                finally
+                {
+                    Marshal.Copy(new byte[utf8Bytes], 0, utf8BytesPin.AddrOfPinnedObject(), utf8Bytes);
+                    utf8BytesPin.Free();
+                }
+            }
+            finally
+            {
+                inputKeyHandler.Free();
+                addendumHandler.Free();
+                Marshal.FreeHGlobal(utf8Buffer);
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// Validate existing hash and password,
@@ -599,6 +891,10 @@ namespace BCrypt.Net
         /// <exception cref="SaltParseException">Thrown when the <paramref name="salt"/> could not be parsed.</exception>
         public static string HashPassword(string inputKey, string salt, bool enhancedEntropy, HashType hashType = DefaultEnhancedHashType)
         {
+            // SecureString COMMENT
+            // DO NOT DO ANYTHING WITH inputKey lest thee drop a copy in managed memory
+            // Let our use of it happen in the sandboxed utf8 scope
+
             if (inputKey == null)
             {
                 throw new ArgumentNullException(nameof(inputKey));
@@ -652,26 +948,33 @@ namespace BCrypt.Net
 
             string extractedSalt = salt.Substring(startingOffset + 3, 22);
 
-            byte[] inputBytes = SafeUTF8.GetBytes(inputKey + (minor >= 'a' ? Nul : EmptyString));
+            // originally this - which makes a managed string copy...
+            //byte[] inputBytes = SafeUTF8.GetBytes(inputKey + (minor >= 'a' ? Nul : EmptyString));
 
-            if (enhancedEntropy)
-            {
-                inputBytes = EnhancedHash(inputBytes, hashType);
-            }
+            return SandboxUTF8Copy(
+                inputKey,
+                minor >= 'a' ? Nul : EmptyString,
+                inputBytes => // SecureString COMMENT - this is a reference to the pinned byte[]
+                {
+                    if (enhancedEntropy)
+                    {
+                        inputBytes = EnhancedHash(inputBytes, hashType); // SecureString COMMENT - changes the reference to a managed hash byte[]
+                    }
 
-            byte[] saltBytes = DecodeBase64(extractedSalt, BCryptSaltLen);
+                    byte[] saltBytes = DecodeBase64(extractedSalt, BCryptSaltLen);
 
-            BCrypt bCrypt = new BCrypt();
+                    BCrypt bCrypt = new BCrypt();
 
-            byte[] hashed = bCrypt.CryptRaw(inputBytes, saltBytes, workFactor);
+                    byte[] hashed = bCrypt.CryptRaw(inputBytes, saltBytes, workFactor); // SecureString COMMENT - I did not find any buffer copying from here - be careful
 
-            // Generate result string
-            StringBuilder result = new StringBuilder();
-            result.AppendFormat("$2{1}${0:00}$", workFactor, minor);
-            result.Append(EncodeBase64(saltBytes, saltBytes.Length));
-            result.Append(EncodeBase64(hashed, (BfCryptCiphertext.Length * 4) - 1));
+                    // Generate result string
+                    StringBuilder result = new StringBuilder();
+                    result.AppendFormat("$2{1}${0:00}$", workFactor, minor);
+                    result.Append(EncodeBase64(saltBytes, saltBytes.Length));
+                    result.Append(EncodeBase64(hashed, (BfCryptCiphertext.Length * 4) - 1));
 
-            return result.ToString();
+                    return result.ToString();
+                });
         }
 
         /// <summary>
@@ -682,6 +985,13 @@ namespace BCrypt.Net
         /// <returns></returns>
         private static byte[] EnhancedHash(byte[] inputBytes, HashType hashType)
         {
+
+            // SecureString COMMENT
+            // We have to trust that these hash functions don't make a copy of inputBytes.  I checked the  \referencesource on github
+            // and the managed version of SHA256, SHA384, and SHA512 do not.  I figured the managed version would be worst case.
+            // Now, keep in mind that the hash they produce will be in managed memory and possibly leaky.  Without implementing
+            // them ourself we'll just have to accept this compromise.
+
             switch (hashType)
             {
                 case HashType.SHA256:
@@ -834,8 +1144,17 @@ namespace BCrypt.Net
         /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         public static bool Verify(string text, string hash, bool enhancedEntropy = false, HashType hashType = DefaultEnhancedHashType)
+            => VerifyHashes(hash, HashPassword(text, hash, enhancedEntropy, hashType));
+
+        /// <summary>
+        /// Verifies same hash values
+        /// </summary>
+        /// <param name="hashA">a hashed password</param>
+        /// <param name="hashB">another hashed password</param>
+        /// <returns>true if hashes are equal</returns>
+        private static bool VerifyHashes(string hashA, string hashB)
         {
-            return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash, enhancedEntropy, hashType)));
+            return SecureEquals(SafeUTF8.GetBytes(hashA), SafeUTF8.GetBytes(hashB));
         }
 
         // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.
