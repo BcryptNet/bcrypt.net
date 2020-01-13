@@ -606,7 +606,7 @@ namespace BCrypt.Net
 
             if (string.IsNullOrEmpty(salt))
             {
-                throw new ArgumentException("Invalid salt", nameof(salt));
+                throw new ArgumentException("Invalid salt: salt cannot be null or empty", nameof(salt));
             }
 
             if (enhancedEntropy && hashType == HashType.None)
