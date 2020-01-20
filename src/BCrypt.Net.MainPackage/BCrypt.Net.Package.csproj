@@ -12,7 +12,7 @@
     <PackageId>BCrypt.Net-Next</PackageId>
     <Title>BCrypt .Net</Title>
     <Authors>Chris McKee, Ryan D. Emerl, Damien Miller</Authors>
-    <Copyright>2006-2019 Chris McKee, Ryan D. Emerl, Damien Miller</Copyright>
+    <Copyright>2006-2020 Chris McKee, Ryan D. Emerl, Damien Miller</Copyright>
     <Summary>BCrypt.Net, C# implementation of BCrypt, OpenBSD-style Blowfish password hashing</Summary>
     <Description>A fixed, enhanced and namespace compatible version of BCrypt.Net port of jBCrypt implemented in C#. It uses a variant of the Blowfish encryption algorithm’s keying schedule, and introduces a work factor, which allows you to determine how expensive the hash function will be, allowing the algorithm to be "future-proof".</Description>
     <License>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt</License>
