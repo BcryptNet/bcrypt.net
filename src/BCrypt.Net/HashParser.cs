@@ -14,6 +14,16 @@ namespace BCrypt.Net
             return new HashInformation(hash.Substring(0, 6), hash.Substring(1, 2), hash.Substring(4, 2), hash.Substring(7));
         }
 
+        public static int GetWorkFactor(string hash)
+        {
+            if (!IsValidHash(hash))
+            {
+                ThrowInvalidHashFormat();
+            }
+
+            return 10 * (hash[4] - '0') + (hash[5] - '0');
+        }
+
         private static bool IsValidHash(string hash)
         {
             if (hash is null)

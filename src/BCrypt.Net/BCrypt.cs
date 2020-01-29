@@ -738,11 +738,7 @@ namespace BCrypt.Net
         /// <exception cref="HashInformationException"></exception>
         public static bool PasswordNeedsRehash(string hash, int newMinimumWorkLoad)
         {
-            var hashInfo = InterrogateHash(hash);
-            if (!Int32.TryParse(hashInfo.WorkFactor, out var currentWorkLoad))
-            {
-                throw new ArgumentException("Work Factor (logrounds) could not be parsed", nameof(hash));
-            }
+            int currentWorkLoad = HashParser.GetWorkFactor(hash);
 
             return currentWorkLoad < newMinimumWorkLoad;
         }
