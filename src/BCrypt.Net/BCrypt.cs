@@ -666,7 +666,12 @@ namespace BCrypt.Net
             byte[] hashed = bCrypt.CryptRaw(inputBytes, saltBytes, workFactor);
 
             // Generate result string
-            return $"$2{bcryptMinorRevision}${workFactor:00}${EncodeBase64(saltBytes, saltBytes.Length)}{EncodeBase64(hashed, (BfCryptCiphertext.Length * 4) - 1)}";
+            var result = new StringBuilder(60);
+            result.Append("$2").Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$');
+            result.Append(EncodeBase64(saltBytes, saltBytes.Length));
+            result.Append(EncodeBase64(hashed, (BfCryptCiphertext.Length * 4) - 1));
+
+            return result.ToString();
         }
 
         /// <summary>
@@ -724,7 +729,11 @@ namespace BCrypt.Net
 
             RngCsp.GetBytes(saltBytes);
 
-            return $"$2{bcryptMinorRevision}${workFactor:00}${EncodeBase64(saltBytes, saltBytes.Length)}";
+            var result = new StringBuilder(29);
+            result.Append("$2").Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$');
+            result.Append(EncodeBase64(saltBytes, saltBytes.Length));
+
+            return result.ToString();
         }
 
 
@@ -859,40 +868,46 @@ namespace BCrypt.Net
         /// <param name="byteArray">The byte array to encode.</param>
         /// <param name="length">   The number of bytes to encode.</param>
         /// <returns>Base64-encoded string.</returns>
-        private static string EncodeBase64(byte[] byteArray, int length)
+        private static char[] EncodeBase64(byte[] byteArray, int length)
         {
             if (length <= 0 || length > byteArray.Length)
             {
                 throw new ArgumentException("Invalid length", nameof(length));
             }
 
+            int encodedSize = (int)Math.Ceiling((length * 4D) / 3);
+            char[] encoded = new char[encodedSize];
+
+            int pos = 0;
             int off = 0;
-            StringBuilder rs = new StringBuilder(length);
             while (off < length)
             {
                 int c1 = byteArray[off++] & 0xff;
-                rs.Append(Base64Code[(c1 >> 2) & 0x3f]);
+                encoded[pos++] = (Base64Code[(c1 >> 2) & 0x3f]);
                 c1 = (c1 & 0x03) << 4;
                 if (off >= length)
                 {
-                    rs.Append(Base64Code[c1 & 0x3f]);
+                    encoded[pos++] = (Base64Code[c1 & 0x3f]);
                     break;
                 }
+
                 int c2 = byteArray[off++] & 0xff;
                 c1 |= (c2 >> 4) & 0x0f;
-                rs.Append(Base64Code[c1 & 0x3f]);
+                encoded[pos++] = (Base64Code[c1 & 0x3f]);
                 c1 = (c2 & 0x0f) << 2;
                 if (off >= length)
                 {
-                    rs.Append(Base64Code[c1 & 0x3f]);
+                    encoded[pos++] = (Base64Code[c1 & 0x3f]);
                     break;
                 }
+
                 c2 = byteArray[off++] & 0xff;
                 c1 |= (c2 >> 6) & 0x03;
-                rs.Append(Base64Code[c1 & 0x3f]);
-                rs.Append(Base64Code[c2 & 0x3f]);
+                encoded[pos++] = (Base64Code[c1 & 0x3f]);
+                encoded[pos++] = (Base64Code[c2 & 0x3f]);
             }
-            return rs.ToString();
+
+            return encoded;
         }
 
         /// <summary>
@@ -1007,7 +1022,7 @@ namespace BCrypt.Net
             {
                 bval[i] = (byte)rs[i];
             }
-             return bval;
+            return bval;
 #endif
 
         }
