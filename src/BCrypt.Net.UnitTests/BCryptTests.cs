@@ -625,5 +625,15 @@ namespace BCrypt.Net.UnitTests
 
             Assert.Equal("Invalid Hash Format", saltParseException.Message);
         }
+
+        [Theory]
+        [InlineData("$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye", 10, true)]
+        [InlineData("$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye", 6, false)]
+        public void PasswordNeedsRehash_ComparesWorkFactorInHashWithGiven(string hash, int newWorkFactor, bool expected)
+        {
+            bool needsRehash = BCrypt.PasswordNeedsRehash(hash, newWorkFactor);
+
+            Assert.Equal(expected, needsRehash);
+        }
     }
 }
