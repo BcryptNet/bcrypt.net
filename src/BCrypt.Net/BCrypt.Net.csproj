@@ -38,6 +38,10 @@
     <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1' ">
+    <DefineConstants>$(DefineConstants);NET2_1</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net20|net35|net40'">
     <Reference Include="System" />
   </ItemGroup>

@@ -724,7 +724,7 @@ namespace BCrypt.Net
 
             RngCsp.GetBytes(saltBytes);
 
-             return $"$2{bcryptMinorRevision}${workFactor:00}${EncodeBase64(saltBytes, saltBytes.Length)}";
+            return $"$2{bcryptMinorRevision}${workFactor:00}${EncodeBase64(saltBytes, saltBytes.Length)}";
         }
 
 
@@ -901,13 +901,13 @@ namespace BCrypt.Net
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or
         ///                                     illegal values.</exception>
-        /// <param name="encodedstring">The string to decode.</param>
+        /// <param name="encodedString">The string to decode.</param>
         /// <param name="maximumBytes"> The maximum bytes to decode.</param>
         /// <returns>The decoded byte array.</returns>
-        internal static byte[] DecodeBase64(string encodedstring, int maximumBytes)
+        internal static byte[] DecodeBase64(string encodedString, int maximumBytes)
         {
-            int position = 0;
-            int sourceLength = encodedstring.Length;
+
+            int sourceLength = encodedString.Length;
             int outputLength = 0;
 
             if (maximumBytes <= 0)
@@ -915,11 +915,65 @@ namespace BCrypt.Net
                 throw new ArgumentException("Invalid maximum bytes value", nameof(maximumBytes));
             }
 
-            StringBuilder rs = new StringBuilder();
+#if NET2_1
+            var rs = string.Create(maximumBytes, encodedString, (chars, buff) =>
+            {
+                int position = 0;
+                int charpos = 0;
+
+                while (position < sourceLength - 1 && outputLength < maximumBytes)
+                {
+                    int c1 = Char64(buff[position++]);
+                    int c2 = Char64(buff[position++]);
+                    if (c1 == -1 || c2 == -1)
+                    {
+                        break;
+                    }
+
+                    chars[charpos] = (char)((c1 << 2) | ((c2 & 0x30) >> 4));
+                    charpos++;
+
+                    if (++outputLength >= maximumBytes || position >= sourceLength)
+                    {
+                        break;
+                    }
+
+                    int c3 = Char64(buff[position++]);
+                    if (c3 == -1)
+                    {
+                        break;
+                    }
+
+                    chars[charpos] = ((char)(((c2 & 0x0f) << 4) | ((c3 & 0x3c) >> 2)));
+                    charpos++;
+                    if (++outputLength >= maximumBytes || position >= sourceLength)
+                    {
+                        break;
+                    }
+
+                    int c4 = Char64(buff[position++]);
+                    chars[charpos] = ((char)(((c3 & 0x03) << 6) | c4));
+                    charpos++;
+
+                    ++outputLength;
+                }
+            }).AsSpan();
+
+            Span<byte> ret = new byte[outputLength];
+
+            for (var i = 0; i < outputLength; i++)
+            {
+                ret[i] = (byte)rs[i];
+            }
+
+            return ret.ToArray();
+#else
+            int position = 0;
+            StringBuilder rs = new StringBuilder(maximumBytes);
             while (position < sourceLength - 1 && outputLength < maximumBytes)
             {
-                int c1 = Char64(encodedstring[position++]);
-                int c2 = Char64(encodedstring[position++]);
+                int c1 = Char64(encodedString[position++]);
+                int c2 = Char64(encodedString[position++]);
                 if (c1 == -1 || c2 == -1)
                 {
                     break;
@@ -931,7 +985,7 @@ namespace BCrypt.Net
                     break;
                 }
 
-                int c3 = Char64(encodedstring[position++]);
+                int c3 = Char64(encodedString[position++]);
                 if (c3 == -1)
                 {
                     break;
@@ -943,18 +997,19 @@ namespace BCrypt.Net
                     break;
                 }
 
-                int c4 = Char64(encodedstring[position++]);
+                int c4 = Char64(encodedString[position++]);
                 rs.Append((char)(((c3 & 0x03) << 6) | c4));
 
                 ++outputLength;
             }
-
-            byte[] ret = new byte[outputLength];
-            for (position = 0; position < outputLength; position++)
+            var bval = new byte[outputLength];
+            for (var i = 0; i < outputLength; i++)
             {
-                ret[position] = (byte)rs[position];
+                bval[i] = (byte)rs[i];
             }
-            return ret;
+             return bval;
+#endif
+
         }
 
         /// <summary>
