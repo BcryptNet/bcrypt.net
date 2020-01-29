@@ -616,7 +616,7 @@ namespace BCrypt.Net
 
             // Determine the starting offset and validate the salt
             int startingOffset;
-            char minor = (char)0;
+            char bcryptMinorRevision = (char)0;
             if (salt[0] != '$' || salt[1] != '2')
             {
                 throw new SaltParseException("Invalid salt version");
@@ -627,8 +627,8 @@ namespace BCrypt.Net
             }
             else
             {
-                minor = salt[2];
-                if (minor != 'a' && minor != 'b' && minor != 'x' && minor != 'y' || salt[3] != '$')
+                bcryptMinorRevision = salt[2];
+                if (bcryptMinorRevision != 'a' && bcryptMinorRevision != 'b' && bcryptMinorRevision != 'x' && bcryptMinorRevision != 'y' || salt[3] != '$')
                 {
                     throw new SaltParseException("Invalid salt revision");
                 }
@@ -652,7 +652,7 @@ namespace BCrypt.Net
 
             string extractedSalt = salt.Substring(startingOffset + 3, 22);
 
-            byte[] inputBytes = SafeUTF8.GetBytes(inputKey + (minor >= 'a' ? Nul : EmptyString));
+            byte[] inputBytes = SafeUTF8.GetBytes(inputKey + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
 
             if (enhancedEntropy)
             {
@@ -666,12 +666,7 @@ namespace BCrypt.Net
             byte[] hashed = bCrypt.CryptRaw(inputBytes, saltBytes, workFactor);
 
             // Generate result string
-            StringBuilder result = new StringBuilder();
-            result.AppendFormat("$2{1}${0:00}$", workFactor, minor);
-            result.Append(EncodeBase64(saltBytes, saltBytes.Length));
-            result.Append(EncodeBase64(hashed, (BfCryptCiphertext.Length * 4) - 1));
-
-            return result.ToString();
+            return $"$2{bcryptMinorRevision}${workFactor:00}${EncodeBase64(saltBytes, saltBytes.Length)}{EncodeBase64(hashed, (BfCryptCiphertext.Length * 4) - 1)}";
         }
 
         /// <summary>
@@ -729,10 +724,7 @@ namespace BCrypt.Net
 
             RngCsp.GetBytes(saltBytes);
 
-            StringBuilder result = new StringBuilder();
-            result.AppendFormat("$2{1}${0:00}$", workFactor, bcryptMinorRevision);
-            result.Append(EncodeBase64(saltBytes, saltBytes.Length));
-            return result.ToString();
+             return $"$2{bcryptMinorRevision}${workFactor:00}${EncodeBase64(saltBytes, saltBytes.Length)}";
         }
 
 
@@ -748,8 +740,7 @@ namespace BCrypt.Net
         public static bool PasswordNeedsRehash(string hash, int newMinimumWorkLoad)
         {
             var hashInfo = InterrogateHash(hash);
-            int currentWorkLoad;
-            if (!Int32.TryParse(hashInfo.WorkFactor, out currentWorkLoad))
+            if (!Int32.TryParse(hashInfo.WorkFactor, out var currentWorkLoad))
             {
                 throw new ArgumentException("Work Factor (logrounds) could not be parsed", nameof(hash));
             }
@@ -876,7 +867,7 @@ namespace BCrypt.Net
             }
 
             int off = 0;
-            StringBuilder rs = new StringBuilder();
+            StringBuilder rs = new StringBuilder(length);
             while (off < length)
             {
                 int c1 = byteArray[off++] & 0xff;
