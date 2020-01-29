@@ -21,7 +21,6 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace BCrypt.Net
 {
@@ -748,16 +747,6 @@ namespace BCrypt.Net
             return currentWorkLoad < newMinimumWorkLoad;
         }
 
-
-#if LEGACY
-        private static readonly Regex HashInformation = new Regex(@"^(?<settings>\$2[a-z]{1}?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline);
-        private static readonly Regex SettingsInformation = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline);
-#else
-        private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(30);
-        private static readonly Regex HashInformation = new Regex(@"^(?<settings>\$2[a-z]{1}?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline, RegexTimeout);
-        private static readonly Regex SettingsInformation = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline, RegexTimeout);
-#endif
-
         /// <summary>
         /// Takes a valid hash and outputs its component parts
         /// </summary>
@@ -767,24 +756,7 @@ namespace BCrypt.Net
         {
             try
             {
-                var hashInfo = HashInformation.Match(hash);
-
-                if (!hashInfo.Success)
-                {
-                    throw new SaltParseException("Invalid Hash Format");
-                }
-
-                var saltInfo = SettingsInformation.Match(hashInfo.Groups["settings"].Value);
-                if (!saltInfo.Success)
-                {
-                    throw new SaltParseException("Invalid Settings Format");
-                }
-
-                return new HashInformation(hashInfo.Groups["settings"].Value,
-                                            saltInfo.Groups["version"].Value,
-                                            saltInfo.Groups["rounds"].Value,
-                                            hashInfo.Groups["hash"].Value);
-
+                return HashParser.GetHashInformation(hash);
             }
             catch (Exception ex)
             {

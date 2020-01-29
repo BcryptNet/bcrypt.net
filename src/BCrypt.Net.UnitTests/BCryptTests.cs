@@ -595,5 +595,35 @@ namespace BCrypt.Net.UnitTests
             Assert.True(validatePassword);
         }
 
+        [Theory]
+        [InlineData("$2a$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s.", "$2a$06", "2a", "06", "DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s.")]
+        [InlineData("$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye", "$2a$08", "2a", "08", "HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")]
+        public void InterrogateHash_WhenHashIsValid_ParsesHash(string hash, string settings, string version, string workFactor, string rawHash)
+        {
+            var hashInformation = BCrypt.InterrogateHash(hash);
+
+            Assert.Equal(settings, hashInformation.Settings);
+            Assert.Equal(version, hashInformation.Version);
+            Assert.Equal(workFactor, hashInformation.WorkFactor);
+            Assert.Equal(rawHash, hashInformation.RawHash);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("asdasdasldkfhja;sldgkja;sldgkjasdg")] // Jibberish
+        [InlineData("$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/Sg")] // Too short
+        [InlineData("$2a$-1$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Strange workfactor
+        [InlineData("$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUty!")] // Invalid base64 character
+        [InlineData("$2a$08aHqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Invalid hash layout
+        [InlineData("$2ac08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Invalid hash layout
+        [InlineData("a2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Invalid hash layout
+        public void InterrogateHash_WhenHashInvalid_ThrowsInvalidHashFormat(string hash)
+        {
+            var exception = Assert.Throws<HashInformationException>(() => BCrypt.InterrogateHash(hash));
+
+            var saltParseException = Assert.IsType<SaltParseException>(exception.InnerException);
+
+            Assert.Equal("Invalid Hash Format", saltParseException.Message);
+        }
     }
 }

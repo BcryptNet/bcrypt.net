@@ -47,7 +47,6 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net452|net462|net472'">
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <Reference Include="System" />
   </ItemGroup>
 
