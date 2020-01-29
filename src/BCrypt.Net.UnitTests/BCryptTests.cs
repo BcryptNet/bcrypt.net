@@ -246,16 +246,16 @@ namespace BCrypt.Net.UnitTests
         [InlineData("ππππππππ")]
         public void TestValidateAndReplaceEnhanced(string pass)
         {
-                string newPassword = "my new password";
-                string hashed = BCrypt.EnhancedHashPassword(pass, HashType.SHA256);
+            string newPassword = "my new password";
+            string hashed = BCrypt.EnhancedHashPassword(pass, HashType.SHA256);
 
-                var newHash = BCrypt.ValidateAndReplacePassword(pass, hashed, true, HashType.SHA256, newPassword, true, HashType.SHA512);
+            var newHash = BCrypt.ValidateAndReplacePassword(pass, hashed, true, HashType.SHA256, newPassword, true, HashType.SHA512);
 
-                var newPassValid = BCrypt.EnhancedVerify(newPassword, newHash, HashType.SHA512);
+            var newPassValid = BCrypt.EnhancedVerify(newPassword, newHash, HashType.SHA512);
 
-                Assert.True(newPassValid);
+            Assert.True(newPassValid);
 
-                Trace.Write(".");
+            Trace.Write(".");
         }
 
         [Fact()]
@@ -590,7 +590,7 @@ namespace BCrypt.Net.UnitTests
 
             var enhancedHashPassword = BCrypt.EnhancedHashPassword(myPassword, hashType: HashType.SHA384);
 
-            var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword, hashType:HashType.SHA384);
+            var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword, hashType: HashType.SHA384);
 
             Assert.True(validatePassword);
         }
