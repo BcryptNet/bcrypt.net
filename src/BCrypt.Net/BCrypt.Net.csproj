@@ -65,4 +65,19 @@
     <PackageReference Update="SourceLink.Create.GitHub" Version="2.8.3" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'
+                         or '$(TargetFramework)' == 'net452'
+                         or '$(TargetFramework)' == 'net462'
+                         or '$(TargetFramework)' == 'net472'">
+    <PackageReference Include="System.Memory" Version="4.5.3" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'
+                         or '$(TargetFramework)' == 'netstandard2.0'
+                         or '$(TargetFramework)' == 'net452'
+                         or '$(TargetFramework)' == 'net462'
+                         or '$(TargetFramework)' == 'net472'">
+    <DefineConstants>$(DefineConstants);HAS_SPAN</DefineConstants>
+  </PropertyGroup>
+
 </Project>
