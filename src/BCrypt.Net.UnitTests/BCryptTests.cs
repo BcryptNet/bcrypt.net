@@ -246,16 +246,16 @@ namespace BCrypt.Net.UnitTests
         [InlineData("ππππππππ")]
         public void TestValidateAndReplaceEnhanced(string pass)
         {
-                string newPassword = "my new password";
-                string hashed = BCrypt.EnhancedHashPassword(pass, HashType.SHA256);
+            string newPassword = "my new password";
+            string hashed = BCrypt.EnhancedHashPassword(pass, HashType.SHA256);
 
-                var newHash = BCrypt.ValidateAndReplacePassword(pass, hashed, true, HashType.SHA256, newPassword, true, HashType.SHA512);
+            var newHash = BCrypt.ValidateAndReplacePassword(pass, hashed, true, HashType.SHA256, newPassword, true, HashType.SHA512);
 
-                var newPassValid = BCrypt.EnhancedVerify(newPassword, newHash, HashType.SHA512);
+            var newPassValid = BCrypt.EnhancedVerify(newPassword, newHash, HashType.SHA512);
 
-                Assert.True(newPassValid);
+            Assert.True(newPassValid);
 
-                Trace.Write(".");
+            Trace.Write(".");
         }
 
         [Fact()]
@@ -590,10 +590,52 @@ namespace BCrypt.Net.UnitTests
 
             var enhancedHashPassword = BCrypt.EnhancedHashPassword(myPassword, hashType: HashType.SHA384);
 
-            var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword, hashType:HashType.SHA384);
+            var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword, hashType: HashType.SHA384);
 
             Assert.True(validatePassword);
         }
 
+        [Theory]
+        [InlineData("$2$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s.", "$2$06", "2", "06", "DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s.")]
+        [InlineData("$2a$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s.", "$2a$06", "2a", "06", "DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s.")]
+        [InlineData("$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye", "$2a$08", "2a", "08", "HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")]
+        public void InterrogateHash_WhenHashIsValid_ParsesHash(string hash, string settings, string version, string workFactor, string rawHash)
+        {
+            var hashInformation = BCrypt.InterrogateHash(hash);
+
+            Assert.Equal(settings, hashInformation.Settings);
+            Assert.Equal(version, hashInformation.Version);
+            Assert.Equal(workFactor, hashInformation.WorkFactor);
+            Assert.Equal(rawHash, hashInformation.RawHash);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("asdasdasldkfhja;sldgkja;sldgkjasdg")] // Jibberish
+        [InlineData("$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/Sg")] // Too short
+        [InlineData("$2a$-1$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Strange workfactor
+        [InlineData("$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUty!")] // Invalid base64 character
+        [InlineData("$2a$08aHqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Invalid hash layout
+        [InlineData("$2ac08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Invalid hash layout
+        [InlineData("a2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Invalid hash layout
+        public void InterrogateHash_WhenHashInvalid_ThrowsInvalidHashFormat(string hash)
+        {
+            var exception = Assert.Throws<HashInformationException>(() => BCrypt.InterrogateHash(hash));
+
+            var saltParseException = Assert.IsType<SaltParseException>(exception.InnerException);
+
+            Assert.Equal("Invalid Hash Format", saltParseException.Message);
+        }
+
+        [Theory]
+        [InlineData("$2$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s.", 8, true)]
+        [InlineData("$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye", 10, true)]
+        [InlineData("$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye", 6, false)]
+        public void PasswordNeedsRehash_ComparesWorkFactorInHashWithGiven(string hash, int newWorkFactor, bool expected)
+        {
+            bool needsRehash = BCrypt.PasswordNeedsRehash(hash, newWorkFactor);
+
+            Assert.Equal(expected, needsRehash);
+        }
     }
 }

@@ -1,16 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;netcoreapp2.1;net48;net472</TargetFrameworks>
+    <Configurations>Benchmark</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Benchmark|AnyCPU'">
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.12.0" />
+    <PackageReference Include="NETStandard.Library" Version="2.0.3" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\BCrypt.Net\BCrypt.Net.csproj" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+    <Reference Include="System" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
+    <DefineConstants>$(DefineConstants);NET2_1</DefineConstants>
+  </PropertyGroup>
+
 
 </Project>

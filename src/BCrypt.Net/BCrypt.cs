@@ -21,7 +21,6 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace BCrypt.Net
 {
@@ -666,7 +665,12 @@ namespace BCrypt.Net
             byte[] hashed = bCrypt.CryptRaw(inputBytes, saltBytes, workFactor);
 
             // Generate result string
-            return $"$2{bcryptMinorRevision}${workFactor:00}${EncodeBase64(saltBytes, saltBytes.Length)}{EncodeBase64(hashed, (BfCryptCiphertext.Length * 4) - 1)}";
+            var result = new StringBuilder(60);
+            result.Append("$2").Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$');
+            result.Append(EncodeBase64(saltBytes, saltBytes.Length));
+            result.Append(EncodeBase64(hashed, (BfCryptCiphertext.Length * 4) - 1));
+
+            return result.ToString();
         }
 
         /// <summary>
@@ -724,7 +728,11 @@ namespace BCrypt.Net
 
             RngCsp.GetBytes(saltBytes);
 
-             return $"$2{bcryptMinorRevision}${workFactor:00}${EncodeBase64(saltBytes, saltBytes.Length)}";
+            var result = new StringBuilder(29);
+            result.Append("$2").Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$');
+            result.Append(EncodeBase64(saltBytes, saltBytes.Length));
+
+            return result.ToString();
         }
 
 
@@ -739,24 +747,10 @@ namespace BCrypt.Net
         /// <exception cref="HashInformationException"></exception>
         public static bool PasswordNeedsRehash(string hash, int newMinimumWorkLoad)
         {
-            var hashInfo = InterrogateHash(hash);
-            if (!Int32.TryParse(hashInfo.WorkFactor, out var currentWorkLoad))
-            {
-                throw new ArgumentException("Work Factor (logrounds) could not be parsed", nameof(hash));
-            }
+            int currentWorkLoad = HashParser.GetWorkFactor(hash);
 
             return currentWorkLoad < newMinimumWorkLoad;
         }
-
-
-#if LEGACY
-        private static readonly Regex HashInformation = new Regex(@"^(?<settings>\$2[a-z]{1}?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline);
-        private static readonly Regex SettingsInformation = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline);
-#else
-        private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(30);
-        private static readonly Regex HashInformation = new Regex(@"^(?<settings>\$2[a-z]{1}?\$\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline, RegexTimeout);
-        private static readonly Regex SettingsInformation = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<rounds>\d\d?)$", RegexOptions.Singleline, RegexTimeout);
-#endif
 
         /// <summary>
         /// Takes a valid hash and outputs its component parts
@@ -767,24 +761,7 @@ namespace BCrypt.Net
         {
             try
             {
-                var hashInfo = HashInformation.Match(hash);
-
-                if (!hashInfo.Success)
-                {
-                    throw new SaltParseException("Invalid Hash Format");
-                }
-
-                var saltInfo = SettingsInformation.Match(hashInfo.Groups["settings"].Value);
-                if (!saltInfo.Success)
-                {
-                    throw new SaltParseException("Invalid Settings Format");
-                }
-
-                return new HashInformation(hashInfo.Groups["settings"].Value,
-                                            saltInfo.Groups["version"].Value,
-                                            saltInfo.Groups["rounds"].Value,
-                                            hashInfo.Groups["hash"].Value);
-
+                return HashParser.GetHashInformation(hash);
             }
             catch (Exception ex)
             {
@@ -859,40 +836,46 @@ namespace BCrypt.Net
         /// <param name="byteArray">The byte array to encode.</param>
         /// <param name="length">   The number of bytes to encode.</param>
         /// <returns>Base64-encoded string.</returns>
-        private static string EncodeBase64(byte[] byteArray, int length)
+        private static char[] EncodeBase64(byte[] byteArray, int length)
         {
             if (length <= 0 || length > byteArray.Length)
             {
                 throw new ArgumentException("Invalid length", nameof(length));
             }
 
+            int encodedSize = (int)Math.Ceiling((length * 4D) / 3);
+            char[] encoded = new char[encodedSize];
+
+            int pos = 0;
             int off = 0;
-            StringBuilder rs = new StringBuilder(length);
             while (off < length)
             {
                 int c1 = byteArray[off++] & 0xff;
-                rs.Append(Base64Code[(c1 >> 2) & 0x3f]);
+                encoded[pos++] = Base64Code[(c1 >> 2) & 0x3f];
                 c1 = (c1 & 0x03) << 4;
                 if (off >= length)
                 {
-                    rs.Append(Base64Code[c1 & 0x3f]);
+                    encoded[pos++] = Base64Code[c1 & 0x3f];
                     break;
                 }
+
                 int c2 = byteArray[off++] & 0xff;
                 c1 |= (c2 >> 4) & 0x0f;
-                rs.Append(Base64Code[c1 & 0x3f]);
+                encoded[pos++] = Base64Code[c1 & 0x3f];
                 c1 = (c2 & 0x0f) << 2;
                 if (off >= length)
                 {
-                    rs.Append(Base64Code[c1 & 0x3f]);
+                    encoded[pos++] = Base64Code[c1 & 0x3f];
                     break;
                 }
+
                 c2 = byteArray[off++] & 0xff;
                 c1 |= (c2 >> 6) & 0x03;
-                rs.Append(Base64Code[c1 & 0x3f]);
-                rs.Append(Base64Code[c2 & 0x3f]);
+                encoded[pos++] = Base64Code[c1 & 0x3f];
+                encoded[pos++] = Base64Code[c2 & 0x3f];
             }
-            return rs.ToString();
+
+            return encoded;
         }
 
         /// <summary>
@@ -901,13 +884,12 @@ namespace BCrypt.Net
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or
         ///                                     illegal values.</exception>
-        /// <param name="encodedstring">The string to decode.</param>
+        /// <param name="encodedString">The string to decode.</param>
         /// <param name="maximumBytes"> The maximum bytes to decode.</param>
         /// <returns>The decoded byte array.</returns>
-        internal static byte[] DecodeBase64(string encodedstring, int maximumBytes)
+        internal static byte[] DecodeBase64(string encodedString, int maximumBytes)
         {
-            int position = 0;
-            int sourceLength = encodedstring.Length;
+            int sourceLength = encodedString.Length;
             int outputLength = 0;
 
             if (maximumBytes <= 0)
@@ -915,46 +897,43 @@ namespace BCrypt.Net
                 throw new ArgumentException("Invalid maximum bytes value", nameof(maximumBytes));
             }
 
-            StringBuilder rs = new StringBuilder();
+            byte[] result = new byte[maximumBytes];
+
+            int position = 0;
             while (position < sourceLength - 1 && outputLength < maximumBytes)
             {
-                int c1 = Char64(encodedstring[position++]);
-                int c2 = Char64(encodedstring[position++]);
+                int c1 = Char64(encodedString[position++]);
+                int c2 = Char64(encodedString[position++]);
                 if (c1 == -1 || c2 == -1)
                 {
                     break;
                 }
 
-                rs.Append((char)((c1 << 2) | ((c2 & 0x30) >> 4)));
+                result[outputLength] = (byte)((c1 << 2) | ((c2 & 0x30) >> 4));
                 if (++outputLength >= maximumBytes || position >= sourceLength)
                 {
                     break;
                 }
 
-                int c3 = Char64(encodedstring[position++]);
+                int c3 = Char64(encodedString[position++]);
                 if (c3 == -1)
                 {
                     break;
                 }
 
-                rs.Append((char)(((c2 & 0x0f) << 4) | ((c3 & 0x3c) >> 2)));
+                result[outputLength] = (byte)(((c2 & 0x0f) << 4) | ((c3 & 0x3c) >> 2));
                 if (++outputLength >= maximumBytes || position >= sourceLength)
                 {
                     break;
                 }
 
-                int c4 = Char64(encodedstring[position++]);
-                rs.Append((char)(((c3 & 0x03) << 6) | c4));
+                int c4 = Char64(encodedString[position++]);
+                result[outputLength] = (byte)(((c3 & 0x03) << 6) | c4);
 
                 ++outputLength;
             }
 
-            byte[] ret = new byte[outputLength];
-            for (position = 0; position < outputLength; position++)
-            {
-                ret[position] = (byte)rs[position];
-            }
-            return ret;
+            return result;
         }
 
         /// <summary>

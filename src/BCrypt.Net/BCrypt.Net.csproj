@@ -20,6 +20,8 @@
     <PackageLicenseUrl>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt</PackageLicenseUrl>
 
     <Version>3.2.1</Version>
+
+    <Configurations>Debug;Release;Benchmark</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -27,15 +29,15 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net20' ">
-    <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
     <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net20'">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'net35' ">
-    <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
     <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net35'">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net40' ">
-    <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1' ">
+    <DefineConstants>$(DefineConstants);NET2_1</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net20|net35|net40'">
@@ -43,11 +45,14 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net452|net462|net472'">
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <Reference Include="System" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\BCrypt.Net-Next.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Benchmark'">
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\BCrypt.Net-Next.xml</DocumentationFile>
   </PropertyGroup>
 
