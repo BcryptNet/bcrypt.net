@@ -3,8 +3,8 @@
 namespace BCrypt.Net
 {
     /// <summary>
-    /// HashInformation : A value object that contains the results of interrogating a hash
-    /// Namely its settings (2a$10 for example); version (2a); workfactor (log rounds), and the raw hash returned
+    ///     HashInformation : A value object that contains the results of interrogating a hash
+    ///     Namely its settings (2a$10 for example); version (2a); workfactor (log rounds), and the raw hash returned
     /// </summary>
     [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
     public sealed class HashInformation
@@ -23,21 +23,23 @@ namespace BCrypt.Net
         }
 
         /// <summary>
-        /// Settings string
+        ///     Settings string
         /// </summary>
         public string Settings { get; private set; }
+
         /// <summary>
-        /// Hash Version
+        ///     Hash Version
         /// </summary>
         public string Version { get; private set; }
+
         /// <summary>
-        /// log rounds used / workfactor
+        ///     log rounds used / workfactor
         /// </summary>
         public string WorkFactor { get; private set; }
+
         /// <summary>
-        /// Raw Hash
+        ///     Raw Hash
         /// </summary>
         public string RawHash { get; private set; }
     }
-
 }
