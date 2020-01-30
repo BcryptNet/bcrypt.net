@@ -7,6 +7,7 @@ namespace BCrypt.Net.Benchmarks
 {
     [MemoryDiagnoser]
     [RPlotExporter, RankColumn]
+    [KeepBenchmarkFiles]
     public class InterrogateHashBenchmarks
     {
 
@@ -15,7 +16,7 @@ namespace BCrypt.Net.Benchmarks
         [Arguments( "$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
         public void InterrogateHashUsingRegex(string hash)
         {
-            var interrogateHash = BaseLine.BCrypt.InterrogateHash(hash);
+            BaseLine.BCrypt.InterrogateHash(hash);
         }
 
         [Benchmark()]
@@ -23,7 +24,7 @@ namespace BCrypt.Net.Benchmarks
         [Arguments( "$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
         public void InterrogateHashUsingParser(string hash)
         {
-            var interrogateHash = Decoder.GetHashInformation(hash);
+            Decoder.GetHashInformation(hash);
         }
 
     }

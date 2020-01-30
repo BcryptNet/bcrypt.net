@@ -77,6 +77,8 @@ namespace Benchmark.HashParser
             return result;
         }
 
+#if NET2_1
+
         internal static byte[] DecodeBase64StringCreateSpan(string encodedString, int maximumBytes)
         {
 
@@ -140,6 +142,7 @@ namespace Benchmark.HashParser
             return ret.ToArray();
 
         }
+#endif
 
         internal static byte[] DecodeBase64StandardSized(string encodedString, int maximumBytes)
         {

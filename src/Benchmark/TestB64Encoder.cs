@@ -8,6 +8,7 @@ namespace BCrypt.Net.Benchmarks
 {
     [MemoryDiagnoser]
     [RPlotExporter, RankColumn]
+    [KeepBenchmarkFiles]
     public class TestB64Encoder
     {
         private static readonly byte[] SaltBytes = BaseLine.BCrypt.DecodeBase64("sGBxdT2q8Qd84NyZEkwTY.", 16);

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Benchmark._3._2._1;
 using Benchmark.HashParser;
 using BenchmarkDotNet.Attributes;
@@ -11,6 +12,7 @@ namespace BCrypt.Net.Benchmarks
     [CategoriesColumn]
     [RPlotExporter, RankColumn]
     [ReturnValueValidator(failOnError: true)]
+    [KeepBenchmarkFiles]
     public class TestVariantsOnStringBuilding
     {
         private readonly string bcryptMinorRevision = "a";
@@ -57,7 +59,7 @@ namespace BCrypt.Net.Benchmarks
         {
             // Generate result string
             StringBuilder result = new StringBuilder(60);
-            result.AppendFormat("$2{1}${0:00}$",  workFactor, bcryptMinorRevision);
+            result.AppendFormat("$2{1}${0:00}$", workFactor, bcryptMinorRevision);
             result.Append(EncodedSaltAsChars);
             result.Append(EncodedHashAsChars);
 
@@ -77,24 +79,77 @@ namespace BCrypt.Net.Benchmarks
         }
 
         [Benchmark]
-        [BenchmarkCategory("StringAppend", "AppendString")]
-        public string Original_StrBuilder_SinEncoding_AppendChar_Sized_FROMSTRING_PRFmt()
+        [BenchmarkCategory("StringAppend", "AppendChar")]
+        public string Original_StrBuilder_SinEncoding_AppendChar_Sized_PRFmt_MoreChar()
         {
             var result = new StringBuilder(60);
-            result.Append("$2").Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$');
+            result.Append('$').Append('2').Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$')
+            .Append(EncodedSaltAsChars)
+            .Append(EncodedHashAsChars);
+
+            return result.ToString();
+        }
+
+        [Benchmark]
+        [BenchmarkCategory("StringAppend", "AppendChar")]
+        public string Original_StrBuilder_SinEncoding_AppendChar_Sized_PRFmt_MoreString()
+        {
+            var result = new StringBuilder(60);
+            result.Append("$2").Append(bcryptMinorRevision).Append("$").Append(workFactor.ToString("D2")).Append("$")
+            .Append(EncodedSaltAsChars)
+            .Append(EncodedHashAsChars);
+
+            return result.ToString();
+        }
+
+        [Benchmark]
+        [BenchmarkCategory("StringAppend", "AppendString")]
+        public string Original_StrBuilder_SinEncoding_AppendChar_Sized_PRFmt_StringNotChar()
+        {
+            var result = new StringBuilder(60);
+            result.Append("$2").Append(bcryptMinorRevision).Append("$").Append(workFactor.ToString("D2")).Append("$");
             result.Append(salt);
             result.Append(hash);
 
             return result.ToString();
         }
 
+        [Benchmark]
+        [BenchmarkCategory("StringAppend", "AppendString")]
+        public string Original_StrBuilder_SinEncoding_AppendChar_Sized_FROMSTRING_PRFmt_plusfmt()
+        {
+            var result = new StringBuilder(60);
+            result.Append("$2")
+                .Append(bcryptMinorRevision)
+                .Append("$")
+                .AppendFormat("{0:00}", workFactor)
+                .Append("$")
+                .Append(salt)
+                .Append(hash);
+
+            return result.ToString();
+        }
+
+        public static char[] Concatenate(char[] array1, char[] array2)
+        {
+            char[] result = new char[array1.Length + array2.Length];
+            array1.CopyTo(result, 0);
+            array2.CopyTo(result, array1.Length);
+            return result;
+        }
 
         [Benchmark]
         [BenchmarkCategory("StringFmt", "AppendChar")]
         public string StringInterpolation_WithChar()
         {
-            return
-                $"$2{bcryptMinorRevision}${workFactor:00}${new string(EncodedSaltAsChars)}{new string(EncodedHashAsChars)}";
+            return $"$2{bcryptMinorRevision}${workFactor:00}${new string(EncodedSaltAsChars)}{new string(EncodedHashAsChars)}";
+        }
+
+        [Benchmark]
+        [BenchmarkCategory("StringFmt", "AppendChar")]
+        public string StringInterpolation_WithCharMerged()
+        {
+            return $"$2{bcryptMinorRevision}${workFactor:00}${new string(Concatenate(EncodedSaltAsChars, EncodedHashAsChars))}";
         }
 
         [Benchmark]

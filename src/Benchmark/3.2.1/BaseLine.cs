@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 // BASE
 namespace Benchmark._3._2._1
 {
-    internal class BaseLine
+    public class BaseLine
     {
 
         [Serializable]
