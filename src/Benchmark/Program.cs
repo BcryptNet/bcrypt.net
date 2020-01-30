@@ -8,10 +8,14 @@ namespace BCrypt.Net.Benchmarks
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<InterrogateHashBenchmarks>();
-            BenchmarkRunner.Run<TestB64Decoder>();
-            BenchmarkRunner.Run<TestB64Encoder>();
-            BenchmarkRunner.Run<TestVariantsOnStringBuilding>();
+            BenchmarkRunner.Run<TestBcrypt_Hashing>();
+            BenchmarkRunner.Run<TestBcrypt_Hashing_Enhanced>();
+
+            // Tests for testing in isolation
+            //BenchmarkRunner.Run<InterrogateHashBenchmarks>();
+            //BenchmarkRunner.Run<TestB64Decoder>();
+            //BenchmarkRunner.Run<TestB64Encoder>();
+            //BenchmarkRunner.Run<TestVariantsOnStringBuilding>();
 
             Console.WriteLine("Finished");
             Console.ReadLine();

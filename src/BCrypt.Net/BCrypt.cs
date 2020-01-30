@@ -851,28 +851,28 @@ namespace BCrypt.Net
             while (off < length)
             {
                 int c1 = byteArray[off++] & 0xff;
-                encoded[pos++] = (Base64Code[(c1 >> 2) & 0x3f]);
+                encoded[pos++] = Base64Code[(c1 >> 2) & 0x3f];
                 c1 = (c1 & 0x03) << 4;
                 if (off >= length)
                 {
-                    encoded[pos++] = (Base64Code[c1 & 0x3f]);
+                    encoded[pos++] = Base64Code[c1 & 0x3f];
                     break;
                 }
 
                 int c2 = byteArray[off++] & 0xff;
                 c1 |= (c2 >> 4) & 0x0f;
-                encoded[pos++] = (Base64Code[c1 & 0x3f]);
+                encoded[pos++] = Base64Code[c1 & 0x3f];
                 c1 = (c2 & 0x0f) << 2;
                 if (off >= length)
                 {
-                    encoded[pos++] = (Base64Code[c1 & 0x3f]);
+                    encoded[pos++] = Base64Code[c1 & 0x3f];
                     break;
                 }
 
                 c2 = byteArray[off++] & 0xff;
                 c1 |= (c2 >> 6) & 0x03;
-                encoded[pos++] = (Base64Code[c1 & 0x3f]);
-                encoded[pos++] = (Base64Code[c2 & 0x3f]);
+                encoded[pos++] = Base64Code[c1 & 0x3f];
+                encoded[pos++] = Base64Code[c2 & 0x3f];
             }
 
             return encoded;
