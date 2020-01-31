@@ -20,6 +20,10 @@
     <Reference Include="System" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BCrypt.Net\BCrypt.Net.csproj" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
     <DefineConstants>$(DefineConstants);NET2_1</DefineConstants>
   </PropertyGroup>
