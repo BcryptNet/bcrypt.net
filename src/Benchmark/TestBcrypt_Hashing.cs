@@ -13,7 +13,7 @@ namespace BCrypt.Net.Benchmarks
     {
         public IEnumerable<object[]> Data()
         {
-            yield return new object[] {  "", "$2a$06$DCq7YPn5Rq63x1Lad4cll.", "$2a$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s."};
+            yield return new object[] { "", "$2a$06$DCq7YPn5Rq63x1Lad4cll.", "$2a$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s." };
             yield return new object[] { "", "$2a$08$HqWuK6/Ng6sg9gQzbLrgb.", "$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye" };
             yield return new object[] { "", "$2a$10$k1wbIrmNyFAPwPVPSVa/ze", "$2a$10$k1wbIrmNyFAPwPVPSVa/zecw2BCEnBwVS2GbrmgzxFUOqW9dk4TCW" };
             yield return new object[] { "", "$2a$12$k42ZFHFWqBp3vWli.nIn8u", "$2a$12$k42ZFHFWqBp3vWli.nIn8uYyIkbvYRvodzbfbK18SSsY.CsIQPlxO" };
@@ -37,7 +37,7 @@ namespace BCrypt.Net.Benchmarks
 
         [Benchmark(Baseline = true)]
         [ArgumentsSource(nameof(Data))]
-        public string TestHashValidateEnhanced(string key, string salt, string hash)
+        public string TestHashValidate(string key, string salt, string hash)
         {
             string hashed = BaseLine.BCrypt.HashPassword(key, salt, enhancedEntropy: false);
             var validateHashCheck = BaseLine.BCrypt.Verify(key, hashed);
@@ -47,12 +47,20 @@ namespace BCrypt.Net.Benchmarks
 
         [Benchmark]
         [ArgumentsSource(nameof(Data))]
-        public string TestHashValidateEnhancedPerf1(string key, string salt, string hash)
+        public string TestHashValidatePerf1(string key, string salt, string hash)
         {
             string hashed = PerfMerge1.BCrypt.HashPassword(key, salt, enhancedEntropy: false);
             var validateHashCheck = PerfMerge1.BCrypt.Verify(key, hashed);
             return hashed + validateHashCheck.ToString();
+        }
 
+        [Benchmark]
+        [ArgumentsSource(nameof(Data))]
+        public string TestHashValidateCurrent(string key, string salt, string hash)
+        {
+            string hashed = BCrypt.HashPassword(key, salt, enhancedEntropy: false);
+            var validateHashCheck = BCrypt.Verify(key, hashed);
+            return hashed + validateHashCheck.ToString();
         }
     }
 }

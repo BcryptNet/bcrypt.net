@@ -950,7 +950,11 @@ namespace BCrypt.Net
         /// <summary>Blowfish encipher a single 64-bit block encoded as two 32-bit halves.</summary>
         /// <param name="blockArray">An array containing the two 32-bit half blocks.</param>
         /// <param name="offset">    The position in the array of the blocks.</param>
+#if HAS_SPAN
+        private void Encipher(Span<uint> blockArray, int offset)
+#else
         private void Encipher(uint[] blockArray, int offset)
+#endif
         {
             uint block = blockArray[offset];
             uint r = blockArray[offset + 1];
@@ -985,7 +989,11 @@ namespace BCrypt.Net
         /// <param name="data">The string to extract the data from.</param>
         /// <param name="offset"> [in,out] The current offset.</param>
         /// <returns>The next word of material from data.</returns>
+#if HAS_SPAN
+        private static uint StreamToWord(ReadOnlySpan<byte> data, ref int offset)
+#else
         private static uint StreamToWord(byte[] data, ref int offset)
+#endif
         {
             int i;
             uint word = 0;
@@ -1009,11 +1017,19 @@ namespace BCrypt.Net
 
         /// <summary>Key the Blowfish cipher.</summary>
         /// <param name="keyBytes">The key byte array.</param>
+#if HAS_SPAN
+        private void Key(ReadOnlySpan<byte> keyBytes)
+#else
         private void Key(byte[] keyBytes)
+#endif
         {
             int i;
             int koffp = 0;
+#if HAS_SPAN
+            Span<uint> lr = stackalloc uint[2] { 0, 0 };
+#else
             uint[] lr = { 0, 0 };
+#endif
             int plen = _p.Length, slen = _s.Length;
 
             for (i = 0; i < plen; i++)
@@ -1043,12 +1059,20 @@ namespace BCrypt.Net
         /// <param name="saltBytes"> Salt byte array.</param>
         /// <param name="inputBytes">Input byte array.</param>
         // ReSharper disable once InconsistentNaming
+#if HAS_SPAN
+        private void EKSKey(ReadOnlySpan<byte> saltBytes, ReadOnlySpan<byte> inputBytes)
+#else
         private void EKSKey(byte[] saltBytes, byte[] inputBytes)
+#endif
         {
             int i;
             int passwordOffset = 0;
             int saltOffset = 0;
+#if HAS_SPAN
+            Span<uint> lr = stackalloc uint[2] { 0, 0 };
+#else
             uint[] lr = { 0, 0 };
+#endif
             int plen = _p.Length, slen = _s.Length;
 
             for (i = 0; i < plen; i++)
@@ -1082,13 +1106,23 @@ namespace BCrypt.Net
         /// <param name="saltBytes"> The salt byte array to hash with.</param>
         /// <param name="workFactor"> The binary logarithm of the number of rounds of hashing to apply.</param>
         /// <returns>A byte array containing the hashed result.</returns>
-        internal byte[] CryptRaw(byte[] inputBytes, byte[] saltBytes, int workFactor)
+#if HAS_SPAN
+        internal byte[] CryptRaw(ReadOnlySpan<byte> inputBytes, ReadOnlySpan<byte> saltBytes, int workFactor)
+#else
+       internal byte[] CryptRaw(byte[] inputBytes, byte[] saltBytes, int workFactor)
+#endif
         {
             int i;
             int j;
 
+#if HAS_SPAN
+            Span<uint> cdata = stackalloc uint[BfCryptCiphertext.Length];
+            BfCryptCiphertext.CopyTo(cdata);
+#else
             uint[] cdata = new uint[BfCryptCiphertext.Length];
             Array.Copy(BfCryptCiphertext, cdata, BfCryptCiphertext.Length);
+#endif
+
             int clen = cdata.Length;
 
             if (workFactor < MinRounds || workFactor > MaxRounds)

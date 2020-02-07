@@ -4,7 +4,7 @@
     <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next</AssemblyName>
 
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net20;net35;net40;net452;net462;net472</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.0;netstandard2.1;net20;net35;net40;net452;net462;net472</TargetFrameworks>
     <OutputTypeEx>Library</OutputTypeEx>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSource>true</IncludeSource>
@@ -28,6 +28,7 @@
     <Deterministic>false</Deterministic>
   </PropertyGroup>
 
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'net20' ">
     <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net20'">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
   </PropertyGroup>
@@ -48,9 +49,21 @@
     <Reference Include="System" />
   </ItemGroup>
 
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0|net452|net462|net472'">
+    <PackageReference Include="System.Memory" Version="4.5.3" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1|netstandard2.0|net452|net462|net472'">
+    <DefineConstants>$(DefineConstants);HAS_SPAN</DefineConstants>
+  </PropertyGroup>
+
+
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\BCrypt.Net-Next.xml</DocumentationFile>
   </PropertyGroup>
+
+
 
   <ItemGroup>
     <PackageReference Update="SourceLink.Create.GitHub" Version="2.8.3" />

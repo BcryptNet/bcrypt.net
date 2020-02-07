@@ -43,12 +43,20 @@ namespace BCrypt.Net.Benchmarks
             string hashed = BaseLine.BCrypt.HashPassword(key, salt, enhancedEntropy: true);
             var validateHashCheck = BaseLine.BCrypt.EnhancedVerify(key, hashed);
             return hashed + validateHashCheck.ToString();
-
         }
 
         [Benchmark]
         [ArgumentsSource(nameof(Data))]
         public string TestHashValidateEnhancedPerf1(string key, string salt, string hash)
+        {
+            string hashed = PerfMerge1.BCrypt.HashPassword(key, salt, enhancedEntropy: true);
+            var validateHashCheck = PerfMerge1.BCrypt.EnhancedVerify(key, hashed);
+            return hashed + validateHashCheck.ToString();
+        }
+
+        [Benchmark]
+        [ArgumentsSource(nameof(Data))]
+        public string TestHashValidateEnhancedCurrent(string key, string salt, string hash)
         {
             string hashed = PerfMerge1.BCrypt.HashPassword(key, salt, enhancedEntropy: true);
             var validateHashCheck = PerfMerge1.BCrypt.EnhancedVerify(key, hashed);
