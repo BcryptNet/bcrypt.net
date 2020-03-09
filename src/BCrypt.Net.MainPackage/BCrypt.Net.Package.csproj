@@ -7,7 +7,7 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1;net20;net35;net40;net452;net462;net472</TargetFrameworks>
     <OutputTypeEx>Library</OutputTypeEx>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <IncludeSource>true</IncludeSource>
+    <IncludeSource>false</IncludeSource>
 
     <PackageId>BCrypt.Net-Next</PackageId>
     <Title>BCrypt .Net</Title>
@@ -22,7 +22,7 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssemblyOriginatorKeyFile>../bcrypt.pfx</AssemblyOriginatorKeyFile>
 
-    <Version>3.2.1</Version>
+    <Version>3.3.0</Version>
     <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security,hash;crypto;blowfish;gdpr</PackageTags>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
@@ -36,15 +36,15 @@
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net20' ">
-    <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
     <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net20'">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'net35' ">
-    <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
     <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net35'">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net40' ">
-    <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1' ">
+    <DefineConstants>$(DefineConstants);NET2_1</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net20|net35|net40'">
@@ -52,24 +52,32 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net452|net462|net472'">
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <Reference Include="System" />
   </ItemGroup>
+
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0|net452|net462|net472'">
+    <PackageReference Include="System.Memory" Version="4.5.3" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1|netstandard2.1|netstandard2.0|net452|net462|net472'">
+    <DefineConstants>$(DefineConstants);HAS_SPAN</DefineConstants>
+  </PropertyGroup>
+
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\BCrypt.Net-Next.xml</DocumentationFile>
+  </PropertyGroup>
+
 
   <ItemGroup>
     <Compile Remove="..\BCrypt.Net\Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
+
+
   <ItemGroup>
     <PackageReference Update="SourceLink.Create.GitHub" Version="2.8.3" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\BCrypt.Net-Next.xml</DocumentationFile>
-  </PropertyGroup>
 
 </Project>

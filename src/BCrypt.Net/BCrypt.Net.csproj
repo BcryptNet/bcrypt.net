@@ -19,7 +19,7 @@
     <License>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt</License>
     <PackageLicenseUrl>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt</PackageLicenseUrl>
 
-    <Version>3.2.1</Version>
+    <Version>3.3.0</Version>
 
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
@@ -54,7 +54,7 @@
     <PackageReference Include="System.Memory" Version="4.5.3" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1|netstandard2.0|net452|net462|net472'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1|netstandard2.1|netstandard2.0|net452|net462|net472'">
     <DefineConstants>$(DefineConstants);HAS_SPAN</DefineConstants>
   </PropertyGroup>
 
@@ -62,8 +62,6 @@
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\BCrypt.Net-Next.xml</DocumentationFile>
   </PropertyGroup>
-
-
 
   <ItemGroup>
     <PackageReference Update="SourceLink.Create.GitHub" Version="2.8.3" />
