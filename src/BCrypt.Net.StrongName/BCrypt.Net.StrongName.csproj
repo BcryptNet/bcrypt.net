@@ -4,10 +4,12 @@
     <AssemblyTitle>BCrypt.Net-Next.StrongName</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next.StrongName</AssemblyName>
 
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net20;net35;net40;net452;net462;net472</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net20;net35;net40;net452;net462;net472;net48</TargetFrameworks>
     <OutputTypeEx>Library</OutputTypeEx>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSource>false</IncludeSource>
+
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
     <PackageId>BCrypt.Net-Next.StrongName</PackageId>
     <Title>BCrypt .Net (Strong Named)</Title>
@@ -22,7 +24,7 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssemblyOriginatorKeyFile>../bcrypt.pfx</AssemblyOriginatorKeyFile>
 
-    <Version>3.3.0</Version>
+    <Version>3.3.3</Version>
     <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security,hash;crypto;blowfish;gdpr</PackageTags>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
@@ -47,20 +49,31 @@
     <DefineConstants>$(DefineConstants);NET2_1</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net20|net35|net40'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net20'
+                         or '$(TargetFramework)' == 'net35'
+                         or '$(TargetFramework)' == 'net40'">
     <Reference Include="System" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net452|net462|net472'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net452'
+                         or '$(TargetFramework)' == 'net462'">
     <Reference Include="System" />
   </ItemGroup>
 
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0|net452|net462|net472'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'
+                         or '$(TargetFramework)' == 'net452'
+                         or '$(TargetFramework)' == 'net462'
+                         or '$(TargetFramework)' == 'net472'
+                         or '$(TargetFramework)' == 'net48'">
     <PackageReference Include="System.Memory" Version="4.5.3" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1|netstandard2.1|netstandard2.0|net452|net462|net472'">
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'
+                         or '$(TargetFramework)' == 'netstandard2.0'
+                         or '$(TargetFramework)' == 'net472'
+                         or '$(TargetFramework)' == 'net48'
+                         or '$(TargetFramework)' == 'netcoreapp3.1'">
     <DefineConstants>$(DefineConstants);HAS_SPAN</DefineConstants>
   </PropertyGroup>
 
@@ -69,11 +82,9 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\BCrypt.Net-Next.xml</DocumentationFile>
   </PropertyGroup>
 
-
   <ItemGroup>
     <Compile Remove="..\BCrypt.Net\Properties\AssemblyInfo.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Update="SourceLink.Create.GitHub" Version="2.8.3" />
   </ItemGroup>
