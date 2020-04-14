@@ -54,14 +54,18 @@ namespace BCrypt.Net.UnitTests
         };
 
         /// <summary>
-        /// Hashes created using passlib in python prehashed using SHA256; 7 rounds on bcrypt
+        /// Hashes created using other languages
         /// </summary>
-        readonly string[,] _pythonPassLibTestVectors = {
+        readonly string[,] _otherLibTestVectors = {
+            //passlib in python prehashed using SHA256; 7 rounds on bcrypt
             { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2b$07$9IpAgJw99HWJur2uj3vr3O",    "$2b$07$9IpAgJw99HWJur2uj3vr3OyXMLQ05R2dQE.L5iGnbcVFgMRpsPZRG" },
             { "",                                   "$2b$07$0AD340gChkx46nsejmoRw.",    "$2b$07$0AD340gChkx46nsejmoRw.ANNVeZY33cuGluoj/QhaGEFNGb3sg8O" },
             { "a",                                  "$2b$07$uCq3i6F42wcUHItGwO84jO",    "$2b$07$uCq3i6F42wcUHItGwO84jObhWccJLbVf9vUyXMo0NEW8MkhQHuoS." },
             { "abcdefghijklmnopqrstuvwxyz",         "$2b$07$IZIyfWJFuytjdR41r/Fm7.",    "$2b$07$IZIyfWJFuytjdR41r/Fm7.AeV62vhwnzULJwzXuEdtgUMADnq97fu" },
             { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2b$07$xo54ftDxdJKeeVZcVm8y9O",    "$2b$07$xo54ftDxdJKeeVZcVm8y9Ojt76V.7dAICUOYkEXHlZpzEEbuTTRpC" },
+            // PHP password_hash
+            { "test",                               "$2y$10$u3XfEiRife.cNffWS0aD9O",    "$2y$10$u3XfEiRife.cNffWS0aD9OUPdFLVsiedZcGA/fXXeRyZBlvjGyS3e" },
+            { "chipsn'dip",                         "$2y$10$9Cb83ULoFHStLMg2iKG3p.",    "$2y$10$9Cb83ULoFHStLMg2iKG3p.0.ux/vJ49gZXs4FMooj44W1P8DN89Pi" },
         };
 
         readonly char[] _revisions = new char[] { 'a', 'x', 'y', 'b' };
@@ -195,24 +199,24 @@ namespace BCrypt.Net.UnitTests
 
 
         [Fact()]
-        public void TestHashPasswordEnhanced_PASSLIB()
+        public void TestHashPasswordEnhanced_OtherProgrammingLanguagesVectors()
         {
             Trace.Write("BCrypt.HashPassword(): ");
             var sw = Stopwatch.StartNew();
 
-            for (int i = 0; i < _pythonPassLibTestVectors.Length / 3; i++)
+            for (int i = 0; i < _otherLibTestVectors.Length / 3; i++)
             {
-                string plain = _pythonPassLibTestVectors[i, 0];
+                string plain = _otherLibTestVectors[i, 0];
                 string salt;
 
                 //Check hash that goes in one end comes out the next the same
-                salt = _pythonPassLibTestVectors[i, 1];
+                salt = _otherLibTestVectors[i, 1];
 
                 string hashed = BCrypt.HashPassword(plain, salt, enhancedEntropy: true, HashType.SHA256);
 
-                Assert.Equal(hashed, _pythonPassLibTestVectors[i, 2]);
+                Assert.Equal(hashed, _otherLibTestVectors[i, 2]);
 
-                var validateHashCheck = BCrypt.EnhancedVerify(plain, hashed, HashType.SHA256);
+                var validateHashCheck = BCrypt.Verify(plain, hashed, true, HashType.SHA256);
                 Assert.True(validateHashCheck);
 
                 Trace.WriteLine(hashed);
@@ -223,6 +227,7 @@ namespace BCrypt.Net.UnitTests
             Trace.WriteLine(sw.ElapsedMilliseconds);
             Trace.WriteLine("");
         }
+
 
         [Fact()]
         public void TestHashPasswordEnhancedWithHashType()
