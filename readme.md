@@ -230,8 +230,16 @@ A future release of Solar's bcrypt code should also support 'b'.
 * http://marc.info/?l=openbsd-misc&m=139320023202696
 
 # Releases
+release notes are here https://github.com/BcryptNet/bcrypt.net/releases
 
-v2.1.3+ release notes are here https://github.com/BcryptNet/bcrypt.net/releases
+*v4.0.0 (breaking changes)* - A bug in `Enhanced Hashing` was discovered that causes the hashes created to be inoperable between different languages. 
+V4 provides the fix for this as well as adding test vectors from PHP and Python to ensure the issue remains fixed in the future. V4 also removes the legacy 384 option that came before Base64 was added.
+
+*v3.5.0* - A bug in `Enhanced Hashing` was discovered that causes the hashes created to be inoperable between different languages.
+As part of the fix 3.5 release contains the ability to `Verify` and `HashPassword` were given an additional `v4CompatibleEnhancedEntropy` parameter.
+This allows the  user to verify their Enhanced hash as normal; then re-hash + store using V4. This functionality is purely to allow migration and is removed in V4.
+
+*v3.3.3* -Performance (heap reduction) for netcore and removal of regex https://github.com/BcryptNet/bcrypt.net/releases/tag/3.3.0
 
 *v2.1.3 -*
 * Update test SDK
