@@ -596,7 +596,7 @@ namespace BCrypt.Net
         /// <returns>The hashed password</returns>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="inputKey"/> is null.</exception>
         /// <exception cref="SaltParseException">Thrown when the <paramref name="salt"/> could not be parsed.</exception>
-        public static string HashPassword(string inputKey, string salt, bool enhancedEntropy, HashType hashType = DefaultEnhancedHashType)
+        public static string HashPassword(string inputKey, string salt, bool enhancedEntropy, HashType hashType = DefaultEnhancedHashType, bool v4CompatibleEnhancedEntropy = false)
         {
             if (inputKey == null)
             {
@@ -653,9 +653,13 @@ namespace BCrypt.Net
 
             byte[] inputBytes;
 
-            if (enhancedEntropy)
+            if (enhancedEntropy && v4CompatibleEnhancedEntropy)
             {
                 inputBytes = EnhancedHash(SafeUTF8.GetBytes(inputKey), bcryptMinorRevision, hashType);
+            }
+            else if (enhancedEntropy)
+            {
+                inputBytes = V3EnhancedHash(SafeUTF8.GetBytes(inputKey + (bcryptMinorRevision >= 'a' ? Nul : EmptyString)), hashType);
             }
             else
             {
@@ -696,6 +700,29 @@ namespace BCrypt.Net
                     break;
                 case HashType.SHA512:
                     inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA512.Create().ComputeHash(inputBytes)) + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(hashType), hashType, null);
+            }
+
+            return inputBytes;
+        }
+
+        private static byte[] V3EnhancedHash(byte[] inputBytes, HashType hashType)
+        {
+            switch (hashType)
+            {
+                case HashType.SHA256:
+                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA256.Create().ComputeHash(inputBytes)));
+                    break;
+                case HashType.SHA384:
+                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA384.Create().ComputeHash(inputBytes)));
+                    break;
+                case HashType.SHA512:
+                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA512.Create().ComputeHash(inputBytes)));
+                    break;
+                case HashType.Legacy384:
+                    inputBytes = SHA384.Create().ComputeHash(inputBytes);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(hashType), hashType, null);
@@ -803,9 +830,9 @@ namespace BCrypt.Net
         /// <returns>true if the passwords match, false otherwise.</returns>
         /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
-        public static bool Verify(string text, string hash, bool enhancedEntropy = false, HashType hashType = DefaultEnhancedHashType)
+        public static bool Verify(string text, string hash, bool enhancedEntropy = false, HashType hashType = DefaultEnhancedHashType, bool v4CompatibleEnhancedEntropy=false)
         {
-            return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash, enhancedEntropy, hashType)));
+            return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash, enhancedEntropy, hashType, v4CompatibleEnhancedEntropy)));
         }
 
         // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.

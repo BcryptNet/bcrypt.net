@@ -208,9 +208,39 @@ namespace BCrypt.Net.UnitTests
                 //Check hash that goes in one end comes out the next the same
                 salt = _pythonPassLibTestVectors[i, 1];
 
-                string hashed = BCrypt.HashPassword(plain, salt, enhancedEntropy: true, HashType.SHA256);
+                string hashed = BCrypt.HashPassword(plain, salt, enhancedEntropy: true, HashType.SHA256, v4CompatibleEnhancedEntropy:true);
 
                 Assert.Equal(hashed, _pythonPassLibTestVectors[i, 2]);
+
+                var validateHashCheck = BCrypt.Verify(plain, hashed, true, HashType.SHA256, v4CompatibleEnhancedEntropy: true);
+                Assert.True(validateHashCheck);
+
+                Trace.WriteLine(hashed);
+
+                Trace.Write(".");
+            }
+
+            Trace.WriteLine(sw.ElapsedMilliseconds);
+            Trace.WriteLine("");
+        }
+
+        [Fact()]
+        public void TestHashPasswordEnhanced_PASSLIB_V3EnhancedIsNotInteroperable()
+        {
+            Trace.Write("BCrypt.HashPassword(): ");
+            var sw = Stopwatch.StartNew();
+
+            for (int i = 0; i < _pythonPassLibTestVectors.Length / 3; i++)
+            {
+                string plain = _pythonPassLibTestVectors[i, 0];
+                string salt;
+
+                //Check hash that goes in one end comes out the next the same
+                salt = _pythonPassLibTestVectors[i, 1];
+
+                string hashed = BCrypt.HashPassword(plain, salt, enhancedEntropy: true, HashType.SHA256);
+
+                Assert.NotEqual(hashed, _pythonPassLibTestVectors[i, 2]);
 
                 var validateHashCheck = BCrypt.EnhancedVerify(plain, hashed, HashType.SHA256);
                 Assert.True(validateHashCheck);
