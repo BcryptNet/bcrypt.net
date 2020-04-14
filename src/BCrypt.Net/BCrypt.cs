@@ -651,11 +651,15 @@ namespace BCrypt.Net
 
             string extractedSalt = salt.Substring(startingOffset + 3, 22);
 
-            byte[] inputBytes = SafeUTF8.GetBytes(inputKey + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+            byte[] inputBytes;
 
             if (enhancedEntropy)
             {
-                inputBytes = EnhancedHash(inputBytes, hashType);
+                inputBytes = EnhancedHash(SafeUTF8.GetBytes(inputKey), bcryptMinorRevision, hashType);
+            }
+            else
+            {
+                inputBytes = SafeUTF8.GetBytes(inputKey + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
             }
 
             byte[] saltBytes = DecodeBase64(extractedSalt, BCryptSaltLen);
@@ -677,23 +681,21 @@ namespace BCrypt.Net
         /// Hashes key, base64 encodes before returning byte array
         /// </summary>
         /// <param name="inputBytes"></param>
+        /// <param name="bcryptMinorRevision"></param>
         /// <param name="hashType"></param>
         /// <returns></returns>
-        private static byte[] EnhancedHash(byte[] inputBytes, HashType hashType)
+        private static byte[] EnhancedHash(byte[] inputBytes, char bcryptMinorRevision, HashType hashType)
         {
             switch (hashType)
             {
                 case HashType.SHA256:
-                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA256.Create().ComputeHash(inputBytes)));
+                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA256.Create().ComputeHash(inputBytes)) + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
                     break;
                 case HashType.SHA384:
-                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA384.Create().ComputeHash(inputBytes)));
+                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA384.Create().ComputeHash(inputBytes)) + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
                     break;
                 case HashType.SHA512:
-                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA512.Create().ComputeHash(inputBytes)));
-                    break;
-                case HashType.Legacy384:
-                    inputBytes = SHA384.Create().ComputeHash(inputBytes);
+                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA512.Create().ComputeHash(inputBytes)) + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(hashType), hashType, null);
