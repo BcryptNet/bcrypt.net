@@ -689,13 +689,16 @@ namespace BCrypt.Net
             switch (hashType)
             {
                 case HashType.SHA256:
-                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA256.Create().ComputeHash(inputBytes)) + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                    using (var sha = SHA256.Create())
+                        inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(inputBytes)) + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
                     break;
                 case HashType.SHA384:
-                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA384.Create().ComputeHash(inputBytes)) + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                    using (var sha = SHA384.Create())
+                        inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(inputBytes)) + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
                     break;
                 case HashType.SHA512:
-                    inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(SHA512.Create().ComputeHash(inputBytes)) + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                    using (var sha = SHA512.Create())
+                        inputBytes = SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(inputBytes)) + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(hashType), hashType, null);
