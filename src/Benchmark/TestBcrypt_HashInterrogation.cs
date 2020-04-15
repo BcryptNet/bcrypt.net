@@ -1,5 +1,6 @@
 ﻿using Benchmark._3._2._1;
 using Benchmark._3._5.perfmerge_1;
+using Benchmark._4._0._0;
 using BenchmarkDotNet.Attributes;
 #pragma warning disable 1591
 
@@ -23,7 +24,7 @@ namespace BCrypt.Net.Benchmarks
         [Arguments( "$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
         public void InterrogateHashUsingParser(string hash)
         {
-            PerfMerge1.BCrypt.InterrogateHash(hash);
+            version4.BCrypt.InterrogateHash(hash);
         }
     }
 }
