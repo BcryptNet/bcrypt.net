@@ -48,7 +48,7 @@ jobs:
     #    uses a compiled language
 
     - run: |
-       dotnet build src/BCrypt.Net/BCrypt.Net.csproj
+       dotnet build src/BCrypt.Net/BCrypt.Net.csproj -f netstandard2.0
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
