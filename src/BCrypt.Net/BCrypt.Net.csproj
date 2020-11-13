@@ -4,7 +4,7 @@
     <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next</AssemblyName>
 
-    <TargetFrameworks>netcoreapp3.1;netstandard2.0;netstandard2.1;net20;net35;net40;net452;net462;net472;net48</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.0;netstandard2.1;net20;net35;net40;net452;net462;net472;net48;net50</TargetFrameworks>
     <OutputTypeEx>Library</OutputTypeEx>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSource>true</IncludeSource>
@@ -19,8 +19,7 @@
     <License>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt</License>
     <PackageLicenseUrl>https://github.com/BcryptNet/bcrypt.net/blob/master/licence.txt</PackageLicenseUrl>
 
-    <Version>4.0.1</Version>
-
+    <Version>4.0.2</Version>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
