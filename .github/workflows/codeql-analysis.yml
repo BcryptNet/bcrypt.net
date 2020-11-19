@@ -13,9 +13,9 @@ jobs:
 
     steps:
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1.5.0
+      uses: actions/setup-dotnet@v1.7.2
       with:
-        dotnet-version: 3.1        
+        dotnet-version: 5.0.100        
 
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -48,7 +48,7 @@ jobs:
     #    uses a compiled language
 
     - run: |
-       dotnet build src/BCrypt.Net/BCrypt.Net.csproj -f netstandard2.0
+       dotnet build src/BCrypt.Net/BCrypt.Net.csproj -f netstandard2.1
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
