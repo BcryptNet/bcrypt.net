@@ -64,6 +64,7 @@
                          or '$(TargetFramework)' == 'netstandard2.0'
                          or '$(TargetFramework)' == 'net472'
                          or '$(TargetFramework)' == 'net48'
+                         or '$(TargetFramework)' == 'net50'
                          or '$(TargetFramework)' == 'netcoreapp3.1'">
     <DefineConstants>$(DefineConstants);HAS_SPAN</DefineConstants>
   </PropertyGroup>
