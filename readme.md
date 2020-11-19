@@ -23,14 +23,18 @@ The simplest usage is as follows...
 
 To Hash a password:
 
-`string passwordHash =  BCrypt.HashPassword("my password");`
+```csharp
+string passwordHash =  BCrypt.HashPassword("my password");
+```
 
 *Note: Although this library allows you to supply your own salt, it is **highly** advisable that you allow the library to generate the salt for you.
 These methods are supplied to maintain compatibility and for more advanced cross-platform requirements that may necessitate their use.*
 
 To Verify a password against a hash (assuming you've stored the hash and retrieved from storage for verification):
 
-`BCrypt.Verify("my password", passwordHash);`
+```csharp
+BCrypt.Verify("my password", passwordHash);
+```
 
 This implementation on hashing will generate a salt automatically for you with the work factor (2^number of rounds) set to 10 (which matches the default across most implementation and is currently viewed as a good level of security/risk).
 
@@ -231,6 +235,8 @@ A future release of Solar's bcrypt code should also support 'b'.
 
 # Releases
 release notes are here https://github.com/BcryptNet/bcrypt.net/releases
+
+*v4.0.2* - Addition of .net 5 targeting; wrap `shaxxx` creation in using to release.
 
 *v4.0.0 (breaking changes)* - A bug in `Enhanced Hashing` was discovered that causes the hashes created to be inoperable between different languages. 
 V4 provides the fix for this as well as adding test vectors from PHP and Python to ensure the issue remains fixed in the future. V4 also removes the legacy 384 option that came before Base64 was added.
