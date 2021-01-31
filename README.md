@@ -24,7 +24,7 @@ The simplest usage is as follows...
 To Hash a password:
 
 ```csharp
-string passwordHash =  BCrypt.HashPassword("my password");
+string passwordHash = BCrypt.HashPassword("my password");
 ```
 
 *Note: Although this library allows you to supply your own salt, it is **highly** advisable that you allow the library to generate the salt for you.
