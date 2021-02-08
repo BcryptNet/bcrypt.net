@@ -36,7 +36,7 @@ To Verify a password against a hash (assuming you've stored the hash and retriev
 BCrypt.Verify("my password", passwordHash);
 ```
 
-This implementation on hashing will generate a salt automatically for you with the work factor (2^number of rounds) set to 10 (which matches the default across most implementation and is currently viewed as a good level of security/risk).
+This implementation on hashing will generate a salt automatically for you with the work factor (2^number of rounds) set to 11 (which matches the default across most implementation and is currently viewed as a good level of security/risk).
 
 To save you the maths a small table covering the iterations is provided below. The minimum allowed in this library is 4 for compatibility, the maximum is 31 (at 31 your processor will be wishing for death).
 
