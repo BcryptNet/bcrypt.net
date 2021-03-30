@@ -841,7 +841,7 @@ namespace BCrypt.Net
         /// <param name="byteArray">The byte array to encode.</param>
         /// <param name="length">   The number of bytes to encode.</param>
         /// <returns>Base64-encoded string.</returns>
-        private static char[] EncodeBase64(byte[] byteArray, int length)
+        internal static char[] EncodeBase64(byte[] byteArray, int length)
         {
             if (length <= 0 || length > byteArray.Length)
             {

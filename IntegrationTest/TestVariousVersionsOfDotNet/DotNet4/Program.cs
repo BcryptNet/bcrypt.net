@@ -35,26 +35,33 @@
         static void Main(string[] args)
         {
 
-            for (int ji = 0; ji < _testVectors.Length / 3; ji++)
-            {
-                var hashInfo = BCrypt.InterrogateHash(_testVectors[ji, 2]);
-                Console.WriteLine("{0}, {1}", hashInfo.WorkFactor, hashInfo.Version);
+            //for (int ji = 0; ji < _testVectors.Length / 3; ji++)
+            //{
+            //    var hashInfo = BCrypt.InterrogateHash(_testVectors[ji, 2]);
+            //    Console.WriteLine("{0}, {1}", hashInfo.WorkFactor, hashInfo.Version);
 
-            }
+            //}
 
-            Trace.Write("BCrypt.HashPassword(): ");
+            Console.WriteLine("BCrypt.HashPassword(): ");
             var sw = Stopwatch.StartNew();
             for (int i = 0; i < _testVectors.Length / 3; i++)
             {
+
                 string plain = _testVectors[i, 0];
                 string salt = _testVectors[i, 1];
                 string expected = _testVectors[i, 2];
+                var sw2 = Stopwatch.StartNew();
                 string hashed = BCrypt.HashPassword(plain, salt);
-                Console.Write(hashed == expected);
-                Trace.Write(".");
+                sw2.Stop();
+
+                var match = hashed == expected;
+                Console.WriteLine("Hash Matched: " + match + "in " + sw2.ElapsedTicks + " ticks, "  + sw2.ElapsedMilliseconds + "ms");
             }
-            Trace.WriteLine(sw.ElapsedMilliseconds);
-            Trace.WriteLine("---");
+            sw.Stop();
+            Console.WriteLine("Run complete");
+            Console.WriteLine(sw.ElapsedMilliseconds + "ms");
+            Console.WriteLine(sw.ElapsedTicks + "ticks");
+            Console.WriteLine("---");
 
             Console.ReadKey();
         }
