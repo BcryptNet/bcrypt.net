@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31112.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNet35", "DotNet2\DotNet35.csproj", "{B16CEA46-AD1F-4CCA-A7E7-618054771916}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore", "DotNetCore\DotNetCore.csproj", "{1475B4C5-26A7-4A1E-873D-53C3C6069084}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore2", "DotNetCore2\DotNetCore2.csproj", "{3A4420F0-BE42-47AA-9ED2-A8DD927703E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApp", "WindowsFormsApp\WindowsFormsApp.csproj", "{4BB1F216-78B3-4E91-A865-B279B62E03AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{3A4420F0-BE42-47AA-9ED2-A8DD927703E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A4420F0-BE42-47AA-9ED2-A8DD927703E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A4420F0-BE42-47AA-9ED2-A8DD927703E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BB1F216-78B3-4E91-A865-B279B62E03AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BB1F216-78B3-4E91-A865-B279B62E03AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BB1F216-78B3-4E91-A865-B279B62E03AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BB1F216-78B3-4E91-A865-B279B62E03AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
