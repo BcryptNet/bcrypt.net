@@ -3,28 +3,26 @@
   <PropertyGroup>
     <AssemblyTitle>BCrypt.Net-Next.StrongName</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next.StrongName</AssemblyName>
+    <PackageId>BCrypt.Net-Next.StrongName</PackageId>
+    <Title>BCrypt .Net (Strong Named)</Title>
 
-    <TargetFrameworks>netcoreapp3.1;netstandard2.0;netstandard2.1;net20;net35;net40;net452;net462;net472;net48;net50</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net20;net35;net462;net472;net48;net5.0;net6.0</TargetFrameworks>
     <OutputTypeEx>Library</OutputTypeEx>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSource>false</IncludeSource>
-
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
-    <PackageId>BCrypt.Net-Next.StrongName</PackageId>
-    <Title>BCrypt .Net (Strong Named)</Title>
     <Authors>Chris McKee, Ryan D. Emerl, Damien Miller</Authors>
-    <Copyright>2006-2020 Chris McKee, Ryan D. Emerl, Damien Miller</Copyright>
+    <Copyright>2006-2021 Chris McKee, Ryan D. Emerl, Damien Miller</Copyright>
     <Summary>BCrypt.Net, C# implementation of BCrypt, OpenBSD-style Blowfish password hashing</Summary>
     <Description>A fixed, enhanced and namespace compatible version of BCrypt.Net port of jBCrypt implemented in C#. It uses a variant of the Blowfish encryption algorithm’s keying schedule, and introduces a work factor, which allows you to determine how expensive the hash function will be, allowing the algorithm to be "future-proof".</Description>
-    <License>https://github.com/BcryptNet/bcrypt.net/blob/main/licence.txt</License>
+    <!--<PackageLicenseExpression>MIT</PackageLicenseExpression>-->
     <PackageLicenseUrl>https://github.com/BcryptNet/bcrypt.net/blob/main/licence.txt</PackageLicenseUrl>
-
+    
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssemblyOriginatorKeyFile>../bcrypt.pfx</AssemblyOriginatorKeyFile>
 
-    <Version>4.0.2</Version>    
+    <Version>4.0.3</Version>
     <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security,hash;crypto;blowfish;gdpr</PackageTags>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
@@ -50,8 +48,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net20'
-                         or '$(TargetFramework)' == 'net35'
-                         or '$(TargetFramework)' == 'net40'">
+                         or '$(TargetFramework)' == 'net35'">
     <Reference Include="System" />
   </ItemGroup>
 
@@ -61,7 +58,6 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'
-                         or '$(TargetFramework)' == 'net452'
                          or '$(TargetFramework)' == 'net462'
                          or '$(TargetFramework)' == 'net472'
                          or '$(TargetFramework)' == 'net48'">
@@ -73,11 +69,11 @@
                          or '$(TargetFramework)' == 'netstandard2.0'
                          or '$(TargetFramework)' == 'net472'
                          or '$(TargetFramework)' == 'net48'
-                         or '$(TargetFramework)' == 'net50'
+                         or '$(TargetFramework)' == 'net5.0'
+                         or '$(TargetFramework)' == 'net6.0'
                          or '$(TargetFramework)' == 'netcoreapp3.1'">
     <DefineConstants>$(DefineConstants);HAS_SPAN</DefineConstants>
   </PropertyGroup>
-
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\BCrypt.Net-Next.xml</DocumentationFile>
@@ -86,8 +82,20 @@
   <ItemGroup>
     <Compile Remove="..\BCrypt.Net\Properties\AssemblyInfo.cs" />
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Update="SourceLink.Create.GitHub" Version="2.8.3" />
+    <None Include="..\..\ico.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
   </ItemGroup>
 
 </Project>
