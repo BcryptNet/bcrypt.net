@@ -13,9 +13,9 @@ jobs:
 
     steps:
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1.7.2
+      uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.100        
+        dotnet-version: '6.0.x'        
 
     - name: Checkout repository
       uses: actions/checkout@v2
