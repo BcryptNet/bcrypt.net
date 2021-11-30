@@ -6,7 +6,7 @@ Porting of bcrypt.codeplex.com with enhanced security, missing fixes, features a
 
 [![SonarCloud](https://sonarcloud.io/api/project_badges/quality_gate?project=bcryptnet)]()
 
-# Nuget  
+# Nuget
 
 Download using nuget or Paket (https://fsprojects.github.io/Paket/)
 
@@ -15,7 +15,6 @@ Package: https://www.nuget.org/packages/BCrypt.Net-Next/
 
 Signed Package - https://www.nuget.org/packages/BCrypt.Net-Next.StrongName/
 [![NuGet Signed Package](https://img.shields.io/nuget/v/BCrypt.Net-Next.StrongName.svg?style=plastic)](https://www.nuget.org/packages/BCrypt.Net-Next.StrongName)
-
 
 # How to use
 
@@ -27,8 +26,8 @@ To Hash a password:
 string passwordHash =  BCrypt.HashPassword("my password");
 ```
 
-*Note: Although this library allows you to supply your own salt, it is **highly** advisable that you allow the library to generate the salt for you.
-These methods are supplied to maintain compatibility and for more advanced cross-platform requirements that may necessitate their use.*
+_Note: Although this library allows you to supply your own salt, it is **highly** advisable that you allow the library to generate the salt for you.
+These methods are supplied to maintain compatibility and for more advanced cross-platform requirements that may necessitate their use._
 
 To Verify a password against a hash (assuming you've stored the hash and retrieved from storage for verification):
 
@@ -96,20 +95,18 @@ and a simple benchmark you can run by creating a console program, adding this BC
 
 This will start at 16 which is `65,536 iterations` and reduce the cost until the time target is reached.
 It's up to you what you consider an allowable time, but if it's below 10, I'd seriously advice leaving it at 10
-and maybe investing in a larger server package. 
+and maybe investing in a larger server package.
 
+## Enhanced Entropy
 
-## Enhanced Entropy 
-
-The recommended 56 byte password limit (including null termination byte) for bcrypt relates to the 448 bit limit of the Blowfish key; Any 
-bytes beyond that limit are not fully mixed into the hash, as such making the 72 byte absolute limit on bcrypt passwords less relevant 
+The recommended 56 byte password limit (including null termination byte) for bcrypt relates to the 448 bit limit of the Blowfish key; Any
+bytes beyond that limit are not fully mixed into the hash, as such making the 72 byte absolute limit on bcrypt passwords less relevant
 considering what actual effect on the resulting hash by those bytes.
 
-Other languages have handled this percieved issue by pre-hashing the passphrase/password to increase the used entropy, dropbox being one of the more public articles on this.
+Other languages have handled this perceived issue by pre-hashing the passphrase/password to increase the used entropy, dropbox being one of the more public articles on this.
 
-* https://blogs.dropbox.com/tech/2016/09/how-dropbox-securely-stores-your-passwords/
-* https://crypto.stackexchange.com/questions/42415/dropbox-password-security
-
+- https://blogs.dropbox.com/tech/2016/09/how-dropbox-securely-stores-your-passwords/
+- https://crypto.stackexchange.com/questions/42415/dropbox-password-security
 
 You can opt into enhanced hashing simply using the following code (basically prefixing the method calls with Enhanced)
 
@@ -119,7 +116,7 @@ var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword);
 ```
 
 By default the library uses SHA384 hashing of the passphrase, the material generated is then passed to bcrypt to form your hash via the usual bcrypt routine.
-If you want to specify a different version of SHA, or just wish to explicitely set in your code the version used in case it ever changes in a major release of the library,
+If you want to specify a different version of SHA, or just wish to explicitly set in your code the version used in case it ever changes in a major release of the library,
 you can do so by using the following change to the above.
 
 ```csharp
@@ -127,7 +124,7 @@ var enhancedHashPassword = BCrypt.EnhancedHashPassword(myPassword, hashType: Has
 var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword, hashType:HashType.SHA384);
 ```
 
-_Why SHA384?_ It's a good balance of performance, security, collision protection and is the only version that wasnt vulnerable to length extension attacks https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks .
+_Why SHA384?_ It's a good balance of performance, security, collision protection and is the only version that wasn't vulnerable to length extension attacks https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks .
 
 _Should I use Enhanced Entropy?_ You lose nothing by using it
 
@@ -135,14 +132,12 @@ _Why would I need to change the SHA type?_ Some libraries like PassLib hash usin
 
 _What does it do?_ We take the utf8 bytes of your password as inputBytes SHA hash them, convert to base64 (for compatibility with other language implementations) then use those bytes to perform the standard bcrypt call.
 
-
 ## Compiling
 
 You'll need at least VS2017 with the current SDK https://www.microsoft.com/net/download;
 
 The nuget packages can be built by running `buildfornuget.cmd`
-or 
-
+or
 
 ```shell
 dotnet restore .\src
@@ -159,9 +154,10 @@ Running `TestGenerateSaltWithMaxWorkFactor` will take significant time.
 A .Net port of jBCrypt implemented in C#. It uses a variant of the Blowfish encryption algorithm’s keying schedule, and introduces a work factor, which allows you to determine how expensive the hash function will be, allowing the algorithm to be "future-proof".
 
 ## Details
-This is, for all intents and purposes, a direct port of jBCrypt written by Damien Miller.  The main differences are the addition of some convenience methods and some mild re-factoring.  The easiest way to verify BCrypt.Net's parity with jBCrypt is to compare the unit tests.
 
-For an overview of why BCrypt is important, see How to Safely Store a Password.  In general, it's a hashing algorithm that can be adjusted over time to require more CPU power to generate the hashes.  This, in essence, provides some protection against Moore's Law.  That is, as computers get faster, this algorithm can be adjusted to require more CPU power.  The more CPU power that's required to hash a given password, the more time a "hacker" must invest, per password.  Since the "work factor" is embedded in the resultant hash, the hashes generated by this algorithm are forward/backward-compatible.
+This is, for all intents and purposes, a direct port of jBCrypt written by Damien Miller. The main differences are the addition of some convenience methods and some mild re-factoring. The easiest way to verify BCrypt.Net's parity with jBCrypt is to compare the unit tests.
+
+For an overview of why BCrypt is important, see How to Safely Store a Password. In general, it's a hashing algorithm that can be adjusted over time to require more CPU power to generate the hashes. This, in essence, provides some protection against Moore's Law. That is, as computers get faster, this algorithm can be adjusted to require more CPU power. The more CPU power that's required to hash a given password, the more time a "hacker" must invest, per password. Since the "work factor" is embedded in the resultant hash, the hashes generated by this algorithm are forward/backward-compatible.
 
 ## Why BCrypt
 
@@ -177,21 +173,21 @@ The printable form of these hashes starts with $2$, $2a$, $2b$, $2x$ or $2y$ dep
 
 ```
 $2$ – Currently obsolete
-$2a$ – The current key used to identify this scheme. 
-       Since a major security flaw was discovered in 2011 in a third-party implementation of the algorithm, 
-       hashes indicated by this string are now ambiguous and might have been generated by the flawed 
-       implementation, or a subsequent fixed, implementation. 
-       The flaw may be triggered by some password strings containing non-ASCII characters, such as specially 
+$2a$ – The current key used to identify this scheme.
+       Since a major security flaw was discovered in 2011 in a third-party implementation of the algorithm,
+       hashes indicated by this string are now ambiguous and might have been generated by the flawed
+       implementation, or a subsequent fixed, implementation.
+       The flaw may be triggered by some password strings containing non-ASCII characters, such as specially
        crafted password strings.
-$2b$ – Used by some recent implementations which include a mitigation to a wraparound problem. 
-       Previous versions of the algorithm have a problem with long passwords. By design, long passwords 
-       are truncated at 72 characters, but there is an 8-bit wraparound problem with certain password 
+$2b$ – Used by some recent implementations which include a mitigation to a wraparound problem.
+       Previous versions of the algorithm have a problem with long passwords. By design, long passwords
+       are truncated at 72 characters, but there is an 8-bit wraparound problem with certain password
        lengths resulting in weak hashes.
-$2x$ – Post-2011 bug discovery, old hashes can be renamed to be $2x$ to indicate that they were generated with 
-       the broken algorithm. These hashes are still weak, but at least it's clear which algorithm was used to 
+$2x$ – Post-2011 bug discovery, old hashes can be renamed to be $2x$ to indicate that they were generated with
+       the broken algorithm. These hashes are still weak, but at least it's clear which algorithm was used to
        generate them.
-$2y$ – Post Post-2011 bug discovery, $2y$ may be used to unambiguously use the new, corrected algorithm. On an 
-       implementation suffering from the bug, $2y$ simply won't work. On a newer, fixed implementation, it will 
+$2y$ – Post Post-2011 bug discovery, $2y$ may be used to unambiguously use the new, corrected algorithm. On an
+       implementation suffering from the bug, $2y$ simply won't work. On a newer, fixed implementation, it will
        produce the same result as using $2a$.
 ```
 
@@ -228,61 +224,64 @@ A future release of Solar's bcrypt code should also support 'b'.
 
 **There is no difference between 2a, 2x, 2y, and 2b. They all output the same result.**
 
-* https://github.com/spring-projects/spring-security/issues/3320
-* https://en.wikipedia.org/wiki/Crypt_(C)#Blowfish-based_scheme
-* http://undeadly.org/cgi?action=article&sid=20140224132743
-* http://marc.info/?l=openbsd-misc&m=139320023202696
+- https://github.com/spring-projects/spring-security/issues/3320
+- https://en.wikipedia.org/wiki/Crypt_(C)#Blowfish-based_scheme
+- http://undeadly.org/cgi?action=article&sid=20140224132743
+- http://marc.info/?l=openbsd-misc&m=139320023202696
 
 # Releases
+
 release notes are here https://github.com/BcryptNet/bcrypt.net/releases
 
-*v4.0.2* - Addition of .net 5 targeting; wrap `shaxxx` creation in using to release.
+_v4.0.2_ - Addition of .net 5 targeting; wrap `shaxxx` creation in using to release.
 
-*v4.0.0 (breaking changes)* - A bug in `Enhanced Hashing` was discovered that causes the hashes created to be inoperable between different languages. 
+_v4.0.0 (breaking changes)_ - A bug in `Enhanced Hashing` was discovered that causes the hashes created to be inoperable between different languages.
 V4 provides the fix for this as well as adding test vectors from PHP and Python to ensure the issue remains fixed in the future. V4 also removes the legacy 384 option that came before Base64 was added.
 
-*v3.5.0* - A bug in `Enhanced Hashing` was discovered that causes the hashes created to be inoperable between different languages.
+_v3.5.0_ - A bug in `Enhanced Hashing` was discovered that causes the hashes created to be inoperable between different languages.
 As part of the fix 3.5 release contains the ability to `Verify` and `HashPassword` were given an additional `v4CompatibleEnhancedEntropy` parameter.
-This allows the  user to verify their Enhanced hash as normal; then re-hash + store using V4. This functionality is purely to allow migration and is removed in V4.
+This allows the user to verify their Enhanced hash as normal; then re-hash + store using V4. This functionality is purely to allow migration and is removed in V4.
 
-*v3.3.3* -Performance (heap reduction) for netcore and removal of regex https://github.com/BcryptNet/bcrypt.net/releases/tag/3.3.0
+_v3.3.3_ -Performance (heap reduction) for netcore and removal of regex https://github.com/BcryptNet/bcrypt.net/releases/tag/3.3.0
 
-*v2.1.3 -*
-* Update test SDK
-* Match versions between Strongsigned / Normal package
-* Update copyright year in metadata
-* Typo correction
+_v2.1.3 -_
 
-*v2.1.2 -*
-* NetStandard2 and Net 4.7 addition
-* Correct typo in `PasswordNeedsReshash` to `PasswordNeedsRehash`
-* Consolidate config changes
+- Update test SDK
+- Match versions between Strong-Signed / Normal package
+- Update copyright year in metadata
+- Typo correction
 
-*v2.1.1 -*
-* Minor csproj changes / typo
+_v2.1.2 -_
 
-*v2.1.0 -*
+- NetStandard2 and Net 4.7 addition
+- Correct typo in `PasswordNeedsReshash` to `PasswordNeedsRehash`
+- Consolidate config changes
 
-* Adds enhanced mode; enhanced hashing allows you to opt-in to ensuring optimal entropy on your users passwords by first making use of the fast SHA384 algorithm before BCrypt hashes the password.
-* Added Hash interrogation to allow a hash to be passed in and its component parts are returned.
- * Added timeouts to regex and set compiler flags for msbuild so < .net 4.5 (where timeouts were added to regex) we use old regex method.
-* Alter safe equals from ceq/and to xor/and/ceq moving the check outside of the loop to mitigate against branch prediction causing a timing leak
-* Add new method `PasswordNeedsReshash(string hash, int newMinimumWorkLoad)` as a helper method for developers to use when logging a user in to increase legacy workloads
-* Add `ValidateAndReplacePassword` method to allow inline password validation and replacement. Throws `BcryptAuthenticationException` in the event of authentication failure.
-* Cleaned up XML-doc for intellisense
-* Increased compatibility by allowing BCrypt revisions from other frameworks/languages to be validated and generated whilst maintaining compatibility.
-* VS2017 RTW changes
+_v2.1.1 -_
 
-*v2.0.1 -*
+- Minor csproj changes / typo
 
-* Corrects usage of Secure random number generator
-* Change UTF8 handling to safer default (throwOnInvalidBytes: true)
- * .NET Encoding.UTF8 encoding instance does not raise exceptions used to encode bytes which cannot represent a valid encoding & will return the same 'unknown' character instead. This can cause entropy loss when converting from bytes to strings.
-* Change secure equals to match .net identity implementation
-* Inline vars in encipher method
+_v2.1.0 -_
 
-*v2.0.0 -*
+- Adds enhanced mode; enhanced hashing allows you to opt-in to ensuring optimal entropy on your users passwords by first making use of the fast SHA384 algorithm before BCrypt hashes the password.
+- Added Hash interrogation to allow a hash to be passed in and its component parts are returned.
+- Added timeouts to regex and set compiler flags for msbuild so < .net 4.5 (where timeouts were added to regex) we use old regex method.
+- Alter safe equals from ceq/and to xor/and/ceq moving the check outside of the loop to mitigate against branch prediction causing a timing leak
+- Add new method `PasswordNeedsReshash(string hash, int newMinimumWorkLoad)` as a helper method for developers to use when logging a user in to increase legacy workloads
+- Add `ValidateAndReplacePassword` method to allow inline password validation and replacement. Throws `BcryptAuthenticationException` in the event of authentication failure.
+- Cleaned up XML-doc for intellisense
+- Increased compatibility by allowing BCrypt revisions from other frameworks/languages to be validated and generated whilst maintaining compatibility.
+- VS2017 RTW changes
+
+_v2.0.1 -_
+
+- Corrects usage of Secure random number generator
+- Change UTF8 handling to safer default (throwOnInvalidBytes: true)
+- .NET Encoding.UTF8 encoding instance does not raise exceptions used to encode bytes which cannot represent a valid encoding & will return the same 'unknown' character instead. This can cause entropy loss when converting from bytes to strings.
+- Change secure equals to match .net identity implementation
+- Inline vars in encipher method
+
+_v2.0.0 -_
 
 Fresh release packaged for the majority of .net & containing safe-equals to reduce the risks from timing attacks https://en.wikipedia.org/wiki/Timing_attack / https://cryptocoding.net/index.php/Coding_rules#Compare_secret_strings_in_constant_time
 Technically the implementation details of BCrypt theoretically mitigate against timing attacks. But the Bcrypt.net official validation function was vulnerable to timing attacks as it returned as soon as a non-matching byte was found in the hash comparison.
-

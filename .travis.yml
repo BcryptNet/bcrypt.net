@@ -1,8 +1,0 @@
-language: csharp
-solution: src/BCrypt.Net.sln
-mono: none
-dotnet: 2.1.4
-script:
- - dotnet restore
- - dotnet build src/BCrypt.Net/BCrypt.Net.csproj -f netstandard2.0
- - cd src/BCrypt.Net.UnitTests && dotnet restore && dotnet xunit
