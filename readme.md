@@ -233,6 +233,8 @@ A future release of Solar's bcrypt code should also support 'b'.
 
 release notes are here https://github.com/BcryptNet/bcrypt.net/releases
 
+_v4.0.3_ - Addition of .net 6 targeting; tidy up targets.
+
 _v4.0.2_ - Addition of .net 5 targeting; wrap `shaxxx` creation in using to release.
 
 _v4.0.0 (breaking changes)_ - A bug in `Enhanced Hashing` was discovered that causes the hashes created to be inoperable between different languages.
