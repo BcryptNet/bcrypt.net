@@ -1,3 +1,6 @@
+[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
+
+
 # bcrypt.net - next
 
 Porting of bcrypt.codeplex.com with enhanced security, missing fixes, features and better .net support.
