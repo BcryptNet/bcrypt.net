@@ -137,7 +137,7 @@ _What does it do?_ We take the utf8 bytes of your password as inputBytes SHA has
 
 ## Compiling
 
-You'll need at least VS2017 with the current SDK https://www.microsoft.com/net/download;
+You'll need at least VS2022 with the current SDK https://www.microsoft.com/net/download;
 
 The nuget packages can be built by running `buildfornuget.cmd`
 or
@@ -231,6 +231,14 @@ A future release of Solar's bcrypt code should also support 'b'.
 - https://en.wikipedia.org/wiki/Crypt_(C)#Blowfish-based_scheme
 - http://undeadly.org/cgi?action=article&sid=20140224132743
 - http://marc.info/?l=openbsd-misc&m=139320023202696
+
+
+### Refs
+
+* https://www.ecrypt.eu.org/csa/documents/D5.4-FinalAlgKeySizeProt.pdf
+* https://ico.org.uk/for-organisations/guide-to-data-protection/guide-to-the-general-data-protection-regulation-gdpr/security/passwords-in-online-services/
+* https://tools.ietf.org/id/draft-whited-kitten-password-storage-00.html#name-bcrypt
+* 
 
 # Releases
 
