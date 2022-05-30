@@ -52,7 +52,7 @@
                          or '$(TargetFramework)' == 'net462'
                          or '$(TargetFramework)' == 'net472'
                          or '$(TargetFramework)' == 'net48'">
-    <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="System.Memory" Version="4.5.5" />
   </ItemGroup>
 
 
