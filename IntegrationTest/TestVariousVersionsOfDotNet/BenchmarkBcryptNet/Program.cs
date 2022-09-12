@@ -23,7 +23,7 @@ public class Benchmark
     {
         // Save all the benchmark classes from doing a nullity test
         if (args == null)
-            args = new string[0];
+            args = Array.Empty<string>();
 
         // We're only ever interested in public static methods. This variable
         // just makes it easier to read the code...
@@ -38,12 +38,12 @@ public class Benchmark
 
             // Find a parameterless Reset method, if any
             var resetMethod = type.GetMethod("Reset", publicStatic,
-                null, new Type[0],
+                null, Type.EmptyTypes,
                 null);
 
             // Find a parameterless Check method, if any
             var checkMethod = type.GetMethod("Check", publicStatic,
-                null, new Type[0],
+                null, Type.EmptyTypes,
                 null);
 
             // Find all parameterless methods with the [Benchmark] attribute
@@ -74,7 +74,7 @@ public class Benchmark
             catch (TargetInvocationException e)
             {
                 var inner = e.InnerException;
-                var message = inner == null ? null : inner.Message;
+                var message = inner?.Message;
                 if (message == null)
                     message = "(No message)";
                 Console.WriteLine("Init failed ({0})", message);
@@ -624,7 +624,7 @@ public class Benchmark
                 "albert"
             };
 
-        static int iterations = 1;
+        static readonly int iterations = 1;
 
         [Benchmark]
         public static void Test()

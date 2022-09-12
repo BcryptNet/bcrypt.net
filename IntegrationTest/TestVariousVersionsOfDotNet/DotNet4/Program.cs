@@ -1,9 +1,9 @@
-﻿namespace DotNet4
+﻿using BC = BCrypt.Net.BCrypt;
+
+namespace DotNet4
 {
     using System;
     using System.Diagnostics;
-    using BCrypt.Net;
-    using System.Text.RegularExpressions;
 
     class Program
     {
@@ -51,7 +51,7 @@
                 string salt = _testVectors[i, 1];
                 string expected = _testVectors[i, 2];
                 var sw2 = Stopwatch.StartNew();
-                string hashed = BCrypt.HashPassword(plain, salt);
+                string hashed = BC.HashPassword(plain, salt);
                 sw2.Stop();
 
                 var match = hashed == expected;
