@@ -5,7 +5,9 @@
 
 Porting of bcrypt.codeplex.com with enhanced security, missing fixes, features and better .net support.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/me6tlh95u59jl17d/branch/master?svg=true)](https://ci.appveyor.com/project/ChrisMcKee/bcrypt-net/branch/master)
+[![Build status](https://github.com/BcryptNet/bcrypt.net/actions/workflows/dotnet.yml/badge.svg)]()
+
+
 
 [![SonarCloud](https://sonarcloud.io/api/project_badges/quality_gate?project=bcryptnet)]()
 
