@@ -22,7 +22,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace BCrypt.Net
+namespace nBCrypt
 {
     /// <summary>BCrypt implementation.</summary>
     /// <remarks>

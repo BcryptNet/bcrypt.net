@@ -2,7 +2,7 @@
 using BenchmarkDotNet.Running;
 #pragma warning disable 1591
 
-namespace BCrypt.Net.Benchmarks
+namespace nBCrypt.Benchmarks
 {
     class Program
     {

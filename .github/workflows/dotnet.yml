@@ -1,10 +1,18 @@
-name: .NET
+name: .NET Build
 
 on:
+  pull_request:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    paths:
+      - '*'
+      - '!/readme.md'
+      - '!/SECURITY.md'
+      - '!/licence.txt'
+      - '!/Benchmark/*'
+      - '!/IntegrationTest/*'
+      - '!/dists/*'
+      - '!/assets/*'
 
 jobs:
   build:
@@ -18,8 +26,8 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore src/BCrypt.Net.UnitTests/BCrypt.Net.UnitTests.csproj
+      run: dotnet restore src/UnitTests/BCrypt.Net.UnitTests.csproj
     - name: Build
-      run: dotnet build --no-restore src/BCrypt.Net.UnitTests/BCrypt.Net.UnitTests.csproj
+      run: dotnet build --no-restore src/UnitTests/BCrypt.Net.UnitTests.csproj -c Release /p:CI=true
     - name: Test
-      run: dotnet test --no-build --verbosity normal src/BCrypt.Net.UnitTests/BCrypt.Net.UnitTests.csproj
+      run: dotnet test --no-build --verbosity normal src/UnitTests/BCrypt.Net.UnitTests.csproj -c Release --logger GitHubActions /p:CI=true

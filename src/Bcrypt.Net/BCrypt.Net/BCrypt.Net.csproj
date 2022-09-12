@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
+    <AssemblyName>BCrypt.Net-Next</AssemblyName>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net462;net472;net48;net6.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+</Project>

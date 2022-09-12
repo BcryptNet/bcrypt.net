@@ -2,10 +2,18 @@
 
   <PropertyGroup>
     <AssemblyName>BCrypt.Net.UnitTests</AssemblyName>
-    <PackageId>BCrypt.Net.UnitTests</PackageId>
+    <RootNamespace>nBCrypt.UnitTests</RootNamespace>
     <TargetFramework>net6.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
     <LangVersion>default</LangVersion>
+
+    <SignAssembly>false</SignAssembly>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+
+    <DebugType>Full</DebugType>
+    <DefineConstants Condition="'$(OS)' == 'Windows_NT'">$(DefineConstants);WINDOWS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -20,10 +28,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+    <PackageReference Include="GitHubActionsTestLogger" Version="2.0.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BCrypt.Net\BCrypt.Net.csproj" />
+    <ProjectReference Include="..\Bcrypt.Net\BCrypt.Net\BCrypt.Net.csproj" />
   </ItemGroup>
 
 </Project>

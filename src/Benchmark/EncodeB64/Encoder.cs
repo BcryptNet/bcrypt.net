@@ -130,5 +130,4 @@ namespace Benchmark.HashParser
             return encoded;
         }
     }
-
 }
