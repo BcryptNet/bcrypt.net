@@ -97,6 +97,77 @@ namespace BCrypt.Net.UnitTests
             Assert.True(BCrypt.Verify("root", "$2a$11$QyLpYkKKG9oNIl2rbZ9X0OgxxbWYZjPZUFN/kuJ4DDywo20WgK3iu"));
         }
 
+        [Fact]
+        /*
+<?php
+$hash = '$2y$07$BCryptRequires22Chrctet7rDxl8RPE0hiH8EeV/YklkNceXZOjm';
+
+$pass = 'justatestofphpStringHashing_test';
+
+$pr1 = password_hash($pass,PASSWORD_BCRYPT, ["salt"=>'BCryptRequires22Chrcte', "cost"=>7]);
+
+$pr2 = password_hash($pr1,PASSWORD_BCRYPT, ["salt"=>'BCryptRequires22Chrcte', "cost"=>7]);
+
+echo 'This is a single pass through bcrypt' . PHP_EOL;
+echo PHP_EOL . $pr1 . PHP_EOL;
+echo 'This is a second pass of the first hash through bcrypt with the same hash' . PHP_EOL;
+echo PHP_EOL . $pr2 . PHP_EOL;
+
+if (password_verify($pass,$hash)) {
+    echo 'Password is valid!';
+} else {
+    echo 'Invalid password.';
+}
+
+?>
+         */
+        public void GithubIssue119_WoltLabForumPHPBcrypt()
+        {
+            var pass = @"WjswE$v?(n2/";
+            var hash = @"$2y$12$Y7LETq.zS/D1DqYlh4I6beRvX8nF/VEJKnjOLGz6d9.jJKleH.d0a";
+            Assert.True(HashParser.IsValidHash(hash, out _));
+            Assert.True(BCrypt.Verify(pass, hash));
+        }
+
+        [Fact]
+        // If you're using WoldLabForum just use BCrypt and an appropriate level of cost;
+        // DoublebCrypt implementation in the codebase simply hashes with the same salt which is pointless.
+        // https://github.com/WoltLab/WCF/blob/master/wcfsetup/install/files/lib/system/user/authentication/password/algorithm/DoubleBcrypt.class.php
+        public void GithubIssue119_WoltLabForumPHPDoubleBcrypt()
+        {
+            // Check DoubleBcrypt Fails
+            const string pass = "justatestofphpStringHashing_test";
+            const string salt = "$2y$07$BCryptRequires22Chrcte"; // used as a fixed salt in the php code as per the behaviour
+
+            // Password hash created through being passed via bcrypt once (This Should Fail)
+            const string passwordHashOneRound = "$2y$07$BCryptRequires22Chrctet7rDxl8RPE0hiH8EeV/YklkNceXZOjm";
+            var hash = BCrypt.HashPassword(BCrypt.HashPassword(pass, salt), salt);
+
+            Assert.True(HashParser.IsValidHash(hash, out _));
+            Assert.False(BCrypt.Verify(pass, hash));
+
+            // Attempt Double Hash
+
+            // Password hash created through being passed via bcrypt twice (This Should Pass)
+            const string passwordHashTwoRound = "$2y$07$BCryptRequires22ChrcteS5wpRbc0ASkm/s.hXFhQxgB8sPvpfXa";
+
+            var doubleBcryptSaltGiven = BCrypt.HashPassword(BCrypt.HashPassword(pass, salt), salt);
+            var doubleBcryptFullHashGivenAsSalt = BCrypt.HashPassword(BCrypt.HashPassword(pass, passwordHashTwoRound), passwordHashTwoRound);
+
+            // Salt should be extracted from hash  giving same result as passing just the salt
+            Assert.Equal(doubleBcryptSaltGiven, doubleBcryptFullHashGivenAsSalt);
+            Assert.True(HashParser.IsValidHash(passwordHashTwoRound, out _));
+
+            // This will fail as the password passed in will by default only be hashed once
+            Assert.False(BCrypt.Verify(pass, passwordHashTwoRound));
+
+            // This will pass, but is open to timing attacks  (Taken from sample in https://github.com/BcryptNet/bcrypt.net/issues/119)
+            Assert.True(string.Equals(passwordHashTwoRound, doubleBcryptSaltGiven));
+
+            // This will pass and effectively behaves the same as WCF
+            Assert.True(BCrypt.Verify(BCrypt.HashPassword(pass, passwordHashTwoRound), passwordHashTwoRound));
+        }
+
         /*
          * Test to confirm correctness of input key truncation https://github.com/BcryptNet/bcrypt.net/issues/18
          * Test vars from https://security.stackexchange.com/questions/39849/does-bcrypt-have-a-maximum-password-length/39851#39851
@@ -127,7 +198,6 @@ namespace BCrypt.Net.UnitTests
                 {
                     string plain = _testVectors[i, 0];
                     string salt;
-                    string expected;
                     if (r > 0)
                     {
                         //Check hash that goes in one end comes out the next the same
@@ -143,7 +213,7 @@ namespace BCrypt.Net.UnitTests
                     else
                     {
                         salt = _testVectors[i, 1];
-                        expected = _testVectors[i, 2];
+                        var expected = _testVectors[i, 2];
 
                         string hashed = BCrypt.HashPassword(plain, salt);
                         var d = hashed == expected;

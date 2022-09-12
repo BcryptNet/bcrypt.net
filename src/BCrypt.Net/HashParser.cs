@@ -33,7 +33,7 @@ namespace BCrypt.Net
             return 10 * (hash[offset] - '0') + (hash[offset + 1] - '0');
         }
 
-        private static bool IsValidHash(string hash, out HashFormatDescriptor format)
+        internal static bool IsValidHash(string hash, out HashFormatDescriptor format)
         {
             if (hash is null)
             {
@@ -127,7 +127,7 @@ namespace BCrypt.Net
             throw new SaltParseException("Invalid Hash Format");
         }
 
-        private class HashFormatDescriptor
+        internal class HashFormatDescriptor
         {
             public HashFormatDescriptor(int versionLength)
             {
