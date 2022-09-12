@@ -8,7 +8,11 @@
         <LangVersion>default</LangVersion>
     </PropertyGroup>
     <ItemGroup>
-        <Using Include="BCrypt.Net.BCrypt" Alias="BcryptNet"/>
+        <!-- emits global using static global::BCrypt.Net.BCrypt; -->
+        <!--<Using Include="BCrypt.Net.BCrypt" Static="True"/>-->
+
+        <!-- emits global using BcryptNet = global::BCrypt.Net.BCrypt; -->
+        <Using Include="BCrypt.Net.BCrypt" Alias="BcryptNet" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="BCrypt.Net-Next" Version="4.0.3"/>

@@ -58,11 +58,24 @@ string passwordHash =  BC.HashPassword("my password");
 ### DotNet6
 You can also do aliasing at the CSProj level; and wouldn't need to add the using statement at all
 
+This example would allow you to use an alias BC.HashPassword() in your code
+
 ```xml
     <ItemGroup>
+        <!-- emits global using BcryptNet = global::BCrypt.Net.BCrypt; -->
         <Using Include="BCrypt.Net.BCrypt" Alias="BC"/>
     </ItemGroup>
 ```
+
+This version would allow you to just call `Verify` and `HashPassword` in your code base without any other reference.
+
+```xml
+    <ItemGroup>
+        <!-- emits global using static global::BCrypt.Net.BCrypt; -->
+        <Using Include="BCrypt.Net.BCrypt" Static="True"/>
+    </ItemGroup>
+```
+
 
 
 _Note: Although this library allows you to supply your own salt, it is **highly** advisable that you allow the library to generate the salt for you.
