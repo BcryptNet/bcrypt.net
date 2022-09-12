@@ -21,18 +21,56 @@ Signed Package - https://www.nuget.org/packages/BCrypt.Net-Next.StrongName/
 
 # How to use
 
+There are various examples in our [test-harness folder](https://github.com/BcryptNet/bcrypt.net/tree/main/IntegrationTest/TestVariousVersionsOfDotNet) and [unit-tests](https://github.com/BcryptNet/bcrypt.net/blob/main/src/BCrypt.Net.UnitTests/BCryptTests.cs) 
+
+
 The simplest usage is as follows...
 
-To Hash a password:
+**To Hash a password:**
+
+## DotNet6
+File-scoped namespaces are shown; imagine curly brackets if you need to.
+
+`Top level namespace`
 
 ```csharp
+namespace DotNetSix;
+
+using BCrypt.Net;
+
 string passwordHash =  BCrypt.HashPassword("my password");
 ```
+
+### DotNet4/6 etc
+
+Due to the naming of the library if the namespace is after the using statements the call changes as .net fails to resolve naming correctly
+I'd advise rather than enter the entire namespace you simply use the [import aliasing](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-directive) as below.
+
+```csharp
+
+using BC = BCrypt.Net.BCrypt;
+
+namespace DotNetSix;
+
+string passwordHash =  BC.HashPassword("my password");
+```
+
+### DotNet6
+You can also do aliasing at the CSProj level; and wouldn't need to add the using statement at all
+
+```xml
+    <ItemGroup>
+        <Using Include="BCrypt.Net.BCrypt" Alias="BC"/>
+    </ItemGroup>
+```
+
 
 _Note: Although this library allows you to supply your own salt, it is **highly** advisable that you allow the library to generate the salt for you.
 These methods are supplied to maintain compatibility and for more advanced cross-platform requirements that may necessitate their use._
 
-To Verify a password against a hash (assuming you've stored the hash and retrieved from storage for verification):
+**To Verify a password** against a hash (assuming you've stored the hash and retrieved from storage for verification):
+
+_All previous notes about namespacing apply here too_
 
 ```csharp
 BCrypt.Verify("my password", passwordHash);
