@@ -6,7 +6,7 @@
     <PackageId>BCrypt.Net-Next</PackageId>
     <Title>BCrypt .Net</Title>
 
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net20;net35;net462;net472;net48;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net2.0;net3.5;net4.6.2;net4.7.2;net4.8.1;net6.0;netcore50;netcoreapp3.1;netstandard1.4;netstandard2.0;netstandard2.1;</TargetFrameworks>
     <OutputTypeEx>Library</OutputTypeEx>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <IncludeSource>false</IncludeSource>
@@ -26,11 +26,11 @@
     <Deterministic>false</Deterministic>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net20' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net2.0' ">
     <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net20'">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net35' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net3.5' ">
     <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net35'">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
   </PropertyGroup>
 
@@ -38,36 +38,54 @@
     <DefineConstants>$(DefineConstants);NET2_1</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net20'
-                         or '$(TargetFramework)' == 'net35'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net2.0'
+                         or '$(TargetFramework)' == 'net3.5'">
     <Reference Include="System" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net452'
-                         or '$(TargetFramework)' == 'net462'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net4.5.2'
+                         or '$(TargetFramework)' == 'net4.6.2'">
     <Reference Include="System" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'
-                         or '$(TargetFramework)' == 'net462'
-                         or '$(TargetFramework)' == 'net472'
-                         or '$(TargetFramework)' == 'net48'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net4.6.2'
+                         or '$(TargetFramework)' == 'net4.7.2'
+                         or '$(TargetFramework)' == 'net4.8.1'
+                         or '$(TargetFramework)' == 'netcore50'
+                         or '$(TargetFramework)' == 'netstandard1.4'
+                         or '$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Memory" Version="4.5.5" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcore50'
+                         or '$(TargetFramework)' == 'netstandard1.4'">
+    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+  </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'
-                         or '$(TargetFramework)' == 'netstandard2.0'
-                         or '$(TargetFramework)' == 'net472'
-                         or '$(TargetFramework)' == 'net48'
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcore50'">
+    <PackageReference Include="Microsoft.NETCore" Version="5.0.2" />
+    <PackageReference Include="Microsoft.NETCore.Portable.Compatibility" Version="1.0.2" />
+  </ItemGroup>
+
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net4.7.2'
+                         or '$(TargetFramework)' == 'net4.8.1'
                          or '$(TargetFramework)' == 'net5.0'
                          or '$(TargetFramework)' == 'net6.0'
-                         or '$(TargetFramework)' == 'netcoreapp3.1'">
+                         or '$(TargetFramework)' == 'netcore50'
+                         or '$(TargetFramework)' == 'netcoreapp3.1'
+                         or '$(TargetFramework)' == 'netstandard1.4'
+                         or '$(TargetFramework)' == 'netstandard2.0'
+                         or '$(TargetFramework)' == 'netstandard2.1'">
     <DefineConstants>$(DefineConstants);HAS_SPAN</DefineConstants>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\BCrypt.Net-Next.xml</DocumentationFile>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcore50'">
+    <NugetTargetMoniker>.NETCore,Version=v5.0</NugetTargetMoniker>
+  </PropertyGroup>
+
 </Project>
