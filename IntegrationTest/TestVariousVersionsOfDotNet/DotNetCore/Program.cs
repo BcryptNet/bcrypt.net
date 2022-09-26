@@ -54,6 +54,7 @@
             Console.WriteLine(sw.ElapsedMilliseconds);
             Console.WriteLine("---");
 
+            Console.Write("Press any key to exit...");
             Console.ReadKey();
         }
     }

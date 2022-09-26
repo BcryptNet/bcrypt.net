@@ -37,7 +37,7 @@ namespace DotNet4
 
             //for (int ji = 0; ji < _testVectors.Length / 3; ji++)
             //{
-            //    var hashInfo = BCrypt.InterrogateHash(_testVectors[ji, 2]);
+            //    var hashInfo = BC.InterrogateHash(_testVectors[ji, 2]);
             //    Console.WriteLine("{0}, {1}", hashInfo.WorkFactor, hashInfo.Version);
 
             //}
@@ -63,6 +63,7 @@ namespace DotNet4
             Console.WriteLine(sw.ElapsedTicks + "ticks");
             Console.WriteLine("---");
 
+            Console.Write("Press any key to exit...");
             Console.ReadKey();
         }
     }

@@ -1,10 +1,7 @@
 ﻿namespace DotNet2
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Text;
     using BCrypt.Net;
+    using System.Diagnostics;
 
     class Program
     {

@@ -2,7 +2,6 @@
 
 namespace DotNetSix;
 
-
 class Program
 {
     // Vectors stored string, salt, expected hash
@@ -54,6 +53,7 @@ class Program
         Console.WriteLine(sw.ElapsedMilliseconds);
         Console.WriteLine("---");
 
+        Console.Write("Press any key to exit...");
         Console.ReadKey();
     }
 }

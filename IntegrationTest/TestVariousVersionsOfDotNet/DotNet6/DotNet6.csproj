@@ -1,21 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <LangVersion>default</LangVersion>
-    </PropertyGroup>
-    <ItemGroup>
-        <!-- emits global using static global::BCrypt.Net.BCrypt; -->
-        <!--<Using Include="BCrypt.Net.BCrypt" Static="True"/>-->
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
 
-        <!-- emits global using BcryptNet = global::BCrypt.Net.BCrypt; -->
-        <Using Include="BCrypt.Net.BCrypt" Alias="BcryptNet" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3"/>
-    </ItemGroup>
+  <ItemGroup>
+    <!-- emits global using static global::BCrypt.Net.BCrypt; -->
+    <!--<Using Include="BCrypt.Net.BCrypt" Static="True"/>-->
+
+    <!-- emits global using BcryptNet = global::BCrypt.Net.BCrypt; -->
+    <Using Include="BCrypt.Net.BCrypt" Alias="BcryptNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\BCrypt.Net\BCrypt.Net.csproj" />
+  </ItemGroup>
 
 </Project>
