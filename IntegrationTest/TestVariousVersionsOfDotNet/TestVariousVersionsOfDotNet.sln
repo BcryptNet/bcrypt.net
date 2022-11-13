@@ -15,7 +15,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApp", "WindowsF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowsFormsAppCore", "WindowsFormAppViaDotnetTools\WindowsFormsAppCore.csproj", "{130C30A4-4A68-409C-A1A5-7BB4A58F092F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNet6", "DotNet6\DotNet6.csproj", "{D4DDC49B-BCC4-41C3-A22E-3B47EA8BAAE4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNet6", "DotNet6\DotNet6.csproj", "{D4DDC49B-BCC4-41C3-A22E-3B47EA8BAAE4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{9B84043A-05A0-4D7B-89A0-A38C1FF08DEA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net", "..\..\src\BCrypt.Net\BCrypt.Net.csproj", "{4D7DE754-8CF3-4254-833C-FE6385B8AB5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,9 +55,16 @@ Global
 		{D4DDC49B-BCC4-41C3-A22E-3B47EA8BAAE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4DDC49B-BCC4-41C3-A22E-3B47EA8BAAE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4DDC49B-BCC4-41C3-A22E-3B47EA8BAAE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D7DE754-8CF3-4254-833C-FE6385B8AB5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D7DE754-8CF3-4254-833C-FE6385B8AB5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D7DE754-8CF3-4254-833C-FE6385B8AB5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D7DE754-8CF3-4254-833C-FE6385B8AB5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4D7DE754-8CF3-4254-833C-FE6385B8AB5F} = {9B84043A-05A0-4D7B-89A0-A38C1FF08DEA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB432A86-EA89-4A01-8932-B7853B837328}

@@ -115,6 +115,7 @@ public class Benchmark
                     Console.WriteLine("  {0}: Failed ({1})", method.Name, message);
                 }
         }
+        Console.Write("Press any key to exit...");
         Console.ReadLine();
     }
 

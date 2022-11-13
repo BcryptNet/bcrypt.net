@@ -1,17 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <OutputType>WinExe</OutputType>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-    <LangVersion>default</LangVersion>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="BCrypt.Net-Next">
-      <Version>4.0.2</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" />
+    <ProjectReference Include="..\..\..\src\BCrypt.Net\BCrypt.Net.csproj" />
   </ItemGroup>
+
 </Project>
