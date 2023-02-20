@@ -1,4 +1,4 @@
-﻿namespace BCrypt.Net
+﻿namespace nBCrypt
 {
     /// <summary>
     ///     Type of SHA implementation to use

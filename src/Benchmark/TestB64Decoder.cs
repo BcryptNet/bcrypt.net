@@ -1,10 +1,9 @@
 ﻿using Benchmark.HashParser;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Jobs;
 
 #pragma warning disable 1591
 
-namespace BCrypt.Net.Benchmarks
+namespace nBCrypt.Benchmarks
 {
     [MemoryDiagnoser]
     [RPlotExporter, RankColumn]

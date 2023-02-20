@@ -3,19 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 15.0.26228.4
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net", "BCrypt.Net\BCrypt.Net.csproj", "{CD69F016-5940-4FCA-BCA1-9D1D87C6F873}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net", "Bcrypt.Net\BCrypt.Net\BCrypt.Net.csproj", "{CD69F016-5940-4FCA-BCA1-9D1D87C6F873}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net.UnitTests", "BCrypt.Net.UnitTests\BCrypt.Net.UnitTests.csproj", "{2078EB7B-7EDF-4B65-80F7-DB4D92E08CCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\BCrypt.Net.UnitTests.csproj", "{2078EB7B-7EDF-4B65-80F7-DB4D92E08CCD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build-tools", "build-tools", "{6F3D5F8B-CD73-474C-BA79-D4A17E9F106D}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		..\readme.md = ..\readme.md
+		Bcrypt.Net\Directory.Build.props = Bcrypt.Net\Directory.Build.props
+		Bcrypt.Net\Directory.Build.targets = Bcrypt.Net\Directory.Build.targets
+		Dockerfile = Dockerfile
+		..\.github\workflows\dotnet.yml = ..\.github\workflows\dotnet.yml
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net.StrongName", "BCrypt.Net.StrongName\BCrypt.Net.StrongName.csproj", "{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nuget.Package-StrongName", "Bcrypt.Net\Nuget.StrongName\Nuget.Package-StrongName.csproj", "{10BEEF4B-A8BA-4FA2-A7B2-CF14E15B8D65}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net.Package", "BCrypt.Net.MainPackage\BCrypt.Net.Package.csproj", "{2AB9DBD9-6C09-492F-817C-54EEDFFDA120}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nuget.Package", "Bcrypt.Net\Nuget.MainPackage\Nuget.Package.csproj", "{2AB9DBD9-6C09-492F-817C-54EEDFFDA120}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark", "Benchmark\Benchmark.csproj", "{E75AA3B8-BF28-4366-B5C6-14AF342290C3}"
 EndProject

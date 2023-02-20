@@ -23,7 +23,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Xunit;
 
-namespace BCrypt.Net.UnitTests
+namespace nBCrypt.UnitTests
 {
     /// <summary>
     /// BCrypt tests
@@ -140,6 +140,7 @@ if (password_verify($pass,$hash)) {
             const string salt = "$2y$07$BCryptRequires22Chrcte"; // used as a fixed salt in the php code as per the behaviour
 
             // Password hash created through being passed via bcrypt once (This Should Fail)
+            // ReSharper disable once UnusedVariable
             const string passwordHashOneRound = "$2y$07$BCryptRequires22Chrctet7rDxl8RPE0hiH8EeV/YklkNceXZOjm";
             var hash = BCrypt.HashPassword(BCrypt.HashPassword(pass, salt), salt);
 

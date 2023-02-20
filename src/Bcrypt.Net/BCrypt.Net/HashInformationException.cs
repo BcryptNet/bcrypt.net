@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BCrypt.Net
+namespace nBCrypt
 {
     /// <summary>
     ///     Exception used to signal errors that occur during use of the hash information methods

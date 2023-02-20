@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyTitle>BCrypt.Net-Next.StrongName</AssemblyTitle>
+    <AssemblyName>BCrypt.Net-Next.StrongName</AssemblyName>
+    <PackageId>BCrypt.Net-Next.StrongName</PackageId>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net462;net472;net48;net6.0</TargetFrameworks>
+
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <SignAssembly Condition=" '$(OS)' != 'Windows_NT' ">true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <AssemblyOriginatorKeyFile>../../bcrypt.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\BCrypt.Net\**\*.cs" Exclude="..\BCrypt.Net\obj\**\*.cs"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="..\BCrypt.Net\Properties\AssemblyInfo.cs"/>
+  </ItemGroup>
+
+</Project>

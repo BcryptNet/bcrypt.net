@@ -103,19 +103,19 @@ namespace Benchmark.HashParser
         private static bool IsValidBCryptVersionChar(char value)
         {
             return value == 'a'
-                || value == 'b'
-                || value == 'x'
-                || value == 'y';
+                   || value == 'b'
+                   || value == 'x'
+                   || value == 'y';
         }
 
         private static bool IsValidBCryptBase64Char(char value)
         {
             // Ordered by ascending ASCII value
             return value == '.'
-                || value == '/'
-                || (value >= '0' && value <= '9')
-                || (value >= 'A' && value <= 'Z')
-                || (value >= 'a' && value <= 'z');
+                   || value == '/'
+                   || (value >= '0' && value <= '9')
+                   || (value >= 'A' && value <= 'Z')
+                   || (value >= 'a' && value <= 'z');
         }
 
         private static bool IsAsciiNumeric(char value)

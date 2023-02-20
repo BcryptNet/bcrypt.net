@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BCrypt.Net
+namespace nBCrypt
 {
     internal static class HashParser
     {

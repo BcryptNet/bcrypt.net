@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BCrypt.Net
+namespace nBCrypt
 {
     /// <summary>Exception for signalling parse errors during salt checks. </summary>
     public class SaltParseException : Exception

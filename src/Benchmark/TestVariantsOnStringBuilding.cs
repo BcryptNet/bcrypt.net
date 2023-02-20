@@ -1,12 +1,11 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Benchmark._3._2._1;
 using Benchmark.HashParser;
 using BenchmarkDotNet.Attributes;
 
 #pragma warning disable 1591
 
-namespace BCrypt.Net.Benchmarks
+namespace nBCrypt.Benchmarks
 {
     [MemoryDiagnoser]
     [CategoriesColumn]
@@ -84,8 +83,8 @@ namespace BCrypt.Net.Benchmarks
         {
             var result = new StringBuilder(60);
             result.Append('$').Append('2').Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$')
-            .Append(EncodedSaltAsChars)
-            .Append(EncodedHashAsChars);
+                .Append(EncodedSaltAsChars)
+                .Append(EncodedHashAsChars);
 
             return result.ToString();
         }
@@ -96,8 +95,8 @@ namespace BCrypt.Net.Benchmarks
         {
             var result = new StringBuilder(60);
             result.Append("$2").Append(bcryptMinorRevision).Append("$").Append(workFactor.ToString("D2")).Append("$")
-            .Append(EncodedSaltAsChars)
-            .Append(EncodedHashAsChars);
+                .Append(EncodedSaltAsChars)
+                .Append(EncodedHashAsChars);
 
             return result.ToString();
         }
