@@ -1,7 +1,7 @@
 ﻿using System;
-using Benchmark._3._2._1;
+using BCryptNet.BenchMarks._3._2._1;
 
-namespace Benchmark.HashParser
+namespace BCryptNet.BenchMarks.HashParser
 {
     internal static class Decoder
     {

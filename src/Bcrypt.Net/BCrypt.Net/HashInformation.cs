@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace nBCrypt
+namespace BCryptNet
 {
     /// <summary>
     ///     HashInformation : A value object that contains the results of interrogating a hash

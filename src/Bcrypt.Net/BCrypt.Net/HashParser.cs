@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace nBCrypt
+namespace BCryptNet
 {
-    internal static class HashParser
+    public static class HashParser
     {
         private static readonly HashFormatDescriptor OldFormatDescriptor = new HashFormatDescriptor(versionLength: 1);
         private static readonly HashFormatDescriptor NewFormatDescriptor = new HashFormatDescriptor(versionLength: 2);

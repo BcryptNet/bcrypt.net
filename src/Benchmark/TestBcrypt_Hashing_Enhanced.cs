@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
-using Benchmark._3._2._1;
-using Benchmark._3._5.perfmerge_1;
-using Benchmark._4._0._0;
+using BCryptNet.BenchMarks._3._2._1;
+using BCryptNet.BenchMarks._3._5.perfmerge_1;
+using BCryptNet.BenchMarks._4._0._0;
 using BenchmarkDotNet.Attributes;
+
 #pragma warning disable 1591
 
-namespace nBCrypt.Benchmarks
+namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
     [RPlotExporter, RankColumn]
@@ -69,6 +70,24 @@ namespace nBCrypt.Benchmarks
         {
             string hashed = version4.BCrypt.HashPassword(key, salt, enhancedEntropy: true);
             var validateHashCheck = version4.BCrypt.EnhancedVerify(key, hashed);
+            return hashed + validateHashCheck.ToString();
+        }
+
+        [Benchmark]
+        [ArgumentsSource(nameof(Data))]
+        public string TestHashValidateDepreciatedEnhancedCurrent(string key, string salt, string hash)
+        {
+            string hashed = BCryptExtendedV1.HashPassword(key, salt);
+            var validateHashCheck = BCryptExtendedV1.Verify(key, hashed);
+            return hashed + validateHashCheck.ToString();
+        }        
+        
+        [Benchmark]
+        [ArgumentsSource(nameof(Data))]
+        public string TestHashValidateEnhancedCurrent(string key, string salt, string hash)
+        {
+            string hashed = BCryptExtendedV2.HashPassword(key, salt);
+            var validateHashCheck = BCryptExtendedV2.Verify(key, hashed);
             return hashed + validateHashCheck.ToString();
         }
 

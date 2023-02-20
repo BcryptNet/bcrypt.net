@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Benchmark.HashParser
+namespace BCryptNet.BenchMarks.DecodeB64
 {
     internal static class DecodeB64Methods
     {

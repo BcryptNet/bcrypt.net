@@ -1,4 +1,4 @@
-﻿namespace nBCrypt
+﻿namespace BCryptNet
 {
     /// <summary>
     ///     Type of SHA implementation to use
@@ -10,6 +10,8 @@
         None = -1,
         SHA256 = 0,
         SHA384 = 1,
-        SHA512 = 2
+        SHA512 = 2,
+        HMAC384 = 3,
+        HMAC512 = 4
     }
 }

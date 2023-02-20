@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace nBCrypt
+namespace BCryptNet
 {
     /// <inheritdoc />
     /// <summary>Exception for signalling hash validation errors. </summary>

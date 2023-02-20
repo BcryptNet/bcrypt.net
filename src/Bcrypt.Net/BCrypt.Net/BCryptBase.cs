@@ -2,7 +2,7 @@
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
-Copyright (c) 2016/2022 Chris McKee (.Net-core port / patches / new features)
+Copyright (c) 2016/2023 Chris McKee (.Net-core port / patches / new features)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -22,7 +22,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace nBCrypt;
+namespace BCryptNet;
 
 /// <summary>
 /// Base class of the bcrypt api
@@ -35,12 +35,10 @@ public class BCryptCore
     /// </summary>
     internal const int DefaultRounds = 11;
 
-    internal const int BCryptSaltLen = 128 / 8; // 128 bits
+    private const int BCryptSaltLen = 128 / 8; // 128 bits
 
     internal static readonly Encoding SafeUTF8 =
         new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
-
-    internal const HashType DefaultEnhancedHashType = HashType.SHA384;
 
     // Blowfish parameters
     private const int BlowfishNumRounds = 16;
@@ -53,13 +51,13 @@ public class BCryptCore
 
     #region Initial contents of key schedule
 
-    private static readonly uint[] POrig =
+    private static readonly uint[] POrig = new uint[]
     {
         0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344, 0xa4093822, 0x299f31d0, 0x082efa98, 0xec4e6c89, 0x452821e6,
         0x38d01377, 0xbe5466cf, 0x34e90c6c, 0xc0ac29b7, 0xc97c50dd, 0x3f84d5b5, 0xb5470917, 0x9216d5d9, 0x8979fb1b
     };
 
-    private static readonly uint[] SOrig =
+    private static readonly uint[] SOrig = new uint[]
     {
         0xd1310ba6, 0x98dfb5ac, 0x2ffd72db, 0xd01adfb7, 0xb8e1afed, 0x6a267e96, 0xba7c9045, 0xf12c7f99, 0x24a19947,
         0xb3916cf7, 0x0801f2e2, 0x858efc16, 0x636920d8, 0x71574e69, 0xa458fea3, 0xf4933d7e, 0x0d95748f, 0x728eb658,
@@ -181,14 +179,12 @@ public class BCryptCore
 
     // BCrypt IV: "OrpheanBeholderScryDoubt"
     private static readonly uint[] BfCryptCiphertext =
-    {
-        0x4f727068, 0x65616e42, 0x65686f6c, 0x64657253, 0x63727944, 0x6f756274
-    };
+        new uint[] { 0x4f727068, 0x65616e42, 0x65686f6c, 0x64657253, 0x63727944, 0x6f756274 };
 
-    internal static readonly int BfCryptCiphertextLength = BfCryptCiphertext.Length;
+    private static readonly int BfCryptCiphertextLength = BfCryptCiphertext.Length;
 
     // Table for Base64 encoding
-    private static readonly char[] Base64Code =
+    private static readonly char[] Base64Code = new[]
     {
         '.', '/', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
         'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
@@ -196,7 +192,7 @@ public class BCryptCore
     };
 
     // Table for Base64 decoding
-    private static readonly int[] Index64 =
+    private static readonly int[] Index64 = new[]
     {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 54, 55, 56, 57, 58, 59,
@@ -216,6 +212,140 @@ public class BCryptCore
     private uint[] _p;
     private uint[] _s;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="inputKey"></param>
+    /// <param name="salt"></param>
+    /// <param name="hashType"></param>
+    /// <param name="enhancedHashKeyGen"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="SaltParseException"></exception>
+    internal static string CreatePasswordHash(string inputKey, string salt, HashType hashType = HashType.None,
+        Func<string, HashType, char, byte[]> enhancedHashKeyGen = null)
+    {
+        if (inputKey == null)
+        {
+            throw new ArgumentNullException(nameof(inputKey));
+        }
+
+        if (string.IsNullOrEmpty(salt))
+        {
+            throw new ArgumentException("Invalid salt: salt cannot be null or empty", nameof(salt));
+        }
+
+        if (enhancedHashKeyGen == null && hashType != HashType.None)
+            throw new ArgumentException(
+                "Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.",
+                nameof(hashType));
+
+        // Determine the starting offset and validate the salt
+        int startingOffset;
+        char bcryptMinorRevision = (char)0;
+        if (salt[0] != '$' || salt[1] != '2')
+        {
+            throw new SaltParseException("Invalid salt version");
+        }
+        else if (salt[2] == '$')
+        {
+            startingOffset = 3;
+        }
+        else
+        {
+            bcryptMinorRevision = salt[2];
+            if (bcryptMinorRevision != 'a' && bcryptMinorRevision != 'b' && bcryptMinorRevision != 'x' &&
+                bcryptMinorRevision != 'y' || salt[3] != '$')
+            {
+                throw new SaltParseException("Invalid salt revision");
+            }
+
+            startingOffset = 4;
+        }
+
+        // Extract number of rounds
+        if (salt[startingOffset + 2] > '$')
+        {
+            throw new SaltParseException("Missing salt rounds");
+        }
+
+        // Extract details from salt
+        int workFactor = Convert.ToInt16(salt.Substring(startingOffset, 2));
+
+        // Throw if log rounds are out of range on hash, deals with custom salts
+        if (workFactor < 1 || workFactor > 31)
+        {
+            throw new SaltParseException("Salt rounds out of range");
+        }
+
+        var inputBytes = hashType == HashType.None
+            ? SafeUTF8.GetBytes(inputKey + (bcryptMinorRevision >= 'a' ? Nul : EmptyString))
+            : enhancedHashKeyGen(inputKey, hashType, bcryptMinorRevision);
+
+        return HashBytes(inputBytes, salt.Substring(startingOffset + 3, 22), bcryptMinorRevision, workFactor);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="inputBytes"></param>
+    /// <param name="extractedSalt"></param>
+    /// <param name="bcryptMinorRevision"></param>
+    /// <param name="workFactor"></param>
+    /// <returns></returns>
+    internal static string HashBytes(byte[] inputBytes, string extractedSalt, char bcryptMinorRevision, int workFactor)
+    {
+        byte[] saltBytes = DecodeBase64(extractedSalt, BCryptSaltLen);
+
+        BCrypt bCrypt = new BCrypt();
+
+        byte[] hashed = bCrypt.CryptRaw(inputBytes, saltBytes, workFactor);
+
+        // Generate result string
+        var result = new StringBuilder(60);
+        result.Append("$2").Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$');
+        result.Append(EncodeBase64(saltBytes, saltBytes.Length));
+        result.Append(EncodeBase64(hashed, (BfCryptCiphertextLength * 4) - 1));
+
+        return result.ToString();
+    }
+
+    /// <summary>
+    ///  Generate a salt for use with the <see cref="BCrypt.HashPassword(string, string)"/> method.
+    /// </summary>
+    /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
+    ///                          factor therefore increases as 2**workFactor.</param>
+    /// <param name="bcryptMinorRevision"></param>
+    /// <exception cref="ArgumentOutOfRangeException">Work factor must be between 4 and 31</exception>
+    /// <returns>A base64 encoded salt value.</returns>
+    /// <exception cref="ArgumentException">BCrypt Revision should be a, b, x or y</exception>
+    internal static string GenerateSalt(int workFactor = DefaultRounds, char bcryptMinorRevision = DefaultHashVersion)
+    {
+        if (workFactor < MinRounds || workFactor > MaxRounds)
+        {
+            throw new ArgumentOutOfRangeException(nameof(workFactor), workFactor,
+                $"The work factor must be between {MinRounds} and {MaxRounds} (inclusive)");
+        }
+
+        if (bcryptMinorRevision != 'a' && bcryptMinorRevision != 'b' && bcryptMinorRevision != 'x' &&
+            bcryptMinorRevision != 'y')
+        {
+            throw new ArgumentException("BCrypt Revision should be a, b, x or y", nameof(bcryptMinorRevision));
+        }
+
+        byte[] saltBytes = new byte[BCryptSaltLen];
+
+        RngCsp.GetBytes(saltBytes);
+
+        var result = new StringBuilder(29);
+        result.Append("$2").Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$');
+        result.Append(EncodeBase64(saltBytes, saltBytes.Length));
+
+        return result.ToString();
+    }
+
+    // Internals
 
     // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
@@ -367,7 +497,7 @@ public class BCryptCore
 #if HAS_SPAN
     private void Encipher(Span<uint> blockArray, int offset)
 #else
-        private void Encipher(uint[] blockArray, int offset)
+    private void Encipher(uint[] blockArray, int offset)
 #endif
     {
         uint block = blockArray[offset];
@@ -407,7 +537,7 @@ public class BCryptCore
 #if HAS_SPAN
     private static uint StreamToWord(ReadOnlySpan<byte> data, ref int offset)
 #else
-        private static uint StreamToWord(byte[] data, ref int offset)
+    private static uint StreamToWord(byte[] data, ref int offset)
 #endif
     {
         int i;
@@ -436,7 +566,7 @@ public class BCryptCore
 #if HAS_SPAN
     private void Key(ReadOnlySpan<byte> keyBytes)
 #else
-        private void Key(byte[] keyBytes)
+    private void Key(byte[] keyBytes)
 #endif
     {
         int i;
@@ -444,7 +574,7 @@ public class BCryptCore
 #if HAS_SPAN
         Span<uint> lr = stackalloc uint[2] { 0, 0 };
 #else
-            uint[] lr = { 0, 0 };
+        uint[] lr = { 0, 0 };
 #endif
         int pLen = _p.Length, sLen = _s.Length;
 
@@ -478,7 +608,7 @@ public class BCryptCore
 #if HAS_SPAN
     private void EKSKey(ReadOnlySpan<byte> saltBytes, ReadOnlySpan<byte> inputBytes)
 #else
-        private void EKSKey(byte[] saltBytes, byte[] inputBytes)
+    private void EKSKey(byte[] saltBytes, byte[] inputBytes)
 #endif
     {
         int i;
@@ -487,7 +617,7 @@ public class BCryptCore
 #if HAS_SPAN
         Span<uint> lr = stackalloc uint[2] { 0, 0 };
 #else
-            uint[] lr = { 0, 0 };
+        uint[] lr = { 0, 0 };
 #endif
         int pLen = _p.Length, sLen = _s.Length;
 
@@ -525,7 +655,7 @@ public class BCryptCore
 #if HAS_SPAN
     internal byte[] CryptRaw(ReadOnlySpan<byte> inputBytes, ReadOnlySpan<byte> saltBytes, int workFactor)
 #else
-       internal byte[] CryptRaw(byte[] inputBytes, byte[] saltBytes, int workFactor)
+    internal byte[] CryptRaw(byte[] inputBytes, byte[] saltBytes, int workFactor)
 #endif
     {
         int i;
@@ -535,8 +665,8 @@ public class BCryptCore
         Span<uint> cdata = stackalloc uint[BfCryptCiphertext.Length];
         BfCryptCiphertext.CopyTo(cdata);
 #else
-            uint[] cdata = new uint[BfCryptCiphertext.Length];
-            Array.Copy(BfCryptCiphertext, cdata, BfCryptCiphertext.Length);
+        uint[] cdata = new uint[BfCryptCiphertext.Length];
+        Array.Copy(BfCryptCiphertext, cdata, BfCryptCiphertext.Length);
 #endif
 
         int clen = cdata.Length;

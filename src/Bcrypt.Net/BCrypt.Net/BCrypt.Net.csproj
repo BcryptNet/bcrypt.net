@@ -4,9 +4,20 @@
     <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next</AssemblyName>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net462;net472;net48;net6.0</TargetFrameworks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <PropertyGroup>
     <Deterministic>false</Deterministic>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
+    <DocumentationFile>bin\Release\BCrypt.Net-Next.xml</DocumentationFile>
+  </PropertyGroup>
+
+<!--  <ItemGroup>-->
+<!--    <PackageVersion Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" />-->
+<!--  </ItemGroup>-->
 </Project>

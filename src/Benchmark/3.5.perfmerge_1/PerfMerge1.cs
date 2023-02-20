@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 
 // BASE
-namespace Benchmark._3._5.perfmerge_1
+namespace BCryptNet.BenchMarks._3._5.perfmerge_1
 {
     public class PerfMerge1
     {

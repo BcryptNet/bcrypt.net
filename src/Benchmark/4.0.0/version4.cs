@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 
 // BASE
-namespace Benchmark._4._0._0
+namespace BCryptNet.BenchMarks._4._0._0
 {
     public class version4
     {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 // BASE
-namespace Benchmark._3._2._1
+namespace BCryptNet.BenchMarks._3._2._1
 {
     public class BaseLine
     {

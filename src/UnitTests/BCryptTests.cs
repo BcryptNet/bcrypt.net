@@ -2,7 +2,7 @@
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
-Copyright (c) 2016/2021 Chris McKee (.Net-core port / patches / new features)
+Copyright (c) 2016/2023 Chris McKee (.Net-core port / patches / new features)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -23,14 +23,16 @@ using System.Security.Cryptography;
 using System.Text;
 using Xunit;
 
-namespace nBCrypt.UnitTests
+namespace BCryptNet.UnitTests
 {
     /// <summary>
     /// BCrypt tests
     /// </summary>
     public class BCryptTests
     {
-        readonly string[,] _testVectors = {
+        private static readonly Encoding SafeUtf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+        
+        private readonly string[,] _testVectors = new[,] {
             { "",                                   "$2a$06$DCq7YPn5Rq63x1Lad4cll.",    "$2a$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s." },
             { "",                                   "$2a$08$HqWuK6/Ng6sg9gQzbLrgb.",    "$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye" },
             { "",                                   "$2a$10$k1wbIrmNyFAPwPVPSVa/ze",    "$2a$10$k1wbIrmNyFAPwPVPSVa/zecw2BCEnBwVS2GbrmgzxFUOqW9dk4TCW" },
@@ -56,7 +58,7 @@ namespace nBCrypt.UnitTests
         /// <summary>
         /// Hashes created using other languages
         /// </summary>
-        readonly string[,] _otherLibTestVectors = {
+        private readonly string[,] _otherLibTestVectors = new[,] {
             //passlib in python prehashed using SHA256; 7 rounds on bcrypt
             { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2b$07$9IpAgJw99HWJur2uj3vr3O",    "$2b$07$9IpAgJw99HWJur2uj3vr3OyXMLQ05R2dQE.L5iGnbcVFgMRpsPZRG" },
             { "",                                   "$2b$07$0AD340gChkx46nsejmoRw.",    "$2b$07$0AD340gChkx46nsejmoRw.ANNVeZY33cuGluoj/QhaGEFNGb3sg8O" },
@@ -68,11 +70,11 @@ namespace nBCrypt.UnitTests
             { "chipsn'dip",                         "$2y$10$9Cb83ULoFHStLMg2iKG3p.",    "$2y$10$9Cb83ULoFHStLMg2iKG3p.0.ux/vJ49gZXs4FMooj44W1P8DN89Pi" },
         };
 
-        readonly char[] _revisions = new char[] { 'a', 'x', 'y', 'b' };
+        private readonly char[] _revisions = { 'a', 'x', 'y', 'b' };
 
 
-        private string TwoPointZeroVersionPass64 = "585292059d6b430b931e77f046bb20cca5f99e9adc8a4359aadd93afa03e60c3";
-        private string[] TwoPointZeroVersionGeneratedHashes64 = new[]
+        private readonly string TwoPointZeroVersionPass64 = "585292059d6b430b931e77f046bb20cca5f99e9adc8a4359aadd93afa03e60c3";
+        private readonly string[] TwoPointZeroVersionGeneratedHashes64 = new[]
         {
             "$2a$10$J5oWpzAvyvvK1ysM/wcKXuckwyEVUTq9Df7tI04EMgT.ATijICPX.",
             "$2a$11$pTBrApS6R/DagcVWzqsm9eYgYwVC.SKQtd1Gn0tb2ELB22oN9YTKC",
@@ -99,27 +101,27 @@ namespace nBCrypt.UnitTests
 
         [Fact]
         /*
-<?php
-$hash = '$2y$07$BCryptRequires22Chrctet7rDxl8RPE0hiH8EeV/YklkNceXZOjm';
+            <?php
+            $hash = '$2y$07$BCryptRequires22Chrctet7rDxl8RPE0hiH8EeV/YklkNceXZOjm';
 
-$pass = 'justatestofphpStringHashing_test';
+            $pass = 'justatestofphpStringHashing_test';
 
-$pr1 = password_hash($pass,PASSWORD_BCRYPT, ["salt"=>'BCryptRequires22Chrcte', "cost"=>7]);
+            $pr1 = password_hash($pass,PASSWORD_BCRYPT, ["salt"=>'BCryptRequires22Chrcte', "cost"=>7]);
 
-$pr2 = password_hash($pr1,PASSWORD_BCRYPT, ["salt"=>'BCryptRequires22Chrcte', "cost"=>7]);
+            $pr2 = password_hash($pr1,PASSWORD_BCRYPT, ["salt"=>'BCryptRequires22Chrcte', "cost"=>7]);
 
-echo 'This is a single pass through bcrypt' . PHP_EOL;
-echo PHP_EOL . $pr1 . PHP_EOL;
-echo 'This is a second pass of the first hash through bcrypt with the same hash' . PHP_EOL;
-echo PHP_EOL . $pr2 . PHP_EOL;
+            echo 'This is a single pass through bcrypt' . PHP_EOL;
+            echo PHP_EOL . $pr1 . PHP_EOL;
+            echo 'This is a second pass of the first hash through bcrypt with the same hash' . PHP_EOL;
+            echo PHP_EOL . $pr2 . PHP_EOL;
 
-if (password_verify($pass,$hash)) {
-    echo 'Password is valid!';
-} else {
-    echo 'Invalid password.';
-}
+            if (password_verify($pass,$hash)) {
+                echo 'Password is valid!';
+            } else {
+                echo 'Invalid password.';
+            }
 
-?>
+            ?>
          */
         public void GithubIssue119_WoltLabForumPHPBcrypt()
         {
@@ -140,8 +142,7 @@ if (password_verify($pass,$hash)) {
             const string salt = "$2y$07$BCryptRequires22Chrcte"; // used as a fixed salt in the php code as per the behaviour
 
             // Password hash created through being passed via bcrypt once (This Should Fail)
-            // ReSharper disable once UnusedVariable
-            const string passwordHashOneRound = "$2y$07$BCryptRequires22Chrctet7rDxl8RPE0hiH8EeV/YklkNceXZOjm";
+            //const string passwordHashOneRound = "$2y$07$BCryptRequires22Chrctet7rDxl8RPE0hiH8EeV/YklkNceXZOjm";
             var hash = BCrypt.HashPassword(BCrypt.HashPassword(pass, salt), salt);
 
             Assert.True(HashParser.IsValidHash(hash, out _));
@@ -163,7 +164,7 @@ if (password_verify($pass,$hash)) {
             Assert.False(BCrypt.Verify(pass, passwordHashTwoRound));
 
             // This will pass, but is open to timing attacks  (Taken from sample in https://github.com/BcryptNet/bcrypt.net/issues/119)
-            Assert.True(string.Equals(passwordHashTwoRound, doubleBcryptSaltGiven));
+            Assert.Equal(passwordHashTwoRound, doubleBcryptSaltGiven);
 
             // This will pass and effectively behaves the same as WCF
             Assert.True(BCrypt.Verify(BCrypt.HashPassword(pass, passwordHashTwoRound), passwordHashTwoRound));
@@ -205,10 +206,8 @@ if (password_verify($pass,$hash)) {
                         salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
 
                         string hashed = BCrypt.HashPassword(plain, salt);
-
-
-                        var d = hashed.StartsWith("$2" + _revisions[r]);
-                        Assert.True(d);
+                        
+                        Assert.StartsWith("$2" + _revisions[r], hashed);
                         Trace.WriteLine(hashed);
                     }
                     else
@@ -217,7 +216,6 @@ if (password_verify($pass,$hash)) {
                         var expected = _testVectors[i, 2];
 
                         string hashed = BCrypt.HashPassword(plain, salt);
-                        var d = hashed == expected;
                         Assert.Equal(hashed, expected);
                     }
 
@@ -244,18 +242,17 @@ if (password_verify($pass,$hash)) {
                 for (int i = 0; i < _testVectors.Length / 3; i++)
                 {
                     string plain = _testVectors[i, 0];
-                    string salt;
 
                     //Check hash that goes in one end comes out the next the same
-                    salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
+                    string salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
 
-                    string hashed = BCrypt.HashPassword(plain, salt, enhancedEntropy: true);
+                    string hashed = BCryptExtendedV2.HashPassword(plain, salt);
 
                     var revCheck = hashed.StartsWith("$2" + _revisions[r]);
 
                     Assert.True(revCheck);
-
-                    var validateHashCheck = BCrypt.EnhancedVerify(plain, hashed);
+                    
+                    var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed);
                     Assert.True(validateHashCheck);
 
                     Trace.WriteLine(hashed);
@@ -278,16 +275,15 @@ if (password_verify($pass,$hash)) {
             for (int i = 0; i < _otherLibTestVectors.Length / 3; i++)
             {
                 string plain = _otherLibTestVectors[i, 0];
-                string salt;
 
                 //Check hash that goes in one end comes out the next the same
-                salt = _otherLibTestVectors[i, 1];
+                string salt = _otherLibTestVectors[i, 1];
 
-                string hashed = BCrypt.HashPassword(plain, salt, enhancedEntropy: true, HashType.SHA256);
+                string hashed = BCryptExtendedV2.HashPassword(plain, salt, HashType.SHA256);
 
-                Assert.Equal(hashed, _otherLibTestVectors[i, 2]);
+                Assert.Equal(_otherLibTestVectors[i, 2], hashed);
 
-                var validateHashCheck = BCrypt.Verify(plain, hashed, true, HashType.SHA256);
+                var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed, HashType.SHA256);
                 Assert.True(validateHashCheck);
 
                 Trace.WriteLine(hashed);
@@ -310,18 +306,17 @@ if (password_verify($pass,$hash)) {
                 for (int i = 0; i < _testVectors.Length / 3; i++)
                 {
                     string plain = _testVectors[i, 0];
-                    string salt;
 
                     //Check hash that goes in one end comes out the next the same
-                    salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
+                    string salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
 
-                    string hashed = BCrypt.HashPassword(plain, salt, true, HashType.SHA256);
+                    string hashed = BCryptExtendedV2.HashPassword(plain, salt, HashType.SHA256);
 
                     var revCheck = hashed.StartsWith("$2" + _revisions[r]);
 
                     Assert.True(revCheck);
 
-                    var validateHashCheck = BCrypt.EnhancedVerify(plain, hashed, HashType.SHA256);
+                    var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed, HashType.SHA256);
                     Assert.True(validateHashCheck);
 
                     Trace.WriteLine(hashed);
@@ -345,9 +340,9 @@ if (password_verify($pass,$hash)) {
 
                 string newPassword = "my new password";
                 string hashed = BCrypt.HashPassword(currentKey, salt);
-                var d = hashed == currentHash;
+                Assert.Equal(currentHash, hashed);
 
-                var newHash = BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword);
+                var newHash = BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword);
 
                 var newPassValid = BCrypt.Verify(newPassword, newHash);
 
@@ -359,22 +354,22 @@ if (password_verify($pass,$hash)) {
         }
 
 
-        [Theory()]
-        [InlineData("\u2605\u2605\u2605\u2605\u2605\u2605\u2605\u2605")]
-        [InlineData("ππππππππ")]
-        public void TestValidateAndReplaceEnhanced(string pass)
-        {
-            string newPassword = "my new password";
-            string hashed = BCrypt.EnhancedHashPassword(pass, HashType.SHA256);
-
-            var newHash = BCrypt.ValidateAndReplacePassword(pass, hashed, true, HashType.SHA256, newPassword, true, HashType.SHA512);
-
-            var newPassValid = BCrypt.EnhancedVerify(newPassword, newHash, HashType.SHA512);
-
-            Assert.True(newPassValid);
-
-            Trace.Write(".");
-        }
+        // [Theory()]
+        // [InlineData("\u2605\u2605\u2605\u2605\u2605\u2605\u2605\u2605")]
+        // [InlineData("ππππππππ")]
+        // public void TestValidateAndReplaceEnhanced(string pass)
+        // {
+        //     string newPassword = "my new password";
+        //     string hashed = BCryptExtendedV2.HashPassword(pass, HashType.SHA256);
+        //
+        //     var newHash = BCrypt.ValidateAndReplacePassword(pass, hashed, true, HashType.SHA256, newPassword, true, HashType.SHA512);
+        //
+        //     var newPassValid = BCryptExtendedV2.Verify(newPassword, newHash, HashType.SHA512);
+        //
+        //     Assert.True(newPassValid);
+        //
+        //     Trace.Write(".");
+        // }
 
         [Fact()]
         public void TestValidateAndReplaceWithWorkload()
@@ -389,7 +384,7 @@ if (password_verify($pass,$hash)) {
                 string hashed = BCrypt.HashPassword(currentKey, salt);
                 var d = hashed == currentHash;
 
-                var newHash = BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 11);
+                var newHash = BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, workFactor: 11);
 
                 var newPassValid = BCrypt.Verify(newPassword, newHash);
 
@@ -413,7 +408,7 @@ if (password_verify($pass,$hash)) {
             string hashed = BCrypt.HashPassword(currentKey, salt);
             var d = hashed == currentHash;
 
-            Assert.Contains("$12$", BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 5));
+            Assert.Contains("$12$", BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, workFactor: 5));
 
             Trace.Write(".");
         }
@@ -421,15 +416,14 @@ if (password_verify($pass,$hash)) {
         [Fact()]
         public void TestValidateAndReplaceWithForceAndWorkloadSmallerThanCurrentEndsWithRequestedWorkLoad()
         {
-
             string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
             string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
             string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC";
 
             string newPassword = "my new password";
             string hashed = BCrypt.HashPassword(currentKey, salt);
-            var d = hashed == currentHash;
-            var replHash = BCrypt.ValidateAndReplacePassword(currentKey, currentHash, newPassword, workFactor: 5, forceWorkFactor: true);
+            Assert.Equal(hashed, currentHash);
+            var replHash = BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, workFactor: 5, forceWorkFactor: true);
             Assert.Contains("$05$", replHash);
             Trace.Write(".");
         }
@@ -569,62 +563,50 @@ if (password_verify($pass,$hash)) {
             string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
             Assert.True(BCrypt.Verify(pw1, h1));
 
-            string h2 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt(), enhancedEntropy: true);
-            Assert.True(BCrypt.Verify(pw1, h2, true));
-
             Trace.Write(".");
         }
-
-
-
+        
         [Theory()]
-        [InlineData(false, "password\0defgreallylongpassword")]
-        [InlineData(false, "password\x00 xdefgreallylongpassword")]
-        [InlineData(false, "password\x00 defgreallylongpassword")]
-        [InlineData(true, "password\0defgreallylongpassword")]
-        [InlineData(true, "password\x00 xdefgreallylongpassword")]
-        [InlineData(true, "password\x00 defgreallylongpassword")]
-        public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworks(bool enhanced, string password)
+        [InlineData("password\0defgreallylongpassword")]
+        [InlineData("password\x00 xdefgreallylongpassword")]
+        [InlineData("password\x00 defgreallylongpassword")]
+        public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworks(string password)
         {
             var x = BCrypt.GenerateSalt();
-            string hash = BCrypt.HashPassword(password, x, enhanced);
+            string hash = BCrypt.HashPassword(password, x);
 
-            var t1 = BCrypt.Verify(password, hash, enhanced);
-            var t2 = BCrypt.Verify("password", hash, enhanced);
+            var t1 = BCrypt.Verify(password, hash);
+            var t2 = BCrypt.Verify("password", hash);
             Assert.True(t1, "Null terminator should validate if part of passphrase");
-            Assert.False(t2, "Null terminator shouldnt alter passphrase");
+            Assert.False(t2, "Null terminator shouldn't alter passphrase");
         }
 
         [Theory()]
-        [InlineData(false, "\0 defgreallylongpassword", "\0")]
-        [InlineData(true, "\0 defgreallylongpassword", "\0")]
-        public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworksSetB(bool enhanced, string password, string leader)
+        [InlineData("\0 defgreallylongpassword", "\0")]
+        public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworksSetB(string password, string leader)
         {
             var x = BCrypt.GenerateSalt();
-            string hash = BCrypt.HashPassword(password, x, enhanced);
+            string hash = BCrypt.HashPassword(password, x);
 
-            Assert.False(BytesAreValid(SafeUTF8.GetBytes(password)));
+            Assert.False(BytesAreValid(SafeUtf8.GetBytes(password)));
 
-            var t1 = BCrypt.Verify(leader, hash, enhanced);
+            var t1 = BCrypt.Verify(leader, hash);
             Assert.False(t1, "Null should be treated as part of password as per spec");
-            Assert.False(BCrypt.Verify("", hash, enhanced), "Null should be treated as part of password as per spec");
+            Assert.False(BCrypt.Verify("", hash), "Null should be treated as part of password as per spec");
 
         }
-
-        private static readonly Encoding SafeUTF8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
-
 
         [Fact]
         public void LeadingByteDoesntTruncateHash()
         {
-            var b = new BCrypt();
+            var b = new BCryptCore();
             var s = BCrypt.GenerateSalt();
             var extractedSalt = s.Substring(7, 22);
 
-            var passA = SafeUTF8.GetBytes("\0 password");
-            var passB = SafeUTF8.GetBytes("\0");
+            var passA = SafeUtf8.GetBytes("\0 password");
+            var passB = SafeUtf8.GetBytes("\0");
 
-            byte[] saltBytes = BCrypt.DecodeBase64(extractedSalt, 128 / 8);
+            byte[] saltBytes = BCryptCore.DecodeBase64(extractedSalt, 128 / 8);
 
             var bytesAreValid = BytesAreValid(passA);
             Assert.False(bytesAreValid, "Hash contains null bytes");
@@ -637,7 +619,7 @@ if (password_verify($pass,$hash)) {
             var hashBVerification = b.CryptRaw(passB, saltBytes, 4);
             Assert.True(Convert.ToBase64String(hashB) == Convert.ToBase64String(hashBVerification), "These should match as this is how validation works, this is skipping the password");
 
-            Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldnt match as we hash the whole strings bytes, including the null byte");
+            Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldn't match as we hash the whole strings bytes, including the null byte");
         }
 
         [Fact]
@@ -647,7 +629,7 @@ if (password_verify($pass,$hash)) {
             var s = BCrypt.GenerateSalt();
             var extractedSalt = s.Substring(7, 22);
 
-            var passA = SafeUTF8.GetBytes("d27a37");
+            var passA = SafeUtf8.GetBytes("d27a37");
             var passB = new byte[] { 0 };
 
             byte[] saltBytes = BCrypt.DecodeBase64(extractedSalt, 128 / 8);
@@ -706,9 +688,9 @@ if (password_verify($pass,$hash)) {
         {
             const string myPassword = "IPAHJipdfh80adyf80aegh80gfrh";
 
-            var enhancedHashPassword = BCrypt.EnhancedHashPassword(myPassword, hashType: HashType.SHA384);
+            var enhancedHashPassword = BCryptExtendedV2.HashPassword(myPassword);
 
-            var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword, hashType: HashType.SHA384);
+            var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword, hashType: HashType.SHA384);
 
             Assert.True(validatePassword);
         }

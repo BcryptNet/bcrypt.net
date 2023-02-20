@@ -1,11 +1,11 @@
 ﻿using System.Text;
-using Benchmark._3._2._1;
-using Benchmark.HashParser;
+using BCryptNet.BenchMarks._3._2._1;
+using BCryptNet.BenchMarks.EncodeB64;
 using BenchmarkDotNet.Attributes;
 
 #pragma warning disable 1591
 
-namespace nBCrypt.Benchmarks
+namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
     [CategoriesColumn]

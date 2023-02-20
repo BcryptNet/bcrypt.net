@@ -13,11 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\BCrypt.Net\**\*.cs" Exclude="..\BCrypt.Net\obj\**\*.cs"/>
+    <Compile Include="..\BCrypt.Net\**\*.cs" Exclude="..\BCrypt.Net\obj\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="..\BCrypt.Net\Properties\AssemblyInfo.cs"/>
+    <Compile Remove="..\BCrypt.Net\Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" />
   </ItemGroup>
 
 </Project>
