@@ -12,6 +12,8 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>portable</DebugType>
     <CompileUsingReferenceAssemblies>false</CompileUsingReferenceAssemblies>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+
   </PropertyGroup>
 
   <ItemGroup>

@@ -394,6 +394,7 @@ public class BCryptCore
         int off = 0;
         while (off < length)
         {
+            //Process first byte in group
             int c1 = byteArray[off++] & 0xff;
             encoded[pos++] = Base64Code[(c1 >> 2) & 0x3f];
             c1 = (c1 & 0x03) << 4;
@@ -403,6 +404,7 @@ public class BCryptCore
                 break;
             }
 
+            // second byte of group
             int c2 = byteArray[off++] & 0xff;
             c1 |= (c2 >> 4) & 0x0f;
             encoded[pos++] = Base64Code[c1 & 0x3f];
@@ -413,6 +415,7 @@ public class BCryptCore
                 break;
             }
 
+            // third byte of group
             c2 = byteArray[off++] & 0xff;
             c1 |= (c2 >> 6) & 0x03;
             encoded[pos++] = Base64Code[c1 & 0x3f];
@@ -421,6 +424,7 @@ public class BCryptCore
 
         return encoded;
     }
+
 
     /// <summary>
     ///  Decode a string encoded using BCrypt's base64 scheme to a byte array.
@@ -492,7 +496,7 @@ public class BCryptCore
     }
 
     /// <summary>Blowfish encipher a single 64-bit block encoded as two 32-bit halves.</summary>
-    /// <param name="blockArray">An array containing the two 32-bit half blocks.</param>
+    /// <param name="blockArray">An array containing the two 32-bit half blocks. The plaintext to be encrypted</param>
     /// <param name="offset">    The position in the array of the blocks.</param>
 #if HAS_SPAN
     private void Encipher(Span<uint> blockArray, int offset)
@@ -706,13 +710,28 @@ public class BCryptCore
             }
         }
 
+        // Convert ciphertext to output byte-array
         byte[] ret = new byte[clen * 4];
         for (i = 0, j = 0; i < clen; i++)
         {
+            // per-line extract first byte by shifting cdata word at index right 24bits
+            // using >> op then isolate least significant byte using mask 0xff
             ret[j++] = (byte)((cdata[i] >> 24) & 0xff);
             ret[j++] = (byte)((cdata[i] >> 16) & 0xff);
             ret[j++] = (byte)((cdata[i] >> 8) & 0xff);
             ret[j++] = (byte)(cdata[i] & 0xff);
+
+            #region explanation
+            /*
+            // Without bitshifting the code would look like this
+            byte[] wordBytes = BitConverter.GetBytes(cdata[i]);
+
+            ret[i * 4] = wordBytes[3];
+            ret[i * 4 + 1] = wordBytes[2];
+            ret[i * 4 + 2] = wordBytes[1];
+            ret[i * 4 + 3] = wordBytes[0];
+            */
+            #endregion
         }
 
         return ret;

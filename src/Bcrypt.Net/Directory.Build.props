@@ -4,7 +4,7 @@
     <Title>BCrypt .Net</Title>
 
     <Authors>Chris McKee, Ryan D. Emerl, Damien Miller</Authors>
-    <Copyright>2006-2023 Chris McKee, Ryan D. Emerl, Damien Miller</Copyright>
+    <Copyright>2006-$([System.DateTime]::Now.Year) Chris McKee, Ryan D. Emerl, Damien Miller</Copyright>
     <Summary>BCrypt.Net, C# implementation of BCrypt, OpenBSD-style Blowfish password hashing</Summary>
     <Description>A fixed, enhanced and namespace compatible version of BCrypt.Net port of jBCrypt implemented in C#. It uses a variant of the Blowfish encryption algorithm’s keying schedule, and introduces a work factor, which allows you to determine how expensive the hash function will be, allowing the algorithm to be "future-proof".</Description>
 
@@ -24,11 +24,15 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>ico.png</PackageIcon>
 
+    <MSBuildWarningsAsMessages>NETSDK1069</MSBuildWarningsAsMessages>
+    <NoWarn>NU5105;NU1507</NoWarn>
+    <Features>strict</Features>
+
     <Version>5.0.0</Version>
     <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security,hash;crypto;blowfish;gdpr</PackageTags>
     <Configurations>Debug;Release</Configurations>
 
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>11.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -37,40 +41,17 @@
 
   <PropertyGroup>
     <Deterministic>false</Deterministic>
+    <DefineConstants Condition="'$(TargetFramework)' != 'net461'">$(DefineConstants);HAS_SPAN</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' != 'netstandard2.1'">$(DefineConstants);NET2_1</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1' ">
-    <DefineConstants>$(DefineConstants);NET2_1</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net472'
-                         or '$(TargetFramework)' == 'net462'
-                         or '$(TargetFramework)' == 'net48'">
-    <Reference Include="System"/>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'
-                         or '$(TargetFramework)' == 'net462'
-                         or '$(TargetFramework)' == 'net472'
-                         or '$(TargetFramework)' == 'net48'">
-    <PackageReference Include="System.Memory" Version="4.5.*"/>
-  </ItemGroup>
-
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'
-                         or '$(TargetFramework)' == 'netstandard2.0'
-                         or '$(TargetFramework)' == 'net6.0'
-                         or '$(TargetFramework)' == 'netcoreapp3.1'">
-    <DefineConstants>$(DefineConstants);HAS_SPAN</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
-<!--    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers"/>-->
-    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

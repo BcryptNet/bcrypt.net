@@ -2,11 +2,19 @@
 
 namespace BCryptNet
 {
+    /// <summary>
+    /// Hash Parser
+    /// </summary>
     public static class HashParser
     {
         private static readonly HashFormatDescriptor OldFormatDescriptor = new HashFormatDescriptor(versionLength: 1);
         private static readonly HashFormatDescriptor NewFormatDescriptor = new HashFormatDescriptor(versionLength: 2);
 
+        /// <summary>
+        /// Get Hash Info
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <returns></returns>
         public static HashInformation GetHashInformation(string hash)
         {
             if (!IsValidHash(hash, out var format))
@@ -21,6 +29,11 @@ namespace BCryptNet
                 hash.Substring(format.HashOffset));
         }
 
+        /// <summary>
+        /// Get Work Factor
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <returns></returns>
         public static int GetWorkFactor(string hash)
         {
             if (!IsValidHash(hash, out var format))

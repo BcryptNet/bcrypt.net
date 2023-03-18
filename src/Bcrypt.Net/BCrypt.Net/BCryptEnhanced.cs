@@ -26,6 +26,7 @@ namespace BCryptNet;
 /// Legacy (Pre 3.5 SHA Hashing)
 /// </summary>
 [Obsolete("Users should be migrated to SHA or HMACSHA see commit #94f83db2fb4105e9acdfeede77e14477ef0c5fe7")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "Easier to read than endless overloads")]
 public sealed class BCryptExtendedV1 : BCryptCore
 {
     /// <summary>
@@ -36,7 +37,9 @@ public sealed class BCryptExtendedV1 : BCryptCore
     /// <param name="hashType">Configurable hash type for enhanced entropy</param>
     /// <returns>The hashed password.</returns>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
-    public new static string HashPassword(string inputKey, int workFactor = DefaultRounds,
+    public static string HashPassword(
+        string inputKey,
+        int workFactor = DefaultRounds,
         HashType hashType = DefaultEnhancedHashType) =>
         CreatePasswordHash(inputKey, GenerateSalt(workFactor), hashType,
             (s, type, version) => EnhancedHash(s, type, version));
@@ -52,15 +55,17 @@ public sealed class BCryptExtendedV1 : BCryptCore
     /// <param name="hashType">Configurable hash type for enhanced entropy</param>
     /// <returns>The hashed password.</returns>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
-    public new static string HashPassword(string inputKey, string salt, HashType hashType = DefaultEnhancedHashType) =>
+    public static string HashPassword(string inputKey,
+                                      string salt,
+                                      HashType hashType = DefaultEnhancedHashType) =>
         CreatePasswordHash(inputKey, salt, hashType, (s, type, version) => EnhancedHash(s, type, version));
 
     /// <summary>
     /// Hashes key, base64 encodes before returning byte array
     /// </summary>
-    /// <param name="inputBytes"></param>
-    /// <param name="bcryptMinorRevision">(Default: 'a')</param>
-    /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA384)</param>
+    /// <param name="inputString"></param>
+    /// <param name="hashType"></param>
+    /// <param name="version">(Default: 'a')</param>
     /// <returns></returns>
     private static byte[] EnhancedHash(string inputString, HashType hashType, char version = 'a')
     {
@@ -74,7 +79,18 @@ public sealed class BCryptExtendedV1 : BCryptCore
         }
     }
 
-    public new static string ValidateAndUpgradeHash(string currentKey, string currentHash, string newKey,
+    /// <summary>
+    /// Validate And Upgrade Hash
+    /// </summary>
+    /// <param name="currentKey"></param>
+    /// <param name="currentHash"></param>
+    /// <param name="newKey"></param>
+    /// <param name="hashType"></param>
+    /// <param name="workFactor"></param>
+    /// <param name="forceWorkFactor"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public static string ValidateAndUpgradeHash(string currentKey, string currentHash, string newKey,
         HashType hashType = DefaultEnhancedHashType,
         int workFactor = DefaultRounds, bool forceWorkFactor = false) =>
         throw new NotImplementedException("This method isn't supported in the legacy enhanced bcrypt class");
@@ -88,7 +104,7 @@ public sealed class BCryptExtendedV1 : BCryptCore
     /// <param name="hash"> The previously-hashed password.</param>
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA384)</param>
     /// <returns>true if the passwords match, false otherwise.</returns>
-    public new static bool Verify(string text, string hash, HashType hashType = DefaultEnhancedHashType)
+    public static bool Verify(string text, string hash, HashType hashType = DefaultEnhancedHashType)
     {
         return SecureEquals(SafeUTF8.GetBytes(hash),
             SafeUTF8.GetBytes(CreatePasswordHash(text, hash, hashType,
@@ -104,28 +120,29 @@ public sealed class BCryptExtendedV1 : BCryptCore
 /// i.e. passlib in python / php bcrypt and sha
 /// </summary>
 ///  <para>
-///         To hash a password using SHA384 pre-hashing for increased entropy see <see cref="BCryptExtendedV2.HashPassword"/>
+///         To hash a password using SHA384 pre-hashing for increased entropy see <see cref="BCryptExtendedV2.HashPassword(string, int, HashType)"/>
 ///  </para>
 ///  <code>string pw_hash = BCryptExtendedV2.HashPassword(plain_password);
 ///        (To validate an enhanced hash you can pass true as the last parameter of Verify or use  <see cref="BCryptExtendedV2.Verify(string, string, HashType)"/>)
 ///  </code>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "<Pending>")]
 public sealed class BCryptExtendedV2 : BCryptCore
 {
     private const HashType DefaultEnhancedHashType = HashType.SHA384;
 
     /// <summary>
-    ///  Pre-hash a password with SHA384 then using the OpenBSD BCrypt scheme and a salt generated by <see cref="BCrypt.GenerateSalt(int,char)"/>.
+    ///  Pre-hash a password with SHA384 then using the OpenBSD BCrypt scheme and a salt generated by <see cref="BCryptCore.GenerateSalt(int,char)"/>.
     /// </summary>
     /// <param name="inputKey">The password to hash.</param>
     /// <param name="workFactor"></param>
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA384)</param>
     /// <returns>The hashed password.</returns>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
-    public new static string HashPassword(string inputKey, int workFactor = DefaultRounds,
+    public static string HashPassword(string inputKey, int workFactor = DefaultRounds,
         HashType hashType = DefaultEnhancedHashType) =>
         CreatePasswordHash(inputKey, GenerateSalt(workFactor), hashType,
             (s, type, version) => EnhancedHash(s, type, version));
-    
+
     /// <summary>
     ///  Pre-hash a password with SHA384 then using the OpenBSD BCrypt scheme with a manually supplied salt/>.
     /// </summary>
@@ -133,17 +150,17 @@ public sealed class BCryptExtendedV2 : BCryptCore
     ///  You should generally leave generating salts to the library.
     /// </remarks>
     /// <param name="inputKey">The password to hash.</param>
-    /// <param name="workFactor"></param>
+    /// <param name="salt"></param>
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA384)</param>
     /// <returns>The hashed password.</returns>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
-    public new static string HashPassword(string inputKey, string salt, HashType hashType = DefaultEnhancedHashType) =>
+    public static string HashPassword(string inputKey, string salt, HashType hashType = DefaultEnhancedHashType) =>
         CreatePasswordHash(inputKey, salt, hashType, (s, type, version) => EnhancedHash(s, type, version));
 
     /// <summary>
     /// Hashes key, base64 encodes before returning byte array
     /// </summary>
-    /// <param name="inputBytes"></param>
+    /// <param name="inputString"></param>
     /// <param name="bcryptMinorRevision">(Default: 'a')</param>
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA384)</param>
     /// <returns></returns>
@@ -172,26 +189,60 @@ public sealed class BCryptExtendedV2 : BCryptCore
     /// Compares the users stored hash with their password
     /// in a time-safe manner
     /// </summary>
-    /// <param name="inputBytes"></param>
-    /// <param name="bcryptMinorRevision">(Default: 'a')</param>
+    /// <param name="text"></param>
+    /// <param name="hash"></param>
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA384)</param>
     /// <returns></returns>
-    public new static bool Verify(string text, string hash, HashType hashType = DefaultEnhancedHashType)
+    public static bool Verify(string text, string hash, HashType hashType = DefaultEnhancedHashType)
     {
         return SecureEquals(SafeUTF8.GetBytes(hash),
             SafeUTF8.GetBytes(CreatePasswordHash(text, hash, hashType,
                 (s, type, version) => EnhancedHash(s, type, version))));
     }
 
-    public new static string ValidateAndUpgradeHash(string currentKey, string currentHash, string newKey,
+    /// <summary>
+    /// Validate and Upgrade Hash
+    /// </summary>
+    /// <param name="currentKey"></param>
+    /// <param name="currentHash"></param>
+    /// <param name="newKey"></param>
+    /// <param name="hashType"></param>
+    /// <param name="workFactor"></param>
+    /// <param name="forceWorkFactor"></param>
+    /// <returns></returns>
+    public static string ValidateAndUpgradeHash(string currentKey,
+        string currentHash,
+        string newKey,
         HashType hashType = DefaultEnhancedHashType,
-        int workFactor = DefaultRounds, bool forceWorkFactor = false) =>
-        ValidateAndUpgradeHash(currentKey, currentHash, DefaultEnhancedHashType, newKey, hashType, workFactor,
+        int workFactor = DefaultRounds,
+        bool forceWorkFactor = false)
+    {
+        return ValidateAndUpgradeHash(currentKey, currentHash, DefaultEnhancedHashType, newKey, hashType, workFactor,
             forceWorkFactor);
+    }
 
-    public static string ValidateAndUpgradeHash(string currentKey, string currentHash, HashType currentKeyHashType, 
-        string newKey, HashType hashType = DefaultEnhancedHashType, 
-        int workFactor = DefaultRounds, bool forceWorkFactor = false)
+    /// <summary>
+    /// Validate and Upgrade Hash
+    /// </summary>
+    /// <param name="currentKey"></param>
+    /// <param name="currentHash"></param>
+    /// <param name="currentKeyHashType"></param>
+    /// <param name="newKey"></param>
+    /// <param name="hashType"></param>
+    /// <param name="workFactor"></param>
+    /// <param name="forceWorkFactor"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="BcryptAuthenticationException"></exception>
+    /// <exception cref="SaltParseException"></exception>
+    public static string ValidateAndUpgradeHash(string currentKey,
+                                                string currentHash,
+                                                HashType currentKeyHashType,
+                                                string newKey,
+                                                HashType hashType = DefaultEnhancedHashType,
+                                                int workFactor = DefaultRounds,
+                                                bool forceWorkFactor = false)
     {
         if (currentKey == null)
             throw new ArgumentNullException(nameof(currentKey));

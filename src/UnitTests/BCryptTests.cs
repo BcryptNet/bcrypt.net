@@ -31,7 +31,7 @@ namespace BCryptNet.UnitTests
     public class BCryptTests
     {
         private static readonly Encoding SafeUtf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
-        
+
         private readonly string[,] _testVectors = new[,] {
             { "",                                   "$2a$06$DCq7YPn5Rq63x1Lad4cll.",    "$2a$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s." },
             { "",                                   "$2a$08$HqWuK6/Ng6sg9gQzbLrgb.",    "$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye" },
@@ -206,7 +206,7 @@ namespace BCryptNet.UnitTests
                         salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
 
                         string hashed = BCrypt.HashPassword(plain, salt);
-                        
+
                         Assert.StartsWith("$2" + _revisions[r], hashed);
                         Trace.WriteLine(hashed);
                     }
@@ -251,7 +251,7 @@ namespace BCryptNet.UnitTests
                     var revCheck = hashed.StartsWith("$2" + _revisions[r]);
 
                     Assert.True(revCheck);
-                    
+
                     var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed);
                     Assert.True(validateHashCheck);
 
@@ -565,7 +565,7 @@ namespace BCryptNet.UnitTests
 
             Trace.Write(".");
         }
-        
+
         [Theory()]
         [InlineData("password\0defgreallylongpassword")]
         [InlineData("password\x00 xdefgreallylongpassword")]
@@ -736,6 +736,34 @@ namespace BCryptNet.UnitTests
             bool needsRehash = BCrypt.PasswordNeedsRehash(hash, newWorkFactor);
 
             Assert.Equal(expected, needsRehash);
+        }
+    }
+    public class Base64Tests
+    {
+        [Fact]
+        public void EncodeBase64_ValidInput_ReturnsCorrectBase64Encoding()
+        {
+            // Arrange
+            byte[] byteArray = Encoding.UTF8.GetBytes("Hello, world!");
+            int length = byteArray.Length;
+
+            // Act
+            char[] result = BCryptCore.EncodeBase64(byteArray, length);
+
+            // Assert
+            string expectedResult = "QETqZE6qGFbtakviGO";
+            Assert.Equal(expectedResult, new string(result));
+        }
+
+        [Fact]
+        public void EncodeBase64_InvalidLength_ThrowsArgumentException()
+        {
+            // Arrange
+            byte[] byteArray = Encoding.UTF8.GetBytes("Hello, world!");
+            int invalidLength = -1;
+
+            // Act and Assert
+            Assert.Throws<ArgumentException>(() => BCryptCore.EncodeBase64(byteArray, invalidLength));
         }
     }
 }

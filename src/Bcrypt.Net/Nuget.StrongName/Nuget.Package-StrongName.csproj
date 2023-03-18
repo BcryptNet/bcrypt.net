@@ -4,12 +4,13 @@
     <AssemblyTitle>BCrypt.Net-Next.StrongName</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next.StrongName</AssemblyName>
     <PackageId>BCrypt.Net-Next.StrongName</PackageId>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net462;net472;net48;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net462;net6.0</TargetFrameworks>
 
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <SignAssembly Condition=" '$(OS)' != 'Windows_NT' ">true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssemblyOriginatorKeyFile>../../bcrypt.pfx</AssemblyOriginatorKeyFile>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,8 +21,16 @@
     <Compile Remove="..\BCrypt.Net\Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+    <Reference Include="System" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net462'">
+    <PackageReference Include="System.Memory" />
+  </ItemGroup>
+
   <ItemGroup>
-    <PackageVersion Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" />
+    <None Remove="PublicAPI.Shipped.txt" />
   </ItemGroup>
 
 </Project>
