@@ -5,35 +5,46 @@ on:
   pull_request:
   schedule:
     - cron: '0 6 * * 4'
+  paths:
+    - '*'
+    - '!/readme.md'
+    - '!/SECURITY.md'
+    - '!/licence.txt'
+    - '!/Benchmark/*'
+    - '!/IntegrationTest/*'
+    - '!/dists/*'
+    - '!/assets/*'
 
 jobs:
-  CodeQL-Build:
 
+  build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '6.0.x'        
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
-    # If this run was triggered by a pull request event, then checkout
-    # the head of the pull request instead of the merge commit.
-    - run: git checkout HEAD^2
-      if: ${{ github.event_name == 'pull_request' }}
-      
-    # Initializes the CodeQL tools for scanning.
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: csharp
-        
-    - run: |
-       dotnet build src/BCrypt.Net/BCrypt.Net.csproj -f net6.0
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --configuration Release
+				
+  codeql-analysis:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup CodeQL
+        uses: github/codeql-action/init@v1
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+        with:
+          languages: csharp
