@@ -1,6 +1,7 @@
 name: 'Code scanning - action'
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - '*'
