@@ -28,6 +28,7 @@ on:
 jobs:
   analyse:
     runs-on: ubuntu-latest
+    working-directory: src/BCrypt.Net
     permissions:
       actions: read
       contents: read
@@ -45,7 +46,7 @@ jobs:
       - name: Setup CodeQL
         uses: github/codeql-action/init@v2
       - name: Build solution
-        run: dotnet build /p:UseSharedCompilation=false --configuration Release src/BCrypt.Net/BCrypt.Net.csproj -f net6.0
+        run: dotnet build /t:rebuild /p:UseSharedCompilation=false -c Release BCrypt.Net.csproj -f net6.0
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
         with:
