@@ -38,7 +38,7 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Build solution
-        run: dotnet build --configuration Release src/BCrypt.Net.sln -f net6.0
+        run: dotnet build --configuration Release src/BCrypt.Net/BCrypt.Net.csproj -f net6.0
 
   codeql-analysis:
     needs: build
