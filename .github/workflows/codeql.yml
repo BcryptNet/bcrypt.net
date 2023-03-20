@@ -1,4 +1,4 @@
-name: "Code scanning - action"
+name: 'Code scanning - action'
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - '!/Benchmark/*'
       - '!/IntegrationTest/*'
       - '!/dists/*'
-      - '!/assets/*'  
+      - '!/assets/*'
   pull_request:
     paths:
       - '*'
@@ -25,7 +25,6 @@ on:
     - cron: '0 6 * * 4'
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -42,7 +41,7 @@ jobs:
 
       - name: Build solution
         run: dotnet build --configuration Release
-				
+
   codeql-analysis:
     needs: build
     runs-on: ubuntu-latest
