@@ -28,7 +28,9 @@ on:
 jobs:
   analyse:
     runs-on: ubuntu-latest
-    working-directory: src/BCrypt.Net
+    defaults:
+      run:
+        working-directory: src/BCrypt.Net
     permissions:
       actions: read
       contents: read
