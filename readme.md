@@ -8,9 +8,6 @@ Porting of bcrypt.codeplex.com with enhanced security, missing fixes, features a
 [![Build status](https://github.com/BcryptNet/bcrypt.net/actions/workflows/dotnet.yml/badge.svg)]()
 
 
-
-[![SonarCloud](https://sonarcloud.io/api/project_badges/quality_gate?project=bcryptnet)]()
-
 # Nuget
 
 Download using nuget or Paket (https://fsprojects.github.io/Paket/)
