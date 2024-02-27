@@ -9,9 +9,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next">
-      <Version>4.0.2</Version>
+      <Version>4.0.3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.6" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.2" />
   </ItemGroup>
 </Project>
