@@ -3,8 +3,6 @@
   <PropertyGroup>
     <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next</AssemblyName>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net462;net6.0</TargetFrameworks>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>false</DebugSymbols>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>

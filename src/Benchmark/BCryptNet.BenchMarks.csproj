@@ -4,7 +4,7 @@
     <RootNamespace>BCryptNet.BenchMarks</RootNamespace>
     <AssemblyName>BCryptNet.BenchMarks</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net48;net6.0</TargetFrameworks>
+    <TargetFrameworks>net48;net8.0</TargetFrameworks>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <Configurations>Release;Debug</Configurations>
     <Platforms>AnyCPU</Platforms>
@@ -13,11 +13,10 @@
     <DebugType>portable</DebugType>
     <CompileUsingReferenceAssemblies>false</CompileUsingReferenceAssemblies>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
+    <PackageReference Include="BenchmarkDotNet" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
@@ -30,7 +29,7 @@
     <ProjectReference Include="..\Bcrypt.Net\BCrypt.Net\BCrypt.Net.csproj" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0' ">
     <DefineConstants>$(DefineConstants);NET2_1</DefineConstants>
   </PropertyGroup>  
 
