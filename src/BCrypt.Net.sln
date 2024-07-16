@@ -24,6 +24,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nuget.Package", "Bcrypt.Net
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark", "Benchmark\BCryptNet.BenchMarks.csproj", "{E75AA3B8-BF28-4366-B5C6-14AF342290C3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{DBAB6D93-7DE4-4A70-89E7-1EE784C1A466}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleConsoleApp", "Examples\ConsoleApp\ExampleConsoleApp\ExampleConsoleApp.csproj", "{A24DEBF7-6ED9-4774-B67F-7A0EE18125C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "Examples\Api\WebApi\WebApi.csproj", "{CE412A71-A08D-4263-8960-664827DA526B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCrypt.Net.IdentityExtensions", "BCrypt.Net.IdentityExtensions\BCrypt.Net.IdentityExtensions.csproj", "{70440057-8D4E-41B0-8DF7-8A67B4C0EE28}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,11 +57,27 @@ Global
 		{E75AA3B8-BF28-4366-B5C6-14AF342290C3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E75AA3B8-BF28-4366-B5C6-14AF342290C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E75AA3B8-BF28-4366-B5C6-14AF342290C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A24DEBF7-6ED9-4774-B67F-7A0EE18125C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A24DEBF7-6ED9-4774-B67F-7A0EE18125C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A24DEBF7-6ED9-4774-B67F-7A0EE18125C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A24DEBF7-6ED9-4774-B67F-7A0EE18125C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE412A71-A08D-4263-8960-664827DA526B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE412A71-A08D-4263-8960-664827DA526B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE412A71-A08D-4263-8960-664827DA526B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE412A71-A08D-4263-8960-664827DA526B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70440057-8D4E-41B0-8DF7-8A67B4C0EE28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70440057-8D4E-41B0-8DF7-8A67B4C0EE28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70440057-8D4E-41B0-8DF7-8A67B4C0EE28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70440057-8D4E-41B0-8DF7-8A67B4C0EE28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D5ADD1E2-61BB-4575-B5D8-78FB549A4DBC}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A24DEBF7-6ED9-4774-B67F-7A0EE18125C5} = {DBAB6D93-7DE4-4A70-89E7-1EE784C1A466}
+		{CE412A71-A08D-4263-8960-664827DA526B} = {DBAB6D93-7DE4-4A70-89E7-1EE784C1A466}
 	EndGlobalSection
 EndGlobal

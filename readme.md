@@ -1,12 +1,8 @@
-[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
-
 # bcrypt.net - next
 
 Porting of bcrypt.codeplex.com with enhanced security, missing fixes, features and better .net support.
 
 [![Build status](https://github.com/BcryptNet/bcrypt.net/actions/workflows/dotnet.yml/badge.svg)]()
-
-[![SonarCloud](https://sonarcloud.io/api/project_badges/quality_gate?project=bcryptnet)]()
 
 # Nuget
 
@@ -22,11 +18,9 @@ Signed Package - <https://www.nuget.org/packages/BCrypt.Net-Next.StrongName/>
 
 There are various examples in our [test-harness folder](https://github.com/BcryptNet/bcrypt.net/tree/main/IntegrationTest/TestVariousVersionsOfDotNet) and [unit-tests](https://github.com/BcryptNet/bcrypt.net/blob/main/src/BCrypt.Net.UnitTests/BCryptTests.cs)
 
-The simplest usage is as follows...
+The simplest usage is as follows…
 
 **To Hash a password:**
-
-## DotNet6
 
 File-scoped namespaces are shown; imagine curly brackets if you need to.
 
@@ -35,51 +29,15 @@ File-scoped namespaces are shown; imagine curly brackets if you need to.
 ```csharp
 namespace DotNetSix;
 
-using BCrypt.Net;
+using BCryptNet;
 
 string passwordHash =  BCrypt.HashPassword("my password");
-```
-
-### DotNet4/6 etc
-
-Due to the naming of the library if the namespace is after the using statements the call changes as .net fails to resolve naming correctly
-I'd advise rather than enter the entire namespace you simply use the [import aliasing](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-directive) as below.
-
-```csharp
-
-using BC = BCrypt.Net.BCrypt;
-
-namespace DotNetSix;
-
-string passwordHash =  BC.HashPassword("my password");
-```
-
-### DotNet6
-
-You can also do aliasing at the CSProj level; and wouldn't need to add the using statement at all
-
-This example would allow you to use an alias BC.HashPassword() in your code
-
-```xml
-    <ItemGroup>
-        <!-- emits global using BcryptNet = global::BCrypt.Net.BCrypt; -->
-        <Using Include="BCrypt.Net.BCrypt" Alias="BC"/>
-    </ItemGroup>
-```
-
-This version would allow you to just call `Verify` and `HashPassword` in your code base without any other reference.
-
-```xml
-    <ItemGroup>
-        <!-- emits global using static global::BCrypt.Net.BCrypt; -->
-        <Using Include="BCrypt.Net.BCrypt" Static="True"/>
-    </ItemGroup>
 ```
 
 _Note: Although this library allows you to supply your own salt, it is **highly** advisable that you allow the library to generate the salt for you.
 These methods are supplied to maintain compatibility and for more advanced cross-platform requirements that may necessitate their use._
 
-**To Verify a password** against a hash (assuming you've stored the hash and retrieved from storage for verification):
+**To Verify a password** against a hash (assuming you’ve stored the hash and retrieved from storage for verification):
 
 _All previous notes about namespacing apply here too_
 
@@ -146,7 +104,7 @@ and a simple benchmark you can run by creating a console program, adding this BC
 ```
 
 This will start at 16 which is `65,536 iterations` and reduce the cost until the time target is reached.
-It's up to you what you consider an allowable time, but if it's below 10, I'd seriously advice leaving it at 10
+It's up to you what you consider an allowable time, but if it’s below 10, I’d seriously advise leaving it at 10
 and maybe investing in a larger server package.
 
 ## Enhanced Entropy
@@ -167,7 +125,7 @@ var enhancedHashPassword = BCrypt.EnhancedHashPassword(myPassword);
 var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword);
 ```
 
-By default the library uses SHA384 hashing of the passphrase, the material generated is then passed to bcrypt to form your hash via the usual bcrypt routine.
+By default, the library uses SHA384 hashing of the passphrase, the material generated is then passed to bcrypt to form your hash via the usual bcrypt routine.
 If you want to specify a different version of SHA, or just wish to explicitly set in your code the version used in case it ever changes in a major release of the library,
 you can do so by using the following change to the above.
 
@@ -176,17 +134,17 @@ var enhancedHashPassword = BCrypt.EnhancedHashPassword(myPassword, hashType: Has
 var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword, hashType:HashType.SHA384);
 ```
 
-_Why SHA384?_ It's a good balance of performance, security, collision protection and is the only version that wasn't vulnerable to length extension attacks <https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks> .
+_Why SHA384?_ It’s a good balance of performance, security, collision protection and is the only version that wasn't vulnerable to length extension attacks <https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks> .
 
 _Should I use Enhanced Entropy?_ You lose nothing by using it
 
-_Why would I need to change the SHA type?_ Some libraries like PassLib hash using SHA256, so mostly a compatibility thing. DropBox used SHA512 so if you worked at dropbox you'd want compatibility. The enhancing is mostly a convenience extension in that you could already pre-hash and pass into the standard method calls.
+_Why would I need to change the SHA type?_ Some libraries like PassLib hash using SHA256, so mostly a compatibility thing. DropBox used SHA512 so if you worked at dropbox you’d want compatibility. The enhancing is mostly a convenience extension in that you could already pre-hash and pass into the standard method calls.
 
 _What does it do?_ We take the utf8 bytes of your password as inputBytes SHA hash them, convert to base64 (for compatibility with other language implementations) then use those bytes to perform the standard bcrypt call.
 
 ## Compiling
 
-You'll need at least VS2022 with the current SDK <https://www.microsoft.com/net/download>;
+You’ll need at least VS2022 with the current SDK <https://www.microsoft.com/net/download>;
 
 The nuget packages can be built by running `buildfornuget.cmd`
 or
@@ -203,7 +161,7 @@ Running `TestGenerateSaltWithMaxWorkFactor` will take significant time.
 
 ## Description
 
-A .Net port of jBCrypt implemented in C#. It uses a variant of the Blowfish encryption algorithm’s keying schedule, and introduces a work factor, which allows you to determine how expensive the hash function will be, allowing the algorithm to be "future-proof".
+A `.Net` port of jBCrypt implemented in C#. It uses a variant of the Blowfish encryption algorithm’s keying schedule, and introduces a work factor, which allows you to determine how expensive the hash function will be, allowing the algorithm to be "future-proof".
 
 ## Details
 
@@ -215,7 +173,7 @@ For an overview of why BCrypt is important, see How to Safely Store a Password. 
 
 ### From How to Safely Store a Password
 
-It uses a variant of the Blowfish encryption algorithm’s keying schedule and introduces a work factor, which allows you to determine how expensive the hash function will be. Because of this, BCrypt can keep up with Moore’s law. As computers get faster you can increase the work factor and the hash will get slower.
+It uses a variant of the Blowfish encryption algorithms keying schedule and introduces a work factor, which allows you to determine how expensive the hash function will be. Because of this, BCrypt can keep up with Moore’s law. As computers get faster you can increase the work factor and the hash will get slower.
 
 ### Blowfish-based scheme - Versioning/BCrypt Revisions
 
@@ -296,7 +254,7 @@ release notes are here <https://github.com/BcryptNet/bcrypt.net/releases>
 _v5.0.0_ - Breaking change
 
 - Drops support for .net 2, 3.5, 5.0
-- Renamed namespace to `nBCrypt` to fix the issue with the class and namespace clashing.
+- Renamed namespace to `BcryptNet` to fix the issue with the class and namespace clashing.
 - 
 
 _v4.0.3_ - Addition of .net 6 targeting; tidy up targets.

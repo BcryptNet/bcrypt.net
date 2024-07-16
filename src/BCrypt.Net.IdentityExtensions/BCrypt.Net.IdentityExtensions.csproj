@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyTitle>BCrypt.Net-Next - Identity Extensions</AssemblyTitle>
+    <AssemblyName>BCrypt.Net.IdentityExtensions</AssemblyName>
+    <RootNamespace>BCryptNet</RootNamespace>
+    <DebugSymbols>false</DebugSymbols>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <PackageId>BCrypt.Net.IdentityExtensions</PackageId>
+    <RootNamespace>BCryptNet.IdentityExtensions</RootNamespace>
+    <LangVersion>11</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="[8.0,)" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="[8.0,)" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="[8.0,)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bcrypt.Net\Nuget.MainPackage\Nuget.Package.csproj" />
+  </ItemGroup>
+
+</Project>

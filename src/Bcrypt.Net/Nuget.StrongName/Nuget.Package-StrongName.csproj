@@ -4,7 +4,7 @@
     <AssemblyTitle>BCrypt.Net-Next.StrongName</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next.StrongName</AssemblyName>
     <PackageId>BCrypt.Net-Next.StrongName</PackageId>
-
+    <RootNamespace>BCryptNet</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <SignAssembly Condition=" '$(OS)' != 'Windows_NT' ">true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>

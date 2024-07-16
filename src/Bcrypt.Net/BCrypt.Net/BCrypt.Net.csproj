@@ -3,6 +3,7 @@
   <PropertyGroup>
     <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next</AssemblyName>
+    <RootNamespace>BCryptNet</RootNamespace>
     <DebugSymbols>false</DebugSymbols>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>

@@ -2,7 +2,7 @@
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
-Copyright (c) 2016/2023 Chris McKee (.Net-core port / patches / new features)
+Copyright (c) 2016/2024 Chris McKee (.Net-core port / patches / new features)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -25,8 +25,8 @@ namespace BCryptNet
     /// <remarks>
     ///  <para>
     ///        BCrypt implements OpenBSD-style Blowfish password hashing using the scheme described in
-    ///        <a href="http://www.usenix.org/event/usenix99/provos/provos_html/index.html">"A Future-
-    ///        Adaptable Password Scheme"</a> by Niels Provos and David Mazieres.
+    ///        <a href="http://www.usenix.org/event/usenix99/provos/provos_html/index.html">
+    ///        A Future-Adaptable Password Scheme</a> by Niels Provos and David Mazieres.
     ///  </para>
     ///  <para>
     ///        This password hashing system tries to thwart off-line password cracking using a
@@ -76,7 +76,7 @@ namespace BCryptNet
         /// <param name="newKey">New password</param>
         /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
         ///                          factor therefore increases as 2^workFactor. Default is 11</param>
-        /// <param name="forceWorkFactor">By default this method will not accept a work factor lower
+        /// <param name="forceWorkFactor">By default, this method will not accept a work factor lower
         /// than the one set in the current hash and will set the new work-factor to match.</param>
         /// <exception cref="BcryptAuthenticationException">returned if the users hash and current pass doesn't validate</exception>
         /// <exception cref="SaltParseException">returned if the salt is invalid in any way</exception>
@@ -158,7 +158,6 @@ namespace BCryptNet
         ///                          factor therefore increases as 2^workFactor. Default is 11</param>
         /// <returns>The hashed password.</returns>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0027:Public API with optional parameter(s) should have the most parameters amongst its public overloads", Justification = "<Pending>")]
         public static string HashPassword(string inputKey, int workFactor = DefaultRounds) =>
             HashPassword(inputKey, GenerateSalt(workFactor));
 

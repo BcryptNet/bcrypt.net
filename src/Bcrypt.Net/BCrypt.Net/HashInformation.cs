@@ -14,7 +14,7 @@ namespace BCryptNet
         /// <param name="version">The message.</param>
         /// <param name="workFactor">The message.</param>
         /// <param name="rawHash">The message.</param>
-        internal HashInformation(string settings, string version, string workFactor, string rawHash)
+        internal HashInformation(string settings, string version, int workFactor, string rawHash)
         {
             Settings = settings;
             Version = version;
@@ -35,11 +35,17 @@ namespace BCryptNet
         /// <summary>
         ///     log rounds used / workfactor
         /// </summary>
-        public string WorkFactor { get; private set; }
+        public int WorkFactor { get; private set; }
 
         /// <summary>
         ///     Raw Hash
         /// </summary>
         public string RawHash { get; private set; }
+
+        /// <summary>
+        ///  Returns the string representation of the object.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString() => $"Settings: {Settings}, Version: {Version}, WorkFactor: {WorkFactor}, RawHash: {RawHash}";
     }
 }

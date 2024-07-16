@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace BCryptNet
 {
@@ -22,10 +23,12 @@ namespace BCryptNet
                 ThrowInvalidHashFormat();
             }
 
+            var workFactor = 10 * (hash[format.WorkfactorOffset] - '0') + (hash[format.WorkfactorOffset + 1] - '0');
+
             return new HashInformation(
                 hash.Substring(0, format.SettingLength),
                 hash.Substring(1, format.VersionLength),
-                hash.Substring(format.WorkfactorOffset, 2),
+                workFactor,
                 hash.Substring(format.HashOffset));
         }
 
@@ -40,10 +43,8 @@ namespace BCryptNet
             {
                 ThrowInvalidHashFormat();
             }
-
-            int offset = format.WorkfactorOffset;
-
-            return 10 * (hash[offset] - '0') + (hash[offset + 1] - '0');
+            
+            return 10 * (hash[format.WorkfactorOffset] - '0') + (hash[format.WorkfactorOffset + 1] - '0');
         }
 
         internal static bool IsValidHash(string hash, out HashFormatDescriptor format)
