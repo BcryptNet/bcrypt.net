@@ -140,7 +140,6 @@ if (password_verify($pass,$hash)) {
             const string salt = "$2y$07$BCryptRequires22Chrcte"; // used as a fixed salt in the php code as per the behaviour
 
             // Password hash created through being passed via bcrypt once (This Should Fail)
-            const string passwordHashOneRound = "$2y$07$BCryptRequires22Chrctet7rDxl8RPE0hiH8EeV/YklkNceXZOjm";
             var hash = BCrypt.HashPassword(BCrypt.HashPassword(pass, salt), salt);
 
             Assert.True(HashParser.IsValidHash(hash, out _));
@@ -162,7 +161,7 @@ if (password_verify($pass,$hash)) {
             Assert.False(BCrypt.Verify(pass, passwordHashTwoRound));
 
             // This will pass, but is open to timing attacks  (Taken from sample in https://github.com/BcryptNet/bcrypt.net/issues/119)
-            Assert.True(string.Equals(passwordHashTwoRound, doubleBcryptSaltGiven));
+            Assert.Equal(passwordHashTwoRound, doubleBcryptSaltGiven);
 
             // This will pass and effectively behaves the same as WCF
             Assert.True(BCrypt.Verify(BCrypt.HashPassword(pass, passwordHashTwoRound), passwordHashTwoRound));
