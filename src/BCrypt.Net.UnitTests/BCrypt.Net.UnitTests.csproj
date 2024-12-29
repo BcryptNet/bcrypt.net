@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>BCrypt.Net.UnitTests</AssemblyName>
     <PackageId>BCrypt.Net.UnitTests</PackageId>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
     <LangVersion>default</LangVersion>
   </PropertyGroup>
