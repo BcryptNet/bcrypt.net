@@ -6,7 +6,7 @@
     <PackageId>BCrypt.Net-Next</PackageId>
     <Title>BCrypt .Net</Title>
 
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net20;net35;net462;net472;net48;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net20;net35;net462;net472;net48;net5.0;net6.0;net9.0</TargetFrameworks>
     <OutputTypeEx>Library</OutputTypeEx>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSource>false</IncludeSource>
@@ -72,6 +72,7 @@
                          or '$(TargetFramework)' == 'net48'
                          or '$(TargetFramework)' == 'net5.0'
                          or '$(TargetFramework)' == 'net6.0'
+                         or '$(TargetFramework)' == 'net9.0'
                          or '$(TargetFramework)' == 'netcoreapp3.1'">
     <DefineConstants>$(DefineConstants);HAS_SPAN</DefineConstants>
   </PropertyGroup>
