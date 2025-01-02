@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net462;net6.0;net8.0;net9.0</TargetFrameworks>
+
+    <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
+    <AssemblyName>BCrypt.Net-Next</AssemblyName>
+    <RootNamespace>BCryptNet</RootNamespace>
+    <DebugSymbols>false</DebugSymbols>
+    <ImplicitUsings>true</ImplicitUsings>
+    <Configurations>Debug;Release;CodeQL</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
+    <DocumentationFile>bin\Release\BCrypt.Net-Next.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+    <Reference Include="System" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net462'">
+    <PackageReference Include="System.Memory" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="PublicAPI.Shipped.txt" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageIcon>logo.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\logo.png">
+      <Pack>True</Pack>
+      <PackagePath>/</PackagePath>
+    </None>
+    <None Include="..\..\readme.md">
+      <Pack>True</Pack>
+      <PackagePath>/</PackagePath>
+    </None>
+  </ItemGroup>
+</Project>

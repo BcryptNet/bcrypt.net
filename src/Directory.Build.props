@@ -1,0 +1,77 @@
+<Project>
+  <Import Project="..\Directory.Build.props" />
+
+  <PropertyGroup>
+    <OutputTypeEx>Library</OutputTypeEx>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSource>false</IncludeSource>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+    <Deterministic>false</Deterministic>
+    <PackageId>$(AssemblyName)</PackageId>
+    <PackageIcon>logo.png</PackageIcon>
+    <NuspecBasePath>$(MSBuildProjectDirectory)</NuspecBasePath>
+    <MSBuildWarningsAsMessages>NETSDK1069</MSBuildWarningsAsMessages>
+    <NoWarn>NU5105;NU1507</NoWarn>
+    <Features>strict</Features>
+
+    <LangVersion>11.0</LangVersion>
+
+    <SignAssembly Condition=" '$(OS)' != 'Windows_NT' ">true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <AssemblyOriginatorKeyFile>../../bcrypt.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>All</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <Choose>
+    <When Condition="'$(Configuration)' != 'CodeQL'">
+      <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <DebugSymbols>true</DebugSymbols>
+      </PropertyGroup>
+
+      <ItemGroup>
+        <PackageReference Include="DotNet.ReproducibleBuilds" PrivateAssets="All"/>
+        <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="All"/>
+        <PackageReference Include="SonarAnalyzer.CSharp" PrivateAssets="All"/>
+      </ItemGroup>
+    </When>
+  </Choose>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Release configuration
+         Enable sbom generation -->
+  <Choose>
+    <When Condition="'$(Configuration)' == 'Release'">
+      <PropertyGroup>
+        <GenerateSBOM>true</GenerateSBOM>
+      </PropertyGroup>
+      <ItemGroup>
+        <PackageReference Include="Microsoft.Sbom.Targets" PrivateAssets="All"/>
+      </ItemGroup>
+    </When>
+  </Choose>
+
+  <!-- Debug configuration
+       Include documentation analysers, which can't be included in a release build because they're a a prerelease dependency.-->
+  <Choose>
+    <When Condition="'$(Configuration)' == 'Debug'">
+      <ItemGroup>
+        <PackageReference Include="DotNetAnalyzers.DocumentationAnalyzers" PrivateAssets="All"/>
+      </ItemGroup>
+    </When>
+  </Choose>
+
+</Project>

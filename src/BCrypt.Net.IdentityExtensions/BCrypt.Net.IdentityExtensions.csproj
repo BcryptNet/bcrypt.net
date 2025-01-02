@@ -1,25 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <AssemblyTitle>BCrypt.Net-Next - Identity Extensions</AssemblyTitle>
     <AssemblyName>BCrypt.Net.IdentityExtensions</AssemblyName>
     <RootNamespace>BCryptNet</RootNamespace>
-    <DebugSymbols>false</DebugSymbols>
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <PackageId>BCrypt.Net.IdentityExtensions</PackageId>
     <RootNamespace>BCryptNet.IdentityExtensions</RootNamespace>
-    <LangVersion>11</LangVersion>
-  </PropertyGroup>
+    <DebugSymbols>false</DebugSymbols>
 
-  <PropertyGroup>
-    <Deterministic>false</Deterministic>
+    <ImplicitUsings>true</ImplicitUsings>
+    <Configurations>Debug;Release;CodeQL</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="[8.0,)" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="[8.0,)" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="[8.0,)" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
@@ -27,7 +23,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bcrypt.Net\Nuget.MainPackage\Nuget.Package.csproj" />
+    <ProjectReference Include="..\BCrypt.Net\BCrypt.Net.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageIcon>logo.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\logo.png">
+      <Pack>True</Pack>
+      <PackagePath>/</PackagePath>
+    </None>
+    <None Include="..\..\readme.md">
+      <Pack>True</Pack>
+      <PackagePath>/</PackagePath>
+    </None>
+  </ItemGroup>
 </Project>

@@ -1,0 +1,17 @@
+items:
+  - name: Getting started
+    items:
+      - name: Getting Started
+        href: ../index.md
+      - name: Building
+        href: building.md
+      - name: Enhanced Entropy
+        href: enhancedEntropy.md
+      - name: Salts / Salting
+        href: salts.md
+      - name: Scheme Versioning
+        href: schemeVersions.md
+      - name: Releases
+        href: releases.md
+      - name: Common Terms & Concepts
+        href: commonTerms.md

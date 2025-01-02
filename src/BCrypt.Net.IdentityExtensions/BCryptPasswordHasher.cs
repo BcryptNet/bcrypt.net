@@ -2,7 +2,7 @@
 // The MIT License (MIT)
 // Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 // Copyright (c) 2013 Ryan D. Emerle (.Net port)
-// Copyright (c) 2016/2024 Chris McKee (.Net-core port / patches / new features)
+// Copyright (c) 2016/2025 Chris McKee (.Net-core port / patches / new features)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 // (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -23,6 +23,10 @@ using Microsoft.Extensions.Options;
 
 namespace BCryptNet.IdentityExtensions;
 
+/// <summary>
+/// A password hasher that uses BCrypt for password hashing.
+/// </summary>
+/// <typeparam name="TUser"></typeparam>
 public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : class
 {
     private readonly PasswordHasher<TUser> _identityHasher;
@@ -39,6 +43,12 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
         _options = optionsAccessor?.Value ?? new BCryptHasherOptions();
     }
 
+    /// <summary>
+    /// Hashes a password using BCrypt.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
     public string HashPassword(TUser user, string password)
     {
         ArgumentNullException.ThrowIfNull(password);
@@ -47,6 +57,13 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
         return BCrypt.HashPassword(password, _options.WorkFactor);
     }
 
+    /// <summary>
+    /// Verifies that a password matches the hashed password.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="hashedPassword"></param>
+    /// <param name="providedPassword"></param>
+    /// <returns></returns>
     public PasswordVerificationResult VerifyHashedPassword(TUser user, string hashedPassword, string providedPassword)
     {
         ArgumentNullException.ThrowIfNull(user);

@@ -1,0 +1,51 @@
+name: Generate and Publish docs
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  pages: write
+  id-token: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  publish-docs:
+    name: 'Build and publish docs'
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+
+    - name: 'Setup .NET SDK'
+      uses: actions/setup-dotnet@87b7050bc53ea08284295505d98d2aa94301e852 # v4.2.0
+
+    - run: dotnet tool update -g docfx
+    - run: docfx ./docs/docfx.json
+
+    - name: Upload Pages Artifact
+      uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+      with:
+        # Upload entire repository
+        path: './docs/_site'
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

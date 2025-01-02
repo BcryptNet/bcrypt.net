@@ -2,7 +2,7 @@
 // The MIT License (MIT)
 // Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 // Copyright (c) 2013 Ryan D. Emerle (.Net port)
-// Copyright (c) 2016/2024 Chris McKee (.Net-core port / patches / new features)
+// Copyright (c) 2016/2025 Chris McKee (.Net-core port / patches / new features)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 // (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -23,8 +23,17 @@ using Microsoft.AspNetCore.Identity;
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// Extension methods for setting up BCrypt password hashing services in an <see cref="IServiceCollection" />.
+/// </summary>
 public static class BCryptNetPasswordHasher
 {
+    /// <summary>
+    /// Set the IPasswordHasher to use BCrypt for password hashing.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <typeparam name="TUser"></typeparam>
+    /// <returns></returns>
     public static IServiceCollection UseBcrypt<TUser>(this IServiceCollection services) where TUser : class
     {
         services.AddScoped<PasswordHasher<TUser>>();

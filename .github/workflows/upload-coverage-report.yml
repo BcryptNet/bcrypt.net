@@ -1,0 +1,35 @@
+name: Add code coverage summary to PRs
+
+# Allows code coverage comments to be embedded in PRs if the build was ran on a fork.
+
+on:
+  workflow_run:
+    workflows: ["ci-build"]
+    types:
+      - completed
+
+jobs:
+  prCoverageComment:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    if: 
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+      with:
+        egress-policy: audit
+
+    - name: 'Download coverage results'
+      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+      with:
+        name: coverage-results
+
+    - name: Add Code Coverage PR Comment
+      uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31 # v2.9.0
+      if: github.event_name == 'pull_request'
+      with:
+        recreate: true
+        path: code-coverage-results.md

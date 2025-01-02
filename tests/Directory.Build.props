@@ -1,0 +1,30 @@
+<Project>
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+    <IsPublishable>False</IsPublishable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IsPackable>false</IsPackable>
+    <SignAssembly>false</SignAssembly>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+    <PackageReference Include="Microsoft.CodeCoverage"/>
+    <PackageReference Include="xunit.v3"/>
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="JunitXml.TestLogger"/>
+    <PackageReference Include="GitHubActionsTestLogger" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

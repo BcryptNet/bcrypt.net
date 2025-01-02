@@ -1,4 +1,4 @@
-# bcrypt.net - next
+# What is this library for
 
 ## Description
 
@@ -23,6 +23,8 @@ Package: <https://www.nuget.org/packages/BCrypt.Net-Next/>
 
 ## Quick Start
 
+## File-scoped namespaces
+
 **To Hash a password:**
 
 File-scoped namespaces are shown; imagine curly brackets if you need to.
@@ -30,24 +32,27 @@ File-scoped namespaces are shown; imagine curly brackets if you need to.
 `Top level namespace`
 
 ```csharp
-namespace MyDotNetProject;
+namespace DotNetSix;
 
 using BCryptNet;
 
 // Hash a password
 string passwordHash =  BCrypt.HashPassword("my password");
 
-// Verify a password
-if(BCrypt.Verify("my password", passwordHash))
-{
-    // Password is correct
-}
-
+// Validate a password
+var isValid = BCrypt.Verify("my password", passwordHash);
 ```
 
 _Note: Although this library allows you to supply your own salt, it is **highly** advisable that you allow the library to generate the salt for you.
 These methods are supplied to maintain compatibility and for more advanced cross-platform requirements that may necessitate their use._
 
+**To Verify a password** against a hash (assuming you’ve stored the hash and retrieved from storage for verification):
+
+_All previous notes about namespacing apply here too_
+
 This implementation on hashing will generate a salt automatically for you with the work factor (2^number of rounds) set to 11 (which matches the default across most implementation and is currently viewed as a good level of security/risk).
 
-There are various examples in our [test-harness folder](https://github.com/BcryptNet/bcrypt.net/tree/main/testharnesses) and [unit-tests](https://github.com/BcryptNet/bcrypt.net/blob/main/tests/UnitTests/BCryptTests.cs)
+There are various examples in:
+
+- [examples](https://github.com/BcryptNet/bcrypt.net/tree/main/examples)
+- [unit-tests](https://github.com/BcryptNet/bcrypt.net/blob/main/tests/UnitTests/BCryptTests.cs)

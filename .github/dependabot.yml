@@ -1,7 +1,20 @@
 version: 2
 updates:
-- package-ecosystem: nuget
-  directory: "/"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: daily
+      ignore:
+        - dependency-name: "Microsoft.Extensions.Logging"
+          update-types: ["version-update:semver-major"]
+        - dependency-name: "System.Runtime.Caching"
+          update-types: ["version-update:semver-major"]
+    reviewers:
+      - "chrismckee"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "chrismckee"

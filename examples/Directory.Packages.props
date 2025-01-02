@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <CompileUsingReferenceAssemblies>false</CompileUsingReferenceAssemblies>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <IsTestProject>true</IsTestProject>
+    <IsPublishable>false</IsPublishable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IsPackable>false</IsPackable>
+    <SignAssembly>false</SignAssembly>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,60 @@
+{
+    "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+    "metadata": [
+        {
+            "src": [
+                {
+                    "src": "../src",
+                    "files": [
+                        "**/BCrypt.Net/*.csproj",
+                        "**/BCrypt.Net.IdentityExtensions/*.csproj"
+                    ]
+                }
+            ],
+            "dest": "api",
+            "outputFormat": "apiPage"
+        }
+    ],
+    "build": {
+        "content": [
+            {
+                "files": [
+                    "**/*.{md,yml}"
+                ],
+                "exclude": [
+                    "_site/**"
+                ]
+            }
+        ],
+        "resource": [
+            {
+                "files": [
+                    "**/images/**",
+                    "**/media/**"
+                ]
+            },
+            {
+                "files": [
+                    "favicon.ico",
+                    "favicon.png",
+                    "docicon.png"
+                ]
+            }
+        ],
+        "output": "_site",
+        "template": [
+            "default",
+            "modern"
+        ],
+        "globalMetadata": {
+            "_appName": "BCrypt.Net",
+            "_appTitle": "BCrypt.Net Documentation",
+            "_appFooter": "&copy; Chris McKee",
+            "_enableSearch": true,
+            "_appFaviconPath": "favicon.ico",
+            "_appLogoPath": "favicon.png",
+            "_enableNewTab": "true",
+            "pdf": false
+        }
+    }
+}
