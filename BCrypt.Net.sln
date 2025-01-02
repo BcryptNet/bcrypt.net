@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 15.0.26228.4
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net", "src\Bcrypt.Net\BCrypt.Net.csproj", "{CD69F016-5940-4FCA-BCA1-9D1D87C6F873}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCrypt.Net", "src\BCrypt.Net\BCrypt.Net.csproj", "{CD69F016-5940-4FCA-BCA1-9D1D87C6F873}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "tests\UnitTests\BCrypt.Net.UnitTests.csproj", "{2078EB7B-7EDF-4B65-80F7-DB4D92E08CCD}"
 EndProject
