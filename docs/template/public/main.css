@@ -1,0 +1,4 @@
+body {
+    --bs-link-color-rgb: 66, 184, 131 !important;
+    --bs-link-hover-color-rgb: 64, 180, 128 !important;
+  }
