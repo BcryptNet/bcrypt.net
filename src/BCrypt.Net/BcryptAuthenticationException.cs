@@ -19,7 +19,7 @@ namespace BCryptNet
         }
 
         /// <inheritdoc />
-        /// <summary>Initializes a new instance of <see cref="T:BCrypt.Net.BcryptAuthenticationException" />.</summary>
+        /// <summary>Initializes a new instance of <see cref="BcryptAuthenticationException" />.</summary>
         /// <param name="message">The message.</param>
         public BcryptAuthenticationException(string message)
             : base(message)
@@ -27,7 +27,7 @@ namespace BCryptNet
         }
 
         /// <inheritdoc />
-        /// <summary>Initializes a new instance of <see cref="T:BCrypt.Net.BcryptAuthenticationException" />.</summary>
+        /// <summary>Initializes a new instance of <see cref="BcryptAuthenticationException" />.</summary>
         /// <param name="message">       The message.</param>
         /// <param name="innerException">The inner exception.</param>
         public BcryptAuthenticationException(string message, Exception innerException)

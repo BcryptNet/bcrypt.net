@@ -399,7 +399,6 @@ namespace BCryptNet.UnitTests
         [Fact()]
         public void TestValidateAndReplaceWithWorkloadSmallerThanCurrentEndsWithSameWorkLoadAsOriginalHash()
         {
-
             string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
             string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
             string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC";
@@ -588,7 +587,7 @@ namespace BCryptNet.UnitTests
             var x = BCrypt.GenerateSalt();
             string hash = BCrypt.HashPassword(password, x);
 
-            Assert.False(BytesAreValid(SafeUtf8.GetBytes(password)));
+            Assert.False(ContainsNoNullBytes(SafeUtf8.GetBytes(password)));
 
             var t1 = BCrypt.Verify(leader, hash);
             Assert.False(t1, "Null should be treated as part of password as per spec");
@@ -608,8 +607,8 @@ namespace BCryptNet.UnitTests
 
             byte[] saltBytes = BCryptCore.DecodeBase64(extractedSalt, 128 / 8);
 
-            var bytesAreValid = BytesAreValid(passA);
-            Assert.False(bytesAreValid, "Hash contains null bytes");
+            var hasNullBytes = ContainsNoNullBytes(passA);
+            Assert.True(hasNullBytes, "Hash doesnt contain null bytes");
 
             var hashA = b.CryptRaw(passA, saltBytes, 4);
             var hashAVerification = b.CryptRaw(passA, saltBytes, 4);
@@ -637,8 +636,8 @@ namespace BCryptNet.UnitTests
             byte[] enhancedBytes = SHA384.Create().ComputeHash(passA);
             byte[] enhancedBytesB = SHA384.Create().ComputeHash(passB);
 
-            var bytesAreValid = BytesAreValid(enhancedBytes);
-            Assert.False(bytesAreValid, "Hash contains null bytes");
+            var hasNullBytes = ContainsNoNullBytes(enhancedBytes);
+            Assert.False(hasNullBytes, "Hash contains null bytes");
 
             var hashA = b.CryptRaw(enhancedBytes, saltBytes, 4);
             var hashAVerification = b.CryptRaw(enhancedBytes, saltBytes, 4);
@@ -651,13 +650,12 @@ namespace BCryptNet.UnitTests
             Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldnt match as we hash the whole strings bytes, including the null byte");
         }
 
-        private bool BytesAreValid(byte[] bytes)
+        private bool ContainsNoNullBytes(byte[] bytes)
         {
             if (bytes == null) return false;
 
             return !Array.Exists(bytes, x => x == 0);
         }
-
 
         [Fact(Skip = "Ignore; this is example code")]
         public void CalculatePerformantWorkload()

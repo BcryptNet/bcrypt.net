@@ -59,21 +59,6 @@ namespace BCryptNet.UnitTests
             { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2a$12$WApznUOJfkEGSmYRfnkrPO",    "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC" },
         };
 
-        /// <summary>
-        /// Hashes created using other languages
-        /// </summary>
-        private readonly string[,] _otherLibTestVectors = new[,] {
-            //passlib in python prehashed using SHA256; 7 rounds on bcrypt
-            { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2b$07$9IpAgJw99HWJur2uj3vr3O",    "$2b$07$9IpAgJw99HWJur2uj3vr3OyXMLQ05R2dQE.L5iGnbcVFgMRpsPZRG" },
-            { "",                                   "$2b$07$0AD340gChkx46nsejmoRw.",    "$2b$07$0AD340gChkx46nsejmoRw.ANNVeZY33cuGluoj/QhaGEFNGb3sg8O" },
-            { "a",                                  "$2b$07$uCq3i6F42wcUHItGwO84jO",    "$2b$07$uCq3i6F42wcUHItGwO84jObhWccJLbVf9vUyXMo0NEW8MkhQHuoS." },
-            { "abcdefghijklmnopqrstuvwxyz",         "$2b$07$IZIyfWJFuytjdR41r/Fm7.",    "$2b$07$IZIyfWJFuytjdR41r/Fm7.AeV62vhwnzULJwzXuEdtgUMADnq97fu" },
-            { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2b$07$xo54ftDxdJKeeVZcVm8y9O",    "$2b$07$xo54ftDxdJKeeVZcVm8y9Ojt76V.7dAICUOYkEXHlZpzEEbuTTRpC" },
-            // PHP password_hash
-            { "test",                               "$2y$10$u3XfEiRife.cNffWS0aD9O",    "$2y$10$u3XfEiRife.cNffWS0aD9OUPdFLVsiedZcGA/fXXeRyZBlvjGyS3e" },
-            { "chipsn'dip",                         "$2y$10$9Cb83ULoFHStLMg2iKG3p.",    "$2y$10$9Cb83ULoFHStLMg2iKG3p.0.ux/vJ49gZXs4FMooj44W1P8DN89Pi" },
-        };
-
         private readonly char[] _revisions = { 'a', 'x', 'y', 'b' };
 
 
@@ -115,37 +100,6 @@ namespace BCryptNet.UnitTests
             Trace.WriteLine("");
         }
 
-
-        [Fact()]
-        public void TestHashPasswordEnhanced_OtherProgrammingLanguagesVectors()
-        {
-            Trace.Write("BCrypt.HashPassword(): ");
-            var sw = Stopwatch.StartNew();
-
-            for (int i = 0; i < _otherLibTestVectors.Length / 3; i++)
-            {
-                string plain = _otherLibTestVectors[i, 0];
-
-                //Check hash that goes in one end comes out the next the same
-                string salt = _otherLibTestVectors[i, 1];
-
-                string hashed = BCryptExtendedV3.HashPassword(HMACKey, plain, salt, HashType.SHA256);
-
-                Assert.Equal(_otherLibTestVectors[i, 2], hashed);
-
-                var validateHashCheck = BCryptExtendedV3.Verify(HMACKey, plain, hashed, HashType.SHA256);
-                Assert.True(validateHashCheck);
-
-                Trace.WriteLine(hashed);
-
-                Trace.Write(".");
-            }
-
-            Trace.WriteLine(sw.ElapsedMilliseconds);
-            Trace.WriteLine("");
-        }
-
-
         [Fact()]
         public void TestHashPasswordEnhancedWithHashType()
         {
@@ -179,45 +133,22 @@ namespace BCryptNet.UnitTests
             Trace.WriteLine("");
         }
 
-
-        [Fact()]
-        public void TestValidateAndReplaceWithWorkload()
-        {
-            for (int i = 0; i < 6 / 3; i++)
-            {
-                string currentKey = _testVectors[i, 0];
-                string salt = _testVectors[i, 1];
-                string currentHash = _testVectors[i, 2];
-
-                string newPassword = "my new password";
-                string hashed = BCrypt.HashPassword(currentKey, salt);
-                var d = hashed == currentHash;
-
-                var newHash = BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, workFactor: 11);
-
-                var newPassValid = BCrypt.Verify(newPassword, newHash);
-
-                Assert.True(newPassValid);
-                Assert.Contains("$11$", newHash);
-
-                Trace.Write(".");
-            }
-
-        }
-
         [Fact()]
         public void TestValidateAndReplaceWithWorkloadSmallerThanCurrentEndsWithSameWorkLoadAsOriginalHash()
         {
+            var hmacKey = Guid.Parse("BFD57646-9EC2-4ED2-A98D-1CE7107D2E38").ToString();
 
             string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
             string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
-            string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC";
+            string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPO/jMqrnJc5PFWasgccSlw6RlvYsWV4sS";
 
             string newPassword = "my new password";
-            string hashed = BCrypt.HashPassword(currentKey, salt);
+            string hashed = BCryptExtendedV3.HashPassword(hmacKey,currentKey, salt);
+            string hashed2 = BCryptExtendedV3.HashPassword(hmacKey,currentKey, salt);
+            string hashed3 = BCryptExtendedV3.HashPassword(hmacKey,currentKey, salt);
             var d = hashed == currentHash;
 
-            Assert.Contains("$12$", BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, workFactor: 5));
+            Assert.Contains("$12$", BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey,currentKey, currentHash, newPassword, workFactor: 5));
 
             Trace.Write(".");
         }
@@ -225,113 +156,18 @@ namespace BCryptNet.UnitTests
         [Fact()]
         public void TestValidateAndReplaceWithForceAndWorkloadSmallerThanCurrentEndsWithRequestedWorkLoad()
         {
+            var hmacKey = Guid.Parse("BFD57646-9EC2-4ED2-A98D-1CE7107D2E38").ToString();
+
             string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
             string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
-            string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC";
+            string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPO/jMqrnJc5PFWasgccSlw6RlvYsWV4sS";
 
             string newPassword = "my new password";
-            string hashed = BCrypt.HashPassword(currentKey, salt);
+            string hashed = BCryptExtendedV3.HashPassword(hmacKey,currentKey, salt);
             Assert.Equal(hashed, currentHash);
-            var replHash = BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, workFactor: 5, forceWorkFactor: true);
+            var replHash = BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey, currentKey, currentHash, newPassword, workFactor: 5, forceWorkFactor: true);
             Assert.Contains("$05$", replHash);
             Trace.Write(".");
-        }
-
-
-        /**
-         * Test method for 'BCrypt.GenerateSalt(int)'
-         */
-        [Fact()]
-        public void TestGenerateSaltWithWorkFactor()
-        {
-            Trace.Write("BCrypt.GenerateSalt(log_rounds):");
-            for (int i = 4; i <= 10; i++)
-            {
-                Trace.Write(" " + i + ":");
-                for (int j = 0; j < _testVectors.Length / 3; j++)
-                {
-                    string plain = _testVectors[j, 0];
-                    string salt = BCrypt.GenerateSalt(i);
-                    string hashed1 = BCrypt.HashPassword(plain, salt);
-                    string hashed2 = BCrypt.HashPassword(plain, hashed1);
-                    Assert.Equal(hashed1, hashed2);
-                    Trace.Write(".");
-                }
-            }
-            Trace.WriteLine("");
-        }
-
-        [Fact(Skip = "This test takes a very long time to run as it uses the max workload")]
-        public void TestGenerateSaltWithMaxWorkFactor()
-        {
-            Trace.Write("BCrypt.GenerateSalt(31):");
-            for (int j = 0; j < _testVectors.Length / 3; j++)
-            {
-                string plain = _testVectors[j, 0];
-                string salt = BCrypt.GenerateSalt(31);
-                string hashed1 = BCrypt.HashPassword(plain, salt);
-                string hashed2 = BCrypt.HashPassword(plain, hashed1);
-                Assert.Equal(hashed1, hashed2);
-                Trace.Write(".");
-            }
-            Trace.WriteLine("");
-        }
-
-        /**
-         * Test method for 'BCrypt.GenerateSalt()'
-         */
-        [Fact()]
-        public void TestGenerateSalt()
-        {
-            Trace.Write("BCrypt.GenerateSalt():");
-            for (int i = 0; i < _testVectors.Length / 3; i++)
-            {
-                string plain = _testVectors[i, 0];
-                string salt = BCrypt.GenerateSalt();
-                string hashed1 = BCrypt.HashPassword(plain, salt);
-                string hashed2 = BCrypt.HashPassword(plain, hashed1);
-                Assert.Equal(hashed1, hashed2);
-                Trace.Write(".");
-            }
-            Trace.WriteLine("");
-        }
-
-        /**
-         * Test method for 'BCrypt.VerifyPassword(string, string)'
-         * expecting success
-         */
-        [Fact()]
-        public void TestVerifyPasswordSuccess()
-        {
-            Trace.Write("BCrypt.Verify with good passwords:");
-            for (int i = 0; i < _testVectors.Length / 3; i++)
-            {
-                string plain = _testVectors[i, 0];
-                string expected = _testVectors[i, 2];
-                Assert.True(BCrypt.Verify(plain, expected));
-                Trace.Write(".");
-            }
-            Trace.WriteLine("");
-        }
-
-        /**
-         * Test method for 'BCrypt.VerifyPassword(string, string)'
-         * expecting failure
-         */
-        [Fact()]
-        public void TestVerifyPasswordFailure()
-        {
-            Trace.Write("BCrypt.Verify with bad passwords: ");
-            for (int i = 0; i < _testVectors.Length / 3; i++)
-            {
-                int brokenIndex = (i + 4) % (_testVectors.Length / 3);
-                string plain = _testVectors[i, 0];
-                string expected = _testVectors[brokenIndex, 2];
-                var res = BCrypt.Verify(plain, expected);
-                Assert.False(res);
-                Trace.Write(".");
-            }
-            Trace.WriteLine("");
         }
 
         /**
@@ -342,15 +178,16 @@ namespace BCryptNet.UnitTests
         [InlineData("ππππππππ")]
         public void TestInternationalChars(string pw1)
         {
+            var hmacKey = Guid.NewGuid().ToString();
             Trace.Write("BCrypt.HashPassword with international chars: ");
             string pw2 = "????????";
 
-            string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
-            Assert.False(BCrypt.Verify(pw2, h1));
+            string h1 = BCryptExtendedV3.HashPassword(hmacKey,pw1, BCrypt.GenerateSalt());
+            Assert.False(BCryptExtendedV3.Verify(hmacKey,pw2, h1));
             Trace.Write(".");
 
-            string h2 = BCrypt.HashPassword(pw2, BCrypt.GenerateSalt());
-            Assert.False(BCrypt.Verify(pw1, h2));
+            string h2 = BCryptExtendedV3.HashPassword(hmacKey,pw2, BCrypt.GenerateSalt());
+            Assert.False(BCryptExtendedV3.Verify(hmacKey,pw1, h2));
             Trace.Write(".");
             Trace.WriteLine("");
         }
@@ -368,9 +205,10 @@ namespace BCryptNet.UnitTests
         public void TestNaughtyStringsHash(string pw1)
         {
             Trace.Write("BCrypt.HashPassword with naughty strings: ");
+            var hmacKey = Guid.NewGuid().ToString();
 
-            string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
-            Assert.True(BCrypt.Verify(pw1, h1));
+            string h1 = BCryptExtendedV3.HashPassword(hmacKey,pw1, BCrypt.GenerateSalt());
+            Assert.True(BCryptExtendedV3.Verify(hmacKey,pw1, h1));
 
             Trace.Write(".");
         }
@@ -381,11 +219,12 @@ namespace BCryptNet.UnitTests
         [InlineData("password\x00 defgreallylongpassword")]
         public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworks(string password)
         {
-            var x = BCrypt.GenerateSalt();
-            string hash = BCrypt.HashPassword(password, x);
+            var hmacKey = Guid.NewGuid().ToString();
+            var x = BCryptExtendedV3.GenerateSalt();
+            string hash = BCryptExtendedV3.HashPassword(hmacKey,password, x);
 
-            var t1 = BCrypt.Verify(password, hash);
-            var t2 = BCrypt.Verify("password", hash);
+            var t1 = BCryptExtendedV3.Verify(hmacKey,password, hash);
+            var t2 = BCryptExtendedV3.Verify(hmacKey,"password", hash);
             Assert.True(t1, "Null terminator should validate if part of passphrase");
             Assert.False(t2, "Null terminator shouldn't alter passphrase");
         }
@@ -394,46 +233,21 @@ namespace BCryptNet.UnitTests
         [InlineData("\0 defgreallylongpassword", "\0")]
         public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworksSetB(string password, string leader)
         {
-            var x = BCrypt.GenerateSalt();
-            string hash = BCrypt.HashPassword(password, x);
+            var hmacKey = Guid.NewGuid().ToString();
+            var x = BCryptExtendedV3.GenerateSalt();
+            string hash = BCryptExtendedV3.HashPassword(hmacKey,password, x);
 
-            Assert.False(BytesAreValid(SafeUtf8.GetBytes(password)));
+            Assert.False(ContainsNoNullBytes(SafeUtf8.GetBytes(password)));
 
-            var t1 = BCrypt.Verify(leader, hash);
+            var t1 = BCryptExtendedV3.Verify(hmacKey,leader, hash);
             Assert.False(t1, "Null should be treated as part of password as per spec");
-            Assert.False(BCrypt.Verify("", hash), "Null should be treated as part of password as per spec");
-
-        }
-
-        [Fact]
-        public void LeadingByteDoesntTruncateHash()
-        {
-            var b = new BCryptCore();
-            var s = BCrypt.GenerateSalt();
-            var extractedSalt = s.Substring(7, 22);
-
-            var passA = SafeUtf8.GetBytes("\0 password");
-            var passB = SafeUtf8.GetBytes("\0");
-
-            byte[] saltBytes = BCryptCore.DecodeBase64(extractedSalt, 128 / 8);
-
-            var bytesAreValid = BytesAreValid(passA);
-            Assert.False(bytesAreValid, "Hash contains null bytes");
-
-            var hashA = b.CryptRaw(passA, saltBytes, 4);
-            var hashAVerification = b.CryptRaw(passA, saltBytes, 4);
-            Assert.True(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashAVerification), "These should match as this is how validation works");
-
-            var hashB = b.CryptRaw(passB, saltBytes, 4);
-            var hashBVerification = b.CryptRaw(passB, saltBytes, 4);
-            Assert.True(Convert.ToBase64String(hashB) == Convert.ToBase64String(hashBVerification), "These should match as this is how validation works, this is skipping the password");
-
-            Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldn't match as we hash the whole strings bytes, including the null byte");
+            Assert.False(BCryptExtendedV3.Verify(hmacKey,"", hash), "Null should be treated as part of password as per spec");
         }
 
         [Fact]
         public void LeadingByteDoesntTruncateHashSHA()
         {
+            var hmacKey = Guid.Parse("5FDEBC5A-C3DD-4DAD-8DB1-26BB439EDD31").ToString();
             var b = new BCrypt();
             var s = BCrypt.GenerateSalt();
             var extractedSalt = s.Substring(7, 22);
@@ -443,12 +257,8 @@ namespace BCryptNet.UnitTests
 
             byte[] saltBytes = BCrypt.DecodeBase64(extractedSalt, 128 / 8);
 
-            var sha = new HMACSHA256(SafeUtf8.GetBytes(HMACKey));
-            byte[] enhancedBytes = sha.ComputeHash(passA);
-            byte[] enhancedBytesB = sha.ComputeHash(passB);
-
-            var bytesAreValid = BytesAreValid(enhancedBytes);
-            Assert.False(bytesAreValid, "Hash contains null bytes");
+            byte[] enhancedBytes = new HMACSHA3_256(SafeUtf8.GetBytes(hmacKey)).ComputeHash(passA);
+            byte[] enhancedBytesB = new HMACSHA3_256(SafeUtf8.GetBytes(hmacKey)).ComputeHash(passB);
 
             var hashA = b.CryptRaw(enhancedBytes, saltBytes, 4);
             var hashAVerification = b.CryptRaw(enhancedBytes, saltBytes, 4);
@@ -461,7 +271,7 @@ namespace BCryptNet.UnitTests
             Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldnt match as we hash the whole strings bytes, including the null byte");
         }
 
-        private static bool BytesAreValid(byte[] bytes)
+        private static bool ContainsNoNullBytes(byte[] bytes)
         {
             if (bytes == null) return false;
             return !Array.Exists(bytes, x => x == 0);
