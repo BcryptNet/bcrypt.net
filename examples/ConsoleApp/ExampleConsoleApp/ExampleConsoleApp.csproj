@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\src\Bcrypt.Net\BCrypt.Net.csproj" />
+      <ProjectReference Include="..\..\..\src\BCrypt.Net\BCrypt.Net.csproj" />
     </ItemGroup>
   
 </Project>
