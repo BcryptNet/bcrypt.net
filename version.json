@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AArnott/Nerdbank.GitVersioning/master/src/NerdBank.GitVersioning/version.schema.json",
+  "version": "5.0.0-prerelease",
+  "publicReleaseRefSpec": [
+    "^refs\/heads\/rel\/.*$"
+  ],
+
+  "nugetPackageVersion": {
+    "semVer": 2
+  },
+
+  "cloudBuild": {
+    "buildNumber": {
+      "enabled": true,
+      "setVersionVariables": true,
+      "includeCommitId": {
+        "when": "nonPublicReleaseOnly",
+        "where": "buildMetadata"
+      }
+    }
+  }
+}
