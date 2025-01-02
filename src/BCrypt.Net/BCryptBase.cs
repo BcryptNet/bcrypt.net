@@ -17,7 +17,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OU
 IN THE SOFTWARE.
 */
 
-using System;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -543,7 +542,7 @@ public class BCryptCore
 
     /// <summary>Cyclically extract a word of key material.</summary>
     /// <param name="data">The string to extract the data from.</param>
-    /// <param name="offset"> [in,out] The current offset.</param>
+    /// <param name="offset"> [in, out] The current offset.</param>
     /// <returns>The next word of material from data.</returns>
 #if NETCOREAPP
     private static uint StreamToWord(ReadOnlySpan<byte> data, ref int offset)

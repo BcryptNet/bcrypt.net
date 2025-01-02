@@ -6,11 +6,23 @@ on:
     branches:
       - main
     paths-ignore:
+      - '**.md'
       - 'docs/**'
       - '.github/**'
+      - 'assets/*'
+      - 'examples/*'
+      - 'dists/*'
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ main ]
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/**'
+      - 'assets/*'
+      - 'examples/*'
+      - 'dists/*'
   schedule:
     - cron: '25 4 * * 2'
 

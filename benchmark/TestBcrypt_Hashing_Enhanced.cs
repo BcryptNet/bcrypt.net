@@ -82,17 +82,16 @@ namespace BCryptNet.BenchMarks
             var validateHashCheck = BCryptExtendedV2.Verify(key, hashed);
             return hashed + validateHashCheck.ToString();
         }
-#if NET8_0_OR_GREATER
+
         private static readonly string Hmackey = Guid.NewGuid().ToString();
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public string TestHashValidateEnhancedNet8Plus(string key, string salt, string hash)
-        {
-            string hashed = BCryptExtendedV3.HashPassword(Hmackey, key, salt);
-            var validateHashCheck = BCryptExtendedV3.Verify(Hmackey, key, hashed);
-            return hashed + validateHashCheck.ToString();
-        }
-#endif
+        // [Benchmark]
+        // [ArgumentsSource(nameof(Data))]
+        // public string TestHashValidateEnhancedNet8Plus(string key, string salt, string hash)
+        // {
+        //     string hashed = BCryptExtendedV3.HashPassword(Hmackey, key, salt);
+        //     var validateHashCheck = BCryptExtendedV3.Verify(Hmackey, key, hashed);
+        //     return hashed + validateHashCheck.ToString();
+        // }
     }
 }

@@ -17,9 +17,13 @@
 
     <LangVersion>11.0</LangVersion>
 
-    <SignAssembly Condition=" '$(OS)' != 'Windows_NT' ">true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <AssemblyOriginatorKeyFile>../../bcrypt.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\bcrypt.pub</AssemblyOriginatorKeyFile>
+    <DelaySign>true</DelaySign>
+
+<!--    <SignAssembly Condition=" '$(OS)' == 'Windows_NT' ">true</SignAssembly>-->
+<!--    <PublicSign Condition=" '$(OS)' == 'Windows_NT' ">true</PublicSign>-->
+<!--    <AssemblyDelaySignAttribute>true</AssemblyDelaySignAttribute>-->
+<!--    <AssemblyOriginatorKeyFile Condition=" '$(OS)' == 'Windows_NT' ">../../bcrypt.pfx</AssemblyOriginatorKeyFile>-->
   </PropertyGroup>
 
   <PropertyGroup>

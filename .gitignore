@@ -265,3 +265,4 @@ __pycache__/
 *.pyc
 /src/Benchmark/BenchmarkDotNet.Artifacts/results/*
 /docs/_site/
+/assets/*.nupkg
