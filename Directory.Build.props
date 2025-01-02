@@ -8,7 +8,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/BcryptNet/bcrypt.net/</RepositoryUrl>
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
-    <PackageProjectUrl>https://github.com/BcryptNet/bcrypt.net/</PackageProjectUrl>
+    <PackageProjectUrl>https://bcryptnet.chrismckee.uk/</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/BcryptNet/bcrypt.net/</PackageReleaseNotes>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

@@ -1,5 +1,13 @@
 # bcrypt.net - next
 
+[![Documentation](https://img.shields.io/badge/Documentation-Online-blue.svg?style=flat-square)](https://bcryptnet.chrismckee.uk/)
+
+[![NuGet](https://img.shields.io/nuget/v/BCrypt.Net-Next.svg?style=flat-square)](https://www.nuget.org/packages/BCrypt.Net-Next)
+
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/BcryptNet/bcrypt.net/.github%2Fworkflows%2Fcodeql-analysis.yml)
+
+[![License](https://img.shields.io/github/license/BcryptNet/bcrypt.net.svg?style=flat-square)]
+
 ## Description
 
 A `.Net` port of jBCrypt implemented in C#. It uses a variant of the Blowfish encryption algorithm’s keying schedule, and introduces a work factor, which allows you to determine how expensive the hash function will be, allowing the algorithm to be "future-proof".
