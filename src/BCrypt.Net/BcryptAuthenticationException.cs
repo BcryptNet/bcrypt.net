@@ -1,14 +1,16 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace BCryptNet
 {
-    /// <inheritdoc />
+    #if NETFRAMEWORK
     /// <summary>Exception for signalling hash validation errors. </summary>
     [Serializable]
-    public class BcryptAuthenticationException : Exception
+    public sealed class BcryptAuthenticationException : Exception
     {
-        /// <inheritdoc />
-        /// <summary>Default constructor. </summary>
+        /// <summary>
+        ///     Default Constructor
+        /// </summary>
         protected BcryptAuthenticationException()
         {
         }
@@ -18,22 +20,50 @@ namespace BCryptNet
         {
         }
 
-        /// <inheritdoc />
-        /// <summary>Initializes a new instance of <see cref="BcryptAuthenticationException" />.</summary>
-        /// <param name="message">The message.</param>
-        public BcryptAuthenticationException(string message)
-            : base(message)
+        /// <summary>
+        ///     Initializes a new instance of <see cref="BcryptAuthenticationException" />.
+        /// </summary>
+        /// <param name="message"></param>
+        public BcryptAuthenticationException(string message) : base(message)
         {
         }
 
-        /// <inheritdoc />
-        /// <summary>Initializes a new instance of <see cref="BcryptAuthenticationException" />.</summary>
-        /// <param name="message">       The message.</param>
-        /// <param name="innerException">The inner exception.</param>
-        public BcryptAuthenticationException(string message, Exception innerException)
-            : base(message, innerException)
+        /// <summary>
+        ///     Initializes a new instance of <see cref="BcryptAuthenticationException" />.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="innerException"></param>
+        public BcryptAuthenticationException(string message, Exception innerException) : base(message, innerException)
         {
         }
-
     }
+#else
+    /// <summary>Exception for signalling hash validation errors. </summary>
+    public sealed class BcryptAuthenticationException : Exception
+    {
+        /// <summary>
+        ///     Default Constructor
+        /// </summary>
+        public BcryptAuthenticationException()
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of <see cref="BcryptAuthenticationException" />.
+        /// </summary>
+        /// <param name="message"></param>
+        public BcryptAuthenticationException(string message) : base(message)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of <see cref="BcryptAuthenticationException" />.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="innerException"></param>
+        public BcryptAuthenticationException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }
+#endif
 }
