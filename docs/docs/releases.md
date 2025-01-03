@@ -11,6 +11,32 @@ uid: releases
 - Drops support for .net 2, 3.5, 5.0
 - Renamed namespace to `BcryptNet` to fix the issue with the class and namespace clashing.
 
+### Migrating to V5
+
+Enhanced Entropy V1 is removed in V5, if you are using this feature you will need to migrate to V2 or V3.
+
+#### Namespace Change
+
+The namespace has been changed to `BCryptNet` to avoid clashes with the class name.
+
+#### Enhanced Entropy V2
+
+The code has been split to avoid the endless growth of the main class and the signatures altered to more clearly show which version is being used.
+
+Before
+
+```csharp
+var enhancedHashPassword = BCrypt.EnhancedHashPassword(myPassword);
+var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword);
+```
+
+After
+
+```csharp
+var enhancedHashPassword = BCryptExtendedV2.HashPassword(myPassword);
+var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword);
+```
+
 ----
 
 ## v4.x

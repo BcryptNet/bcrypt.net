@@ -46,6 +46,25 @@ namespace BCryptNet
             return 10 * (hash[format.WorkfactorOffset] - '0') + (hash[format.WorkfactorOffset + 1] - '0');
         }
 
+        /// <summary>
+        /// Get Salt from Hash
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <returns></returns>
+        public static string GetSalt(string hash)
+        {
+            if (!IsValidHash(hash, out var format))
+            {
+                ThrowInvalidHashFormat();
+            }
+            if (string.IsNullOrWhiteSpace(hash) || hash.Length < 29)
+            {
+                throw new ArgumentException("Invalid BCrypt hash.");
+            }
+
+            return hash.Substring(0, 22 + format.HashOffset);
+        }
+
         internal static bool IsValidHash(string hash, out HashFormatDescriptor format)
         {
             if (hash is null)

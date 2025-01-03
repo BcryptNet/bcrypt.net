@@ -1,0 +1,13 @@
+<?php
+// https://laravelplayground.com/#/
+use Illuminate\Support\Facades\Hash;
+
+Route::get('/', function () {
+    $hashed = Hash::make('password', [
+        'rounds' => 12,
+    ]);
+
+    return view('playground', [
+        'title' => $hashed
+    ]);
+});

@@ -1,5 +1,8 @@
 # bcrypt.net - next
 
+> [!NOTE]
+> The main code, documentation and website refer to V5 which is being prepared for release
+
 [![Documentation](https://img.shields.io/badge/Documentation-Online-blue.svg?style=flat-square)](https://bcryptnet.chrismckee.uk/)
 
 [![NuGet](https://img.shields.io/nuget/v/BCrypt.Net-Next.svg?style=flat-square)](https://www.nuget.org/packages/BCrypt.Net-Next)

@@ -53,6 +53,8 @@ namespace BCryptNet.UnitTests
             { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2a$08$Eq2r4G/76Wv39MzSX262hu",    "$2a$08$Eq2r4G/76Wv39MzSX262huzPz612MZiYHVUJe/OcOql2jo4.9UxTW" },
             { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2a$10$LgfYWkbzEvQ4JakH7rOvHe",    "$2a$10$LgfYWkbzEvQ4JakH7rOvHe0y8pHKF9OaFgwUZ2q7W2FFZmZzJYlfS" },
             { "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2a$12$WApznUOJfkEGSmYRfnkrPO",    "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC" },
+            // Laravel 11 (changed Y version to A)
+            { "password",                           "$2a$12$oH4q4SYhvsTMLk1Ch6aQ1.",     "$2a$12$oH4q4SYhvsTMLk1Ch6aQ1.7kFpyMNnrLepschA0IXS5zoOCdEE332" },
         };
 
         /// <summary>
@@ -592,7 +594,16 @@ namespace BCryptNet.UnitTests
             var t1 = BCrypt.Verify(leader, hash);
             Assert.False(t1, "Null should be treated as part of password as per spec");
             Assert.False(BCrypt.Verify("", hash), "Null should be treated as part of password as per spec");
+        }
 
+        [Theory()]
+        //https://github.com/BcryptNet/bcrypt.net/issues/112 hash generated in Laravel11
+        [InlineData("123465", "$2y$10$76MoM3QzYb7UmP6lpwDZXu5JzKLNaQ8rnmx03.oDfsdVNj3zv2qJ2")]
+        public void VerificationTestForVariousOtherLibGeneratedHashes(string password, string libHash)
+        {
+            var salt = HashParser.GetSalt(libHash);
+            string hash = BCrypt.HashPassword(password, salt);
+            Assert.Equal(libHash, hash);
         }
 
         [Fact]
@@ -608,7 +619,7 @@ namespace BCryptNet.UnitTests
             byte[] saltBytes = BCryptCore.DecodeBase64(extractedSalt, 128 / 8);
 
             var hasNullBytes = ContainsNoNullBytes(passA);
-            Assert.True(hasNullBytes, "Hash doesnt contain null bytes");
+            Assert.False(hasNullBytes, "Hash doesnt contain null bytes");
 
             var hashA = b.CryptRaw(passA, saltBytes, 4);
             var hashAVerification = b.CryptRaw(passA, saltBytes, 4);
