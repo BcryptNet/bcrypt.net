@@ -7,6 +7,8 @@ items:
         href: building.md
       - name: Enhanced Entropy
         href: enhancedEntropy.md
+      - name: Enhanced Entropy - Password Shucking
+        href: enhancedEntropyPasswordShucking.md
       - name: Salts / Salting
         href: salts.md
       - name: Scheme Versioning
