@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="DotNet.ReproducibleBuilds" Version="1.2.25" />
-    <PackageVersion Include="Nerdbank.GitVersioning" Version="3.7.112" />
+    <PackageVersion Include="Nerdbank.GitVersioning" Version="3.7.115" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.4.0.108396" />
     <PackageVersion Include="DotNetAnalyzers.DocumentationAnalyzers" Version="1.0.0-beta.59" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
