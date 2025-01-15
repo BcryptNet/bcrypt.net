@@ -13,8 +13,6 @@ namespace BCryptNet.BenchMarks
     {
         static void Main(string[] args)
         {
-
-            
             #if DEBUG
             BenchmarkRunner.Run<TestBcrypt_Hashing>(new DebugInProcessConfig().AddValidator(ExecutionValidator.FailOnError));
             // BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly)

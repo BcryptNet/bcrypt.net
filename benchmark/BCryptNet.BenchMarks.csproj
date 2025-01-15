@@ -3,7 +3,7 @@
     <RootNamespace>BCryptNet.BenchMarks</RootNamespace>
     <AssemblyName>BCryptNet.BenchMarks</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net48;net8.0</TargetFrameworks>
+    <TargetFrameworks>net48;net9.0</TargetFrameworks>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <Configurations>Release;Debug</Configurations>
     <Platforms>AnyCPU</Platforms>
