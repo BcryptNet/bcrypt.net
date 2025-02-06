@@ -63,7 +63,8 @@ jobs:
 
     - name: 'Test'
       id: test
-      run: dotnet test --no-build --restore --collect:"XPlat Code Coverage" --logger junit
+      #run: dotnet test --no-build --restore --collect:"XPlat Code Coverage" --logger junit
+      run: dotnet test --configuration release --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
 
     - name: 'Create test summary'
       uses: test-summary/action@31493c76ec9e7aa675f1585d3ed6f1da69269a86 # v2.4
