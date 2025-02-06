@@ -2,9 +2,13 @@
     <PropertyGroup>
         <AssemblyName>BCrypt.Net.UnitTests</AssemblyName>
         <RootNamespace>BCryptNet.UnitTests</RootNamespace>
-        <TargetFrameworks>net9.0</TargetFrameworks>
+        <TargetFramework>net9.0</TargetFramework>
         <Configurations>Debug</Configurations>
         <LangVersion>default</LangVersion>
+
+        <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+        <OutputType>Exe</OutputType>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
 
         <DebugType>Full</DebugType>
         <DefineConstants Condition="'$(OS)' == 'Windows_NT'">$(DefineConstants);WINDOWS</DefineConstants>

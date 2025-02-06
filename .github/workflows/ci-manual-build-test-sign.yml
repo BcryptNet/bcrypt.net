@@ -52,7 +52,7 @@ jobs:
       run: dotnet build --configuration Release --property:PublicRelease=${{ inputs.public_release }}
 
     - name: 'Test'
-      run: dotnet test --configuration Release --no-restore --no-build --property:PublicRelease=${{ inputs.public_release }}
+      run: dotnet test --configuration Release --no-restore --no-build --property:PublicRelease=${{ inputs.public_release }} tests/UnitTests/BCrypt.Net.UnitTests.csproj
 
     - name: 'Pack release'
       run: dotnet pack --configuration Release --no-restore  --no-build --output ${{ env.nupkgDirectory }} --property:PublicRelease=${{ inputs.public_release }}

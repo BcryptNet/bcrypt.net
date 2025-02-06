@@ -1,0 +1,28 @@
+name: 'MSFT Dev Skim'
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - 'main'
+
+permissions:
+  # required for all workflows
+  security-events: write
+  # only required for workflows in private repositories
+  actions: read
+  contents: read
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@cb605e52c26070c328afc4562f0b4ada7618a84e # v2.10.4
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@v4
+    - uses: microsoft/DevSkim-Action@v1
+    - uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: devskim-results.sarif
