@@ -12,9 +12,9 @@ on:
       - main
     paths:
       - '**.md'
-  schedule:
+  #schedule:
   # Run every-day at 9:00 AM (See https://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html#tag_20_25_07)
-  - cron: "0 9 * * *"
+  #- cron: "0 9 * * *"
 permissions:
   contents: read
 

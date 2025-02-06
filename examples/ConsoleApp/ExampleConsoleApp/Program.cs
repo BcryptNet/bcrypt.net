@@ -1,4 +1,6 @@
-﻿namespace ExampleConsoleApp;
+﻿using System;
+
+namespace ExampleConsoleApp;
 
 using BCryptNet;
 
