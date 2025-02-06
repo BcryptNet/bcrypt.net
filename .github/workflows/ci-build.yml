@@ -42,6 +42,7 @@ jobs:
       uses: actions/setup-dotnet@87b7050bc53ea08284295505d98d2aa94301e852 # v4.2.0
       with:
         dotnet-version: 9.0.x
+        cache: true
 
     - name: 'Restore external dependencies'
       run: dotnet restore
@@ -63,19 +64,19 @@ jobs:
 
     - name: 'Test'
       id: test
-      run: dotnet test --no-build --restore --collect:"XPlat Code Coverage" --logger junit
+      run: dotnet test --no-build --restore --collect:"XPlat Code Coverage" --logger junit tests/UnitTests/BCrypt.Net.UnitTests.csproj
 
     - name: 'Create test summary'
       uses: test-summary/action@31493c76ec9e7aa675f1585d3ed6f1da69269a86 # v2.4
       with:
-        paths: test/**/TestResults.xml
+        paths: tests/**/TestResults.xml
         show: "fail, skip"
       if: always()
 
     - name: 'Generate Coverage Reports'
       uses: danielpalme/ReportGenerator-GitHub-Action@c38c522d4b391c1b0da979cbb2e902c0a252a7dc # 5.4.3
       with:
-        reports: "test/**/coverage.cobertura.xml"
+        reports: "tests/**/coverage.cobertura.xml"
         targetdir: "${{ github.workspace }}"
         reporttypes: "Cobertura" 
         verbosity: "Info" 
@@ -110,11 +111,11 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action@170bf24d20d201b842d7a52403b73ed297e6645b # v2.18.0
       if: always()
       with:
-        files: "test/**/TestResults.xml"
+        files: "tests/**/TestResults.xml"
 
     - name: Upload Test Artifacts
       uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
       with:
         name: test-results
-        path: "test/**/TestResults.xml"
+        path: "tests/**/TestResults.xml"
         retention-days: 5
