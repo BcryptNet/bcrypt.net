@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-    <PackageReference Include="System.Collections.Immutable" Version="9.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.2" />
     <PackageReference Include="System.Reflection.Metadata" Version="9.0.0" />
     <PackageReference Include="NETStandard.Library" Version="2.0.3" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
