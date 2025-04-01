@@ -2,7 +2,7 @@
     <PropertyGroup>
         <AssemblyName>BCrypt.Net.UnitTests</AssemblyName>
         <RootNamespace>BCryptNet.UnitTests</RootNamespace>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFrameworks>net9.0;net48</TargetFrameworks>
         <Configurations>Debug</Configurations>
         <LangVersion>default</LangVersion>
 

@@ -17,7 +17,6 @@
 // IN THE SOFTWARE.
 // */
 
-using System;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
@@ -101,6 +100,6 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
     private static bool CheckForAspIdentityHash(string hash)
     {
         if (hash[0] == '$') return false;
-        return hash.FromBase64().ToHex().StartsWith("00") || hash.FromBase64().ToHex().StartsWith("01");
+        return hash.FromBase64().ToHex().StartsWith("00", StringComparison.InvariantCulture) || hash.FromBase64().ToHex().StartsWith("01", StringComparison.InvariantCulture);
     }
 }

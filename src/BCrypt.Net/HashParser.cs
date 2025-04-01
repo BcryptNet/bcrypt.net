@@ -105,8 +105,9 @@ namespace BCryptNet
             }
 
             // Validate workfactor
-            if (!IsAsciiNumeric(hash[offset++])
-                || !IsAsciiNumeric(hash[offset++]))
+#pragma warning disable S1764
+            if (!IsAsciiNumeric(hash[offset++]) || !IsAsciiNumeric(hash[offset++]))
+#pragma warning restore S1764
             {
                 format = null;
                 return false;

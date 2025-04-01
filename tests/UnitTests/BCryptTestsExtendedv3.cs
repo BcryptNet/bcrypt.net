@@ -26,7 +26,7 @@ using Xunit;
 
 namespace BCryptNet.UnitTests
 {
-#if NET8_0_OR_GREATER
+#if NETCOREAPP
 
     /// <summary>
     /// BCrypt tests

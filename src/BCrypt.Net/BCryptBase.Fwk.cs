@@ -411,7 +411,6 @@ public partial class BCryptCore
     /// <param name="workFactor"> The binary logarithm of the number of rounds of hashing to apply.</param>
     /// <returns>A byte array containing the hashed result.</returns>
     internal byte[] CryptRaw(byte[] inputBytes, byte[] saltBytes, int workFactor)
-
     {
         int i;
         int j;

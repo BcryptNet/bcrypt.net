@@ -179,13 +179,37 @@ namespace BCryptNet
         }
 
 #if NETCOREAPP
+        /// <summary>
+        ///  Hash a password using the OpenBSD BCrypt scheme with a manually supplied salt/>.
+        /// </summary>
+        /// <remarks>
+        ///  You should generally leave generating salts to the library.
+        /// </remarks>
+        /// <param name="inputKey">The password to hash.</param>
+        /// <param name="salt">The log2 of the number of rounds of hashing to apply - the work
+        ///                          factor therefore increases as 2^workFactor. Default is 11</param>
+        /// <returns>The hashed password.</returns>
+        /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         public static string HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt)
         {
             Span<char> outputBuffer = stackalloc char[60];
-            BCrypt.HashPassword(inputKey, salt, outputBuffer, out var outputBufferWritten);
+            HashPassword(inputKey, salt, outputBuffer, out var outputBufferWritten);
             return new string(outputBuffer[..outputBufferWritten]);
         }
 
+        /// <summary>
+        ///  Hash a password using the OpenBSD BCrypt scheme with a manually supplied salt/>.
+        /// </summary>
+        /// <remarks>
+        ///  You should generally leave generating salts to the library.
+        /// </remarks>
+        /// <param name="inputKey">The password to hash.</param>
+        /// <param name="salt">The log2 of the number of rounds of hashing to apply - the work
+        ///                          factor therefore increases as 2^workFactor. Default is 11</param>
+        /// <param name="outputBuffer"></param>
+        /// <param name="outputBufferWritten"></param>
+        /// <returns>The hashed password.</returns>
+        /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         public static void HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer, out int outputBufferWritten) => CreatePasswordHash(inputKey, salt, outputBuffer, out outputBufferWritten);
 #endif
 

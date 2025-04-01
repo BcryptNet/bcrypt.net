@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using BCryptNet.BenchMarks._3._2._1;
 using BCryptNet.BenchMarks.EncodeB64;
 using BenchmarkDotNet.Attributes;
@@ -82,7 +83,7 @@ namespace BCryptNet.BenchMarks
         public string Original_StrBuilder_SinEncoding_AppendChar_Sized_PRFmt_MoreChar()
         {
             var result = new StringBuilder(60);
-            result.Append('$').Append('2').Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$')
+            result.Append('$').Append('2').Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2", CultureInfo.InvariantCulture)).Append('$')
                 .Append(EncodedSaltAsChars)
                 .Append(EncodedHashAsChars);
 
@@ -121,7 +122,7 @@ namespace BCryptNet.BenchMarks
             result.Append("$2")
                 .Append(bcryptMinorRevision)
                 .Append("$")
-                .AppendFormat("{0:00}", workFactor)
+                .Append($"{workFactor:00}")
                 .Append("$")
                 .Append(salt)
                 .Append(hash);

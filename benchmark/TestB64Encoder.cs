@@ -30,5 +30,17 @@ namespace BCryptNet.BenchMarks
         {
             var decoded = EncodeB64Methods.EncodeBase64AsBytes(SaltBytes, 16);
         }
+
+        [Benchmark]
+        public void EncodeBase64StackAlloc()
+        {
+            var decoded = EncodeB64Methods.EncodeBase64StackAlloc(SaltBytes, 16);
+        }
+
+        [Benchmark]
+        public void EncodeBase64HeapSpanAlloc()
+        {
+            var decoded = EncodeB64Methods.EncodeBase64HeapAlloc(SaltBytes, 16);
+        }
     }
 }

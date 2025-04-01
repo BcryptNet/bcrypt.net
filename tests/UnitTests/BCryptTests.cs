@@ -230,6 +230,7 @@ namespace BCryptNet.UnitTests
             Trace.WriteLine("");
         }
 
+#if NETCOREAPP
         /**
          * Test method for 'BCrypt.HashPassword(string, string)'
          */
@@ -312,7 +313,7 @@ namespace BCryptNet.UnitTests
             Trace.WriteLine(sw.ElapsedMilliseconds);
             Trace.WriteLine("");
         }
-
+#endif
 
         /**
          * Test method for 'BCrypt.HashPassword(string, string)'

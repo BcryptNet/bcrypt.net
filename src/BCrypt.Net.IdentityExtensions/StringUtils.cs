@@ -17,7 +17,7 @@
 // IN THE SOFTWARE.
 // */
 
-using System;
+using System.Globalization;
 
 namespace BCryptNet.IdentityExtensions;
 
@@ -39,7 +39,11 @@ internal static class StringUtils
     {
         try
         {
-            return BitConverter.ToString(data).Replace("-", "").ToLower();
+#if NET9_0_OR_GREATER
+            return Convert.ToHexStringLower(data);
+#else
+            return BitConverter.ToString(data).Replace("-", "", StringComparison.InvariantCulture).ToLower(CultureInfo.InvariantCulture);
+#endif
         }
         catch
         {

@@ -2,11 +2,11 @@
 
 Running these 
 
-`dotnet run -c Release -f net48 -- --runtimes net48 net9.0 --platform x64`
+`dotnet run -c Release -f net9.0 -- --runtimes net9.0 --platform x64`
 
 or 
 
-`dotnet run -c Release -f net48 -- --runtimes net48 net9.0 --filter * --stopOnFirstError --platform x64`
+`dotnet run -c Release -f net9.0 -- --runtimes net9.0 --filter * --stopOnFirstError --platform x64`
 
 _Change the framework and remove the netfwk runtimes if running on linux._
 

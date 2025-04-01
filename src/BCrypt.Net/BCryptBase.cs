@@ -506,7 +506,7 @@ public partial class BCryptCore
         return true;
     }
 
-    internal static Span<char> EncodeBase64(ReadOnlySpan<byte> byteArray, int length)
+    internal static ReadOnlySpan<char> EncodeBase64(ReadOnlySpan<byte> byteArray, int length)
     {
         if (length <= 0 || length > byteArray.Length)
         {
@@ -514,7 +514,7 @@ public partial class BCryptCore
         }
 
         int encodedSize = (int)Math.Ceiling((length * 4D) / 3);
-        char[] encoded = new char[encodedSize];
+        Span<char> encoded = stackalloc char[encodedSize];
 
         int pos = 0;
         int off = 0;
@@ -548,7 +548,7 @@ public partial class BCryptCore
             encoded[pos++] = Base64Code[c2 & 0x3f];
         }
 
-        return encoded;
+        return encoded.ToArray();
     }
 
     /// <summary>

@@ -69,8 +69,8 @@ namespace BCryptNet.BenchMarks
         [ArgumentsSource(nameof(Data))]
         public string TestHashValidateEnhancedv4perf(string key, string salt, string hash)
         {
-            string hashed = version4.BCrypt.HashPassword(key, salt, enhancedEntropy: true);
-            var validateHashCheck = version4.BCrypt.EnhancedVerify(key, hashed);
+            string hashed = BCryptV4.BCrypt.HashPassword(key, salt, enhancedEntropy: true);
+            var validateHashCheck = BCryptV4.BCrypt.EnhancedVerify(key, hashed);
             return hashed + validateHashCheck.ToString();
         }
 
@@ -85,13 +85,13 @@ namespace BCryptNet.BenchMarks
 
         private static readonly string Hmackey = Guid.NewGuid().ToString();
 
-        // [Benchmark]
-        // [ArgumentsSource(nameof(Data))]
-        // public string TestHashValidateEnhancedNet8Plus(string key, string salt, string hash)
-        // {
-        //     string hashed = BCryptExtendedV3.HashPassword(Hmackey, key, salt);
-        //     var validateHashCheck = BCryptExtendedV3.Verify(Hmackey, key, hashed);
-        //     return hashed + validateHashCheck.ToString();
-        // }
+        [Benchmark]
+        [ArgumentsSource(nameof(Data))]
+        public string TestHashValidateEnhancedNet8Plus(string key, string salt, string hash)
+        {
+            string hashed = BCryptExtendedV3.HashPassword(Hmackey, key, salt);
+            var validateHashCheck = BCryptExtendedV3.Verify(Hmackey, key, hashed);
+            return hashed + validateHashCheck.ToString();
+        }
     }
 }

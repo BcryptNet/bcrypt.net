@@ -15,15 +15,10 @@ namespace BCryptNet.BenchMarks
         {
             #if DEBUG
             BenchmarkRunner.Run<TestBcrypt_Hashing>(new DebugInProcessConfig().AddValidator(ExecutionValidator.FailOnError));
-            // BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly)
-            //     .Run(args, new DebugInProcessConfig()
-            //         // .With(Job.Default.With(CoreRuntime.Latest))
-            //         // .With(Job.Default.With(ClrRuntime.Net48))
-            //         .AddValidator(ExecutionValidator.FailOnError));
             #else
             var config = DefaultConfig.Instance
-                .With(Job.Default.With(CoreRuntime.Core60))
-                .With(Job.Default.With(ClrRuntime.Net48));
+                .With(Job.Default.With(CoreRuntime.Core90))
+                ;
             // BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
             
             BenchmarkRunner.Run<TestBcrypt_Hashing>(config);
