@@ -8,14 +8,14 @@ namespace BCryptNet.BenchMarks.HashParser
         private static readonly HashFormatDescriptor OldFormatDescriptor = new HashFormatDescriptor(versionLength: 1);
         private static readonly HashFormatDescriptor NewFormatDescriptor = new HashFormatDescriptor(versionLength: 2);
 
-        public static BaseLine.HashInformation GetHashInformation(string hash)
+        public static BCryptBaseLine.HashInformation GetHashInformation(string hash)
         {
             if (!IsValidHash(hash, out var format))
             {
                 ThrowInvalidHashFormat();
             }
 
-            return new BaseLine.HashInformation(
+            return new BCryptBaseLine.HashInformation(
                 hash.Substring(0, format.SettingLength),
                 hash.Substring(1, format.VersionLength),
                 hash.Substring(format.WorkfactorOffset, 2),
@@ -125,7 +125,7 @@ namespace BCryptNet.BenchMarks.HashParser
 
         private static void ThrowInvalidHashFormat()
         {
-            throw new BaseLine.SaltParseException("Invalid Hash Format");
+            throw new BCryptBaseLine.SaltParseException("Invalid Hash Format");
         }
 
         private class HashFormatDescriptor

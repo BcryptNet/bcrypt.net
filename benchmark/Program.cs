@@ -14,18 +14,19 @@ namespace BCryptNet.BenchMarks
         static void Main(string[] args)
         {
             #if DEBUG
-            BenchmarkRunner.Run<TestBcrypt_Hashing>(new DebugInProcessConfig().AddValidator(ExecutionValidator.FailOnError));
+            BenchmarkRunner.Run<TestBcrypt_HashingValidation>(new DebugInProcessConfig().AddValidator(ExecutionValidator.FailOnError));
             #else
             var config = DefaultConfig.Instance
                 .With(Job.Default.With(CoreRuntime.Core90))
                 ;
-            // BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
-            
+
             BenchmarkRunner.Run<TestBcrypt_Hashing>(config);
-            BenchmarkRunner.Run<TestBcrypt_Hashing_Enhanced>(config);
-            
+            BenchmarkRunner.Run<TestBcrypt_Hashing_Validation>(config);
+            BenchmarkRunner.Run<TestBcryptHashingEnhanced>(config);
+            BenchmarkRunner.Run<TestBcryptHashingEnhancedValidation>(config);
+
             // Tests for testing in isolation
-            BenchmarkRunner.Run<InterrogateHashBenchmarks>(config);
+            BenchmarkRunner.Run<TestBcrypt_Hash_Interrogation>(config);
             BenchmarkRunner.Run<TestB64Decoder>(config);
             BenchmarkRunner.Run<TestB64Encoder>(config);
             BenchmarkRunner.Run<TestVariantsOnStringBuilding>(config);

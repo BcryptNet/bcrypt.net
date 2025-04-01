@@ -11,7 +11,7 @@ namespace BCryptNet.BenchMarks
     [KeepBenchmarkFiles]
     public class TestB64Encoder
     {
-        private static readonly byte[] SaltBytes = BaseLine.BCrypt.DecodeBase64("sGBxdT2q8Qd84NyZEkwTY.", 16);
+        private static readonly byte[] SaltBytes = BCryptBaseLine.BCrypt.DecodeBase64("sGBxdT2q8Qd84NyZEkwTY.", 16);
 
         [Benchmark(Baseline = true)]
         public void EncodeBase64Unsized()

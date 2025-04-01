@@ -19,8 +19,8 @@ namespace BCryptNet.BenchMarks
         private static readonly string hash = "TV4S6ytwfsfvkgY8jIucDrjc8deX1s.";
         private static readonly string salt = "DCq7YPn5Rq63x1Lad4cll.";
 
-        private static readonly byte[] SaltBytes = BaseLine.BCrypt.DecodeBase64(salt, 16);
-        private static readonly byte[] HashBytes = BaseLine.BCrypt.DecodeBase64(hash, 23);
+        private static readonly byte[] SaltBytes = BCryptBaseLine.BCrypt.DecodeBase64(salt, 16);
+        private static readonly byte[] HashBytes = BCryptBaseLine.BCrypt.DecodeBase64(hash, 23);
 
         private static readonly char[] EncodedSaltAsChars = EncodeB64Methods.EncodeBase64AsBytes(SaltBytes, 16);
         private static readonly char[] EncodedHashAsChars = EncodeB64Methods.EncodeBase64AsBytes(HashBytes, 23);

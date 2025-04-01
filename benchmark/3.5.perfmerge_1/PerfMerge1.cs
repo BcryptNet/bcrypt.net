@@ -6,7 +6,7 @@ using System.Text;
 // BASE
 namespace BCryptNet.BenchMarks._3._5.perfmerge_1
 {
-    public class PerfMerge1
+    public class BCrypt305PerfMerge1
     {
         /// <summary>BCrypt implementation.</summary>
         /// <remarks>

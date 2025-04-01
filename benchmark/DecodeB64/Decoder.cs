@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace BCryptNet.BenchMarks.DecodeB64
@@ -21,6 +22,7 @@ namespace BCryptNet.BenchMarks.DecodeB64
             51, 52, 53, -1, -1, -1, -1, -1
         };
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int Char64(char character)
         {
             return character < 0 || character > Index64.Length ? -1 : Index64[character];
@@ -76,8 +78,6 @@ namespace BCryptNet.BenchMarks.DecodeB64
 
             return result;
         }
-
-#if !NETFRAMEWORK || NETCOREAPP
 
         internal static byte[] DecodeBase64StringCreateSpan(string encodedString, int maximumBytes)
         {
@@ -142,8 +142,6 @@ namespace BCryptNet.BenchMarks.DecodeB64
             return ret.ToArray();
 
         }
-#endif
-
         internal static byte[] DecodeBase64StandardSized(string encodedString, int maximumBytes)
         {
             int sourceLength = encodedString.Length;
@@ -197,7 +195,6 @@ namespace BCryptNet.BenchMarks.DecodeB64
 
         }
 
-
         internal static byte[] DecodeBase64StandardUnSized(string encodedString, int maximumBytes)
         {
 
@@ -250,6 +247,36 @@ namespace BCryptNet.BenchMarks.DecodeB64
             }
             return bval;
 
+        }
+
+        public static int DecodeBase64(ReadOnlySpan<char> encodedSpan, Span<byte> destination)
+        {
+            int outputLength = 0;
+            int position = 0;
+
+            while (position < encodedSpan.Length - 1 && outputLength < destination.Length)
+            {
+                int c1 = Char64(encodedSpan[position++]);
+                int c2 = Char64(encodedSpan[position++]);
+                if (c1 == -1 || c2 == -1) break;
+
+                destination[outputLength] = (byte)((c1 << 2) | ((c2 & 0x30) >> 4));
+                if (++outputLength >= destination.Length || position >= encodedSpan.Length) break;
+
+                int c3 = Char64(encodedSpan[position++]);
+                if (c3 == -1) break;
+
+                destination[outputLength] = (byte)(((c2 & 0x0F) << 4) | ((c3 & 0x3C) >> 2));
+                if (++outputLength >= destination.Length || position >= encodedSpan.Length) break;
+
+                int c4 = Char64(encodedSpan[position++]);
+                if (c4 == -1) break;
+
+                destination[outputLength] = (byte)(((c3 & 0x03) << 6) | c4);
+                ++outputLength;
+            }
+
+            return outputLength;
         }
     }
 }
