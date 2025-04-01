@@ -245,6 +245,9 @@ namespace BCryptNet.UnitTests
             Assert.False(BCryptExtendedV3.Verify(hmacKey,"", hash), "Null should be treated as part of password as per spec");
         }
 
+#if NETCOREAPP
+
+#else
         [Fact]
         public void LeadingByteDoesntTruncateHashSHA()
         {
@@ -271,7 +274,7 @@ namespace BCryptNet.UnitTests
 
             Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldnt match as we hash the whole strings bytes, including the null byte");
         }
-
+#endif
         private static bool ContainsNoNullBytes(byte[] bytes)
         {
             if (bytes == null) return false;

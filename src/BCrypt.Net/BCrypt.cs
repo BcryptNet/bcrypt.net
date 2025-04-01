@@ -169,8 +169,25 @@ namespace BCryptNet
         ///                          factor therefore increases as 2^workFactor. Default is 11</param>
         /// <returns>The hashed password.</returns>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
-        public static string HashPassword(string inputKey, string salt) => CreatePasswordHash(inputKey, salt);
+        public static string HashPassword(string inputKey, string salt)
+        {
+#if NETCOREAPP
+            return HashPassword(inputKey.AsSpan(), salt.AsSpan());
+#else
+            return CreatePasswordHash(inputKey, salt);
+#endif
+        }
 
+#if NETCOREAPP
+        public static string HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt)
+        {
+            Span<char> outputBuffer = stackalloc char[60];
+            BCrypt.HashPassword(inputKey, salt, outputBuffer, out var outputBufferWritten);
+            return new string(outputBuffer[..outputBufferWritten]);
+        }
+
+        public static void HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer, out int outputBufferWritten) => CreatePasswordHash(inputKey, salt, outputBuffer, out outputBufferWritten);
+#endif
 
         /// <summary>
         /// Based on password_needs_rehash in PHP this method will return true

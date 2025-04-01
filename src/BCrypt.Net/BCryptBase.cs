@@ -17,6 +17,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OU
 IN THE SOFTWARE.
 */
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -27,7 +28,7 @@ namespace BCryptNet;
 /// <summary>
 /// Base class of the bcrypt api
 /// </summary>
-public class BCryptCore
+public partial class BCryptCore
 {
     // BCrypt parameters
     /// <summary>
@@ -211,8 +212,9 @@ public class BCryptCore
     private uint[] _p;
     private uint[] _s;
 
+#if !NETCOREAPP
     /// <summary>
-    /// 
+    /// Create Password Hash Base
     /// </summary>
     /// <param name="inputKey"></param>
     /// <param name="salt"></param>
@@ -224,11 +226,6 @@ public class BCryptCore
     /// <exception cref="SaltParseException"></exception>
     internal static string CreatePasswordHash(string inputKey, string salt, HashType hashType = HashType.None, Func<string, HashType, char, byte[]> enhancedHashKeyGen = null)
     {
-        if (string.IsNullOrEmpty(inputKey))
-        {
-            throw new ArgumentException("Invalid input key: input key cannot be null or empty", nameof(inputKey));
-        }
-
         if (string.IsNullOrEmpty(salt))
         {
             throw new ArgumentException("Invalid salt: salt cannot be null or empty", nameof(salt));
@@ -298,22 +295,14 @@ public class BCryptCore
                 break;
         }
 
-        return HashBytes(inputBytes, salt.Substring(startingOffset + 3, 22), bcryptMinorRevision, workFactor);
-    }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="inputBytes"></param>
-    /// <param name="extractedSalt"></param>
-    /// <param name="bcryptMinorRevision"></param>
-    /// <param name="workFactor"></param>
-    /// <returns></returns>
-#if NET5_0_OR_GREATER
-    internal static string HashBytes(ReadOnlySpan<byte> inputBytes, string extractedSalt, char bcryptMinorRevision, int workFactor)
-#else
-    internal static string HashBytes(byte[] inputBytes, string extractedSalt, char bcryptMinorRevision, int workFactor)
+        return HashBytes(inputBytes, salt.Substring(startingOffset + 3, 22), bcryptMinorRevision, workFactor);
+
+    }
 #endif
+
+#if !NETCOREAPP
+    internal static string HashBytes(byte[] inputBytes, string extractedSalt, char bcryptMinorRevision, int workFactor)
     {
         byte[] saltBytes = DecodeBase64(extractedSalt, BCryptSaltLen);
 
@@ -323,13 +312,16 @@ public class BCryptCore
 
         // Generate result string
         var result = new StringBuilder(60);
-        result.Append("$2").Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$');
+        result.Append('$').Append('2').Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2", CultureInfo.InvariantCulture)).Append('$');
         result.Append(EncodeBase64(saltBytes, saltBytes.Length));
         result.Append(EncodeBase64(hashed, (BfCryptCiphertextLength * 4) - 1));
 
         return result.ToString();
     }
+#endif
 
+
+#if !NETCOREAPP
     /// <summary>
     ///  Generate a salt for use with the <see cref="BCrypt.HashPassword(string, string)"/> method.
     /// </summary>
@@ -363,6 +355,7 @@ public class BCryptCore
 
         return result.ToString();
     }
+#endif
 
     // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
@@ -387,6 +380,7 @@ public class BCryptCore
         return diff == 0;
     }
 
+    #if !NETCOREAPP
     /// <summary>
     ///  Encode a byte array using BCrypt's slightly-modified base64 encoding scheme. Note that this
     ///  is *not* compatible with the standard MIME-base64 encoding.
@@ -440,15 +434,17 @@ public class BCryptCore
 
         return encoded;
     }
+    #endif
 
 
+#if !NETCOREAPP
     /// <summary>
     ///  Decode a string encoded using BCrypt's base64 scheme to a byte array.
     ///  Note that this is *not* compatible with the standard MIME-base64 encoding.
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or
     ///                                     illegal values.</exception>
-    /// <param name="encodedString">The string to decode.</param>
+    /// <param name="encodedSpan">The string to decode.</param>
     /// <param name="maximumBytes"> The maximum bytes to decode.</param>
     /// <returns>The decoded byte array.</returns>
     internal static byte[] DecodeBase64(string encodedString, int maximumBytes)
@@ -499,6 +495,7 @@ public class BCryptCore
 
         return result;
     }
+#endif
 
     /// <summary>
     ///  Look up the 3 bits base64-encoded by the specified character, range-checking against
@@ -506,6 +503,7 @@ public class BCryptCore
     /// </summary>
     /// <param name="character">The base64-encoded value.</param>
     /// <returns>The decoded value of x.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int Char64(char character)
     {
         return character < 0 || character > Index64.Length ? -1 : Index64[character];
@@ -665,6 +663,7 @@ public class BCryptCore
         }
     }
 
+#if !NETCOREAPP
     /// <summary>Perform the central hashing step in the BCrypt scheme.</summary>
     /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or
     ///                                     illegal values.</exception>
@@ -672,22 +671,14 @@ public class BCryptCore
     /// <param name="saltBytes"> The salt byte array to hash with.</param>
     /// <param name="workFactor"> The binary logarithm of the number of rounds of hashing to apply.</param>
     /// <returns>A byte array containing the hashed result.</returns>
-#if NETCOREAPP
-    internal byte[] CryptRaw(ReadOnlySpan<byte> inputBytes, ReadOnlySpan<byte> saltBytes, int workFactor)
-#else
     internal byte[] CryptRaw(byte[] inputBytes, byte[] saltBytes, int workFactor)
-#endif
+
     {
         int i;
         int j;
 
-#if NETCOREAPP
-        Span<uint> cdata = stackalloc uint[BfCryptCiphertext.Length];
-        BfCryptCiphertext.CopyTo(cdata);
-#else
         uint[] cdata = new uint[BfCryptCiphertext.Length];
         Array.Copy(BfCryptCiphertext, cdata, BfCryptCiphertext.Length);
-#endif
 
         int clen = cdata.Length;
 
@@ -740,4 +731,5 @@ public class BCryptCore
 
         return ret;
     }
+    #endif
 }

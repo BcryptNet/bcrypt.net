@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using BCryptNet.BenchMarks._3._2._1;
 using BCryptNet.BenchMarks._3._5.perfmerge_1;
 using BCryptNet.BenchMarks._4._0._0;
@@ -72,6 +73,17 @@ namespace BCryptNet.BenchMarks
             var validateHashCheck = BCrypt.Verify(key, hashed);
             return hashed + validateHashCheck.ToString();
         }
+
+#if NETCOREAPP
+        [Benchmark]
+        [ArgumentsSource(nameof(Data))]
+        public string TestHashValidateCurrentSpan(string key, string salt, string hash)
+        {
+            string hashed = BCrypt.HashPassword(key.AsSpan(), salt.AsSpan());
+            var validateHashCheck = BCrypt.Verify(key, hashed);
+            return hashed + validateHashCheck.ToString();
+        }
+#endif
 
     }
 }

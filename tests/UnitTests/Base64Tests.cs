@@ -25,6 +25,30 @@ namespace BCryptNet.UnitTests;
 
 public class Base64Tests
 {
+#if NETCOREAPP
+    [Fact]
+    public void EncodeBase64_ValidInput_ReturnsCorrectBase64Encoding()
+    {
+        // Arrange
+        byte[] saltBytes = Encoding.UTF8.GetBytes("Hello, world!");
+
+        // Act
+        // Assert
+        string expectedResult = "QETqZE6qGFbtakviGO";
+        Assert.Equal(expectedResult, new string(BCryptCore.EncodeBase64(saltBytes, saltBytes.Length)));
+    }
+
+    [Fact]
+    public void EncodeBase64_InvalidLength_ThrowsArgumentException()
+    {
+        // Act and Assert
+        Assert.Throws<ArgumentException>(() =>
+        {
+            byte[] saltBytes = Encoding.UTF8.GetBytes("Hello, world!");
+            return new string(BCryptCore.EncodeBase64(saltBytes, -1));
+        });
+    }
+#else
     [Fact]
     public void EncodeBase64_ValidInput_ReturnsCorrectBase64Encoding()
     {
@@ -50,4 +74,5 @@ public class Base64Tests
         // Act and Assert
         Assert.Throws<ArgumentException>(() => BCryptCore.EncodeBase64(byteArray, invalidLength));
     }
+#endif
 }
