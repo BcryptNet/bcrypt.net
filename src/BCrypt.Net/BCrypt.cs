@@ -17,8 +17,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OU
 IN THE SOFTWARE.
 */
 
-using System;
-
 namespace BCryptNet
 {
     /// <summary>BCrypt implementation.</summary>
@@ -83,8 +81,7 @@ namespace BCryptNet
         /// <exception cref="ArgumentException">returned if the hash is invalid</exception>
         /// <exception cref="ArgumentNullException">returned if the user hash is null</exception>
         /// <returns>New hash of new password</returns>
-        public static string ValidateAndUpgradeHash(string currentKey, string currentHash, string newKey,
-            int workFactor = DefaultRounds, bool forceWorkFactor = false)
+        public static string ValidateAndUpgradeHash(string currentKey, string currentHash, string newKey, int workFactor = DefaultRounds, bool forceWorkFactor = false)
         {
             if (currentKey == null)
                 throw new ArgumentNullException(nameof(currentKey));

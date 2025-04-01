@@ -17,6 +17,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OU
 IN THE SOFTWARE.
 */
 
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -221,12 +222,11 @@ public class BCryptCore
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="SaltParseException"></exception>
-    internal static string CreatePasswordHash(string inputKey, string salt, HashType hashType = HashType.None,
-        Func<string, HashType, char, byte[]> enhancedHashKeyGen = null)
+    internal static string CreatePasswordHash(string inputKey, string salt, HashType hashType = HashType.None, Func<string, HashType, char, byte[]> enhancedHashKeyGen = null)
     {
-        if (inputKey == null)
+        if (string.IsNullOrEmpty(inputKey))
         {
-            throw new ArgumentNullException(nameof(inputKey));
+            throw new ArgumentException("Invalid input key: input key cannot be null or empty", nameof(inputKey));
         }
 
         if (string.IsNullOrEmpty(salt))
@@ -234,10 +234,15 @@ public class BCryptCore
             throw new ArgumentException("Invalid salt: salt cannot be null or empty", nameof(salt));
         }
 
+        if (hashType == HashType.None && inputKey.Length > 72)
+        {
+            throw new ArgumentException("Invalid input key: input key cannot exceed 72 characters for bCrypt", nameof(inputKey));
+        }
+
         if (enhancedHashKeyGen == null && hashType != HashType.None)
-            throw new ArgumentException(
-                "Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.",
-                nameof(hashType));
+        {
+            throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(hashType));
+        }
 
         // Determine the starting offset and validate the salt
         int startingOffset;
@@ -270,7 +275,7 @@ public class BCryptCore
         }
 
         // Extract details from salt
-        int workFactor = Convert.ToInt16(salt.Substring(startingOffset, 2));
+        int workFactor = Convert.ToInt16(salt.Substring(startingOffset, 2), CultureInfo.InvariantCulture);
 
         // Throw if log rounds are out of range on hash, deals with custom salts
         if (workFactor < 1 || workFactor > 31)
@@ -285,8 +290,10 @@ public class BCryptCore
                 inputBytes = SafeUTF8.GetBytes(inputKey + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
                 break;
             default:
-                if(enhancedHashKeyGen == null)
+                if (enhancedHashKeyGen == null)
+                {
                     throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(hashType));
+                }
                 inputBytes = enhancedHashKeyGen(inputKey, hashType, bcryptMinorRevision);
                 break;
         }
@@ -302,7 +309,11 @@ public class BCryptCore
     /// <param name="bcryptMinorRevision"></param>
     /// <param name="workFactor"></param>
     /// <returns></returns>
+#if NET5_0_OR_GREATER
+    internal static string HashBytes(ReadOnlySpan<byte> inputBytes, string extractedSalt, char bcryptMinorRevision, int workFactor)
+#else
     internal static string HashBytes(byte[] inputBytes, string extractedSalt, char bcryptMinorRevision, int workFactor)
+#endif
     {
         byte[] saltBytes = DecodeBase64(extractedSalt, BCryptSaltLen);
 
@@ -375,7 +386,6 @@ public class BCryptCore
 
         return diff == 0;
     }
-
 
     /// <summary>
     ///  Encode a byte array using BCrypt's slightly-modified base64 encoding scheme. Note that this
