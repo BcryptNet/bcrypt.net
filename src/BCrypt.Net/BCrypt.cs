@@ -17,6 +17,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OU
 IN THE SOFTWARE.
 */
 
+using System.Globalization;
+
 namespace BCryptNet
 {
     /// <summary>BCrypt implementation.</summary>
@@ -122,7 +124,7 @@ namespace BCryptNet
             }
 
             // Extract details from salt
-            int currentWorkFactor = Convert.ToInt16(currentHash.Substring(startingOffset, 2));
+            int currentWorkFactor = Convert.ToInt16(currentHash.Substring(startingOffset, 2), CultureInfo.InvariantCulture);
 
             // Never downgrade work-factor (unless forced)
             if (!forceWorkFactor && currentWorkFactor > workFactor)

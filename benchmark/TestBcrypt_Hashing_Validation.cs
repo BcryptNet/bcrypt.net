@@ -23,13 +23,18 @@ using BCryptNet.BenchMarks._3._5.perfmerge_1;
 using BCryptNet.BenchMarks._4._0._0;
 using BCryptNet.BenchMarks._4._0._3;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 
 namespace BCryptNet.BenchMarks;
 
 #pragma warning disable 1591
 [MemoryDiagnoser]
-[RPlotExporter, RankColumn]
+/*[RPlotExporter]*/[RankColumn]
+//[GcServer(true)]
+[Orderer(SummaryOrderPolicy.Declared)]
 [KeepBenchmarkFiles]
+[MarkdownExporterAttribute.GitHub]
+// [ReturnValueValidator(failOnError: true)]
 public class TestBcrypt_Hashing_Validation
 {
     public IEnumerable<object[]> Data()

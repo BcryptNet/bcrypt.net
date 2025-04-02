@@ -349,7 +349,6 @@ public partial class BCryptCore
             throw new SaltParseException("Salt rounds out of range");
         }
 
-        Span<byte> inputBytes;
         switch (hashType)
         {
             case HashType.None:
@@ -357,8 +356,8 @@ public partial class BCryptCore
                 Span<byte> utf8Buffer = stackalloc byte[Encoding.UTF8.GetMaxByteCount(inputKey.Length + (appendNul ? 1 : 0))];
                 int bytesWritten = SafeUTF8.GetBytes(inputKey, utf8Buffer);
                 if (appendNul) utf8Buffer[bytesWritten++] = 0;
-
-                if (!HashBytes(utf8Buffer[..bytesWritten], salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int hashBytesWriten))
+                Span<byte> inputBytes = utf8Buffer[..bytesWritten];
+                if (!HashBytes(inputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int hashBytesWriten))
                     throw new BcryptAuthenticationException("Couldn't hash input");
 
                 outputBufferWritten = hashBytesWriten;
@@ -370,9 +369,8 @@ public partial class BCryptCore
                     throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(hashType));
                 }
 
-                inputBytes = enhancedHashKeyGen(new string(inputKey), hashType, bcryptMinorRevision);
-
-                if (!HashBytes(inputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int written))
+                Span<byte> eInputBytes = enhancedHashKeyGen(new string(inputKey), hashType, bcryptMinorRevision);
+                if (!HashBytes(eInputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int written))
                     throw new BcryptAuthenticationException("Couldn't hash input");
 
                 outputBufferWritten = written;
@@ -388,6 +386,8 @@ public partial class BCryptCore
     /// <param name="extractedSalt"></param>
     /// <param name="bcryptMinorRevision"></param>
     /// <param name="workFactor"></param>
+    /// <param name="destination"></param>
+    /// <param name="charsWritten"></param>
     /// <returns></returns>
     internal static bool HashBytes(
         ReadOnlySpan<byte> inputBytes,
@@ -419,7 +419,7 @@ public partial class BCryptCore
         destination[pos++] = '$';
 
         // Write work factor as 2-digit number
-        if (!workFactor.TryFormat(destination.Slice(pos), out int wfChars, "D2", CultureInfo.InvariantCulture))
+        if (!workFactor.TryFormat(destination[pos..], out int wfChars, "D2", CultureInfo.InvariantCulture))
             return false;
         pos += wfChars;
 
@@ -427,12 +427,12 @@ public partial class BCryptCore
 
         // Write base64-encoded salt
         var s = EncodeBase64(saltBytes, saltBytes.Length);
-        s.TryCopyTo(destination.Slice(pos));
+        s.TryCopyTo(destination[pos..]);
         pos += s.Length;
 
         // Write base64-encoded hash
         var hashEncoded = EncodeBase64(hashBytes, (BfCryptCiphertextLength * 4) - 1);
-        hashEncoded.TryCopyTo(destination.Slice(pos));
+        hashEncoded.TryCopyTo(destination[pos..]);
         pos += hashEncoded.Length;
 
         charsWritten = pos;
@@ -462,9 +462,9 @@ public partial class BCryptCore
         result[1] = '2';
         result[2] = bcryptMinorRevision;
         result[3] = '$';
-        workFactor.TryFormat(result.Slice(4, 2), out int _, "D2", CultureInfo.InvariantCulture);
+        workFactor.TryFormat(result.Slice(4, 2), out _, "D2", CultureInfo.InvariantCulture);
         result[6] = '$';
-        EncodeBase64(saltBytes, saltBytes.Length).CopyTo(result.Slice(7));
+        EncodeBase64(saltBytes, saltBytes.Length).CopyTo(result[7..]);
 
         return result.ToArray();
     }
@@ -555,9 +555,6 @@ public partial class BCryptCore
 
     internal ReadOnlySpan<byte> CryptRaw(ReadOnlySpan<byte> inputBytes, ReadOnlySpan<byte> saltBytes, int workFactor, Span<byte> destination)
     {
-        int i;
-        int j;
-
         Span<uint> cdata = stackalloc uint[BfCryptCiphertext.Length];
         BfCryptCiphertext.CopyTo(cdata);
         int clen = cdata.Length;
@@ -582,6 +579,8 @@ public partial class BCryptCore
 
         InitializeKey();
         EKSKey(saltBytes, inputBytes);
+
+        int i,j;
 
         for (i = 0; i != rounds; i++)
         {

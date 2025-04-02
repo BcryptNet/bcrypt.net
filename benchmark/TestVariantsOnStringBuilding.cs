@@ -3,16 +3,19 @@ using System.Text;
 using BCryptNet.BenchMarks._3._2._1;
 using BCryptNet.BenchMarks.EncodeB64;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 
 #pragma warning disable 1591
 
 namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
-    [CategoriesColumn]
-    [RPlotExporter, RankColumn]
-    [ReturnValueValidator(failOnError: true)]
+    /*[RPlotExporter]*/[RankColumn]
+    //[GcServer(true)]
+    [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]
+    [MarkdownExporterAttribute.GitHub]
+    [ReturnValueValidator(failOnError: true)]
     public class TestVariantsOnStringBuilding
     {
         private readonly string bcryptMinorRevision = "a";

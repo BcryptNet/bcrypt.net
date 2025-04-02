@@ -3,14 +3,19 @@ using BCryptNet.BenchMarks._4._0._0;
 using BCryptNet.BenchMarks._4._0._3;
 using BCryptNet.BenchMarks.HashParser;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 
 #pragma warning disable 1591
 
 namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
-    [RPlotExporter, RankColumn]
+    /*[RPlotExporter]*/[RankColumn]
+    //[GcServer(true)]
+    [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]
+    [MarkdownExporterAttribute.GitHub]
+    // [ReturnValueValidator(failOnError: true)]
     public class TestBcrypt_Hash_Interrogation
     {
         [Benchmark(Baseline = true)]

@@ -1,17 +1,22 @@
 ﻿using System;
 using BCryptNet.BenchMarks.DecodeB64;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 
 #pragma warning disable 1591
 
 namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
-    [RPlotExporter, RankColumn]
+    /*[RPlotExporter]*/
+    [RankColumn]
+    //[GcServer(true)]
+    [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]
+    [MarkdownExporterAttribute.GitHub]
+    // [ReturnValueValidator(failOnError: true)]
     public class TestB64Decoder
     {
-
         [Benchmark(Baseline = true)]
         [Arguments("DCq7YPn5Rq63x1Lad4cll.")]
         [Arguments("HqWuK6/Ng6sg9gQzbLrgb.")]
@@ -35,13 +40,13 @@ namespace BCryptNet.BenchMarks
         {
             return DecodeB64Methods.DecodeBase64StringCreateSpan(salt, 16);
         }
-        
+
         [Benchmark]
         [Arguments("DCq7YPn5Rq63x1Lad4cll.")]
         [Arguments("HqWuK6/Ng6sg9gQzbLrgb.")]
         public byte[] DecodeBase64ToBytes(string salt)
         {
-           return DecodeB64Methods.DecodeBase64ToBytes(salt, 16);
+            return DecodeB64Methods.DecodeBase64ToBytes(salt, 16);
         }
 
         [Benchmark]
@@ -53,6 +58,5 @@ namespace BCryptNet.BenchMarks
             int written = DecodeB64Methods.DecodeBase64(salt, saltBuffer);
             return saltBuffer[..written].ToArray();
         }
-
     }
 }

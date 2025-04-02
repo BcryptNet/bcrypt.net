@@ -4,14 +4,19 @@ using BCryptNet.BenchMarks._3._2._1;
 using BCryptNet.BenchMarks._3._5.perfmerge_1;
 using BCryptNet.BenchMarks._4._0._0;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 
 #pragma warning disable 1591
 
 namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
-    [RPlotExporter, RankColumn]
+    /*[RPlotExporter]*/[RankColumn]
+    //[GcServer(true)]
+    [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]
+    [MarkdownExporterAttribute.GitHub]
+    // [ReturnValueValidator(failOnError: true)]
     public class TestBcryptHashingEnhanced
     {
         public IEnumerable<object[]> Data()

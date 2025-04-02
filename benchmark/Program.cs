@@ -14,7 +14,7 @@ namespace BCryptNet.BenchMarks
         static void Main(string[] args)
         {
             #if DEBUG
-            BenchmarkRunner.Run<TestBcrypt_HashingValidation>(new DebugInProcessConfig().AddValidator(ExecutionValidator.FailOnError));
+            BenchmarkRunner.Run<TestB64Decoder>(new DebugInProcessConfig().AddValidator(ExecutionValidator.FailOnError));
             #else
             var config = DefaultConfig.Instance
                 .With(Job.Default.With(CoreRuntime.Core90))
@@ -24,8 +24,8 @@ namespace BCryptNet.BenchMarks
             BenchmarkRunner.Run<TestBcrypt_Hashing_Validation>(config);
             BenchmarkRunner.Run<TestBcryptHashingEnhanced>(config);
             BenchmarkRunner.Run<TestBcryptHashingEnhancedValidation>(config);
-
-            // Tests for testing in isolation
+            //
+            // // Tests for testing in isolation
             BenchmarkRunner.Run<TestBcrypt_Hash_Interrogation>(config);
             BenchmarkRunner.Run<TestB64Decoder>(config);
             BenchmarkRunner.Run<TestB64Encoder>(config);

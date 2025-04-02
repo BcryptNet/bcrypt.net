@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Globalization;
+using System.Security.Cryptography;
 
 namespace BCryptNet;
 
@@ -171,7 +172,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
         }
 
         // Extract details from salt
-        int currentWorkFactor = Convert.ToInt16(currentHash.Substring(startingOffset, 2));
+        int currentWorkFactor = Convert.ToInt16(currentHash.Substring(startingOffset, 2), CultureInfo.InvariantCulture);
 
         // Never downgrade work-factor (unless forced)
         if (!forceWorkFactor && currentWorkFactor > workFactor)
