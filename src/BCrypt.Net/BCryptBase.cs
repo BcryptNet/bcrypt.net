@@ -355,10 +355,15 @@ public partial class BCryptCore
             case HashType.None:
                 bool appendNul = bcryptMinorRevision >= 'a';
                 Span<byte> utf8Buffer = stackalloc byte[Encoding.UTF8.GetMaxByteCount(inputKey.Length + (appendNul ? 1 : 0))];
-                int bytesWritten = Encoding.UTF8.GetBytes(inputKey, utf8Buffer);
+                int bytesWritten = SafeUTF8.GetBytes(inputKey, utf8Buffer);
                 if (appendNul) utf8Buffer[bytesWritten++] = 0;
-                inputBytes = utf8Buffer[..bytesWritten].ToArray();
-                break;
+
+                if (!HashBytes(utf8Buffer[..bytesWritten], salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int hashBytesWriten))
+                    throw new BcryptAuthenticationException("Couldn't hash input");
+
+                outputBufferWritten = hashBytesWriten;
+                return;
+
             default:
                 if (enhancedHashKeyGen == null)
                 {
@@ -366,13 +371,14 @@ public partial class BCryptCore
                 }
 
                 inputBytes = enhancedHashKeyGen(new string(inputKey), hashType, bcryptMinorRevision);
-                break;
+
+                if (!HashBytes(inputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int written))
+                    throw new BcryptAuthenticationException("Couldn't hash input");
+
+                outputBufferWritten = written;
+
+                return;
         }
-
-        if (!HashBytes(inputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int written))
-            throw new BcryptAuthenticationException("Couldn't hash input");
-
-        outputBufferWritten = written;
     }
 
     /// <summary>
@@ -413,27 +419,27 @@ public partial class BCryptCore
         destination[pos++] = '$';
 
         // Write work factor as 2-digit number
-        if (!workFactor.TryFormat(destination.Slice(pos), out int wfChars, "D2"))
+        if (!workFactor.TryFormat(destination.Slice(pos), out int wfChars, "D2", CultureInfo.InvariantCulture))
             return false;
         pos += wfChars;
 
         destination[pos++] = '$';
 
         // Write base64-encoded salt
-        if (!TryEncodeBase64(saltBytes, saltBytes.Length, destination.Slice(pos), out int saltChars))
-            return false;
-        pos += saltChars;
+        var s = EncodeBase64(saltBytes, saltBytes.Length);
+        s.TryCopyTo(destination.Slice(pos));
+        pos += s.Length;
 
         // Write base64-encoded hash
-        if (!TryEncodeBase64(hashBytes, (BfCryptCiphertextLength * 4) - 1, destination.Slice(pos), out int hashChars))
-            return false;
-        pos += hashChars;
+        var hashEncoded = EncodeBase64(hashBytes, (BfCryptCiphertextLength * 4) - 1);
+        hashEncoded.TryCopyTo(destination.Slice(pos));
+        pos += hashEncoded.Length;
 
         charsWritten = pos;
         return true;
     }
 
-    internal static string GenerateSalt(int workFactor = DefaultRounds, char bcryptMinorRevision = DefaultHashVersion)
+    internal static ReadOnlySpan<char> GenerateSalt(int workFactor = DefaultRounds, char bcryptMinorRevision = DefaultHashVersion)
     {
         if (workFactor < MinRounds || workFactor > MaxRounds)
         {
@@ -447,63 +453,20 @@ public partial class BCryptCore
             throw new ArgumentException("BCrypt Revision should be a, b, x or y", nameof(bcryptMinorRevision));
         }
 
-        byte[] saltBytes = new byte[BCryptSaltLen];
+        Span<byte> saltBytes = stackalloc byte[BCryptSaltLen];
 
         RngCsp.GetBytes(saltBytes);
 
-        var result = new StringBuilder(29);
-        result.Append('$').Append('2').Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2", CultureInfo.InvariantCulture)).Append('$');
+        Span<char> result = stackalloc char[29]; // Adjust the length as needed
+        result[0] = '$';
+        result[1] = '2';
+        result[2] = bcryptMinorRevision;
+        result[3] = '$';
+        workFactor.TryFormat(result.Slice(4, 2), out int _, "D2", CultureInfo.InvariantCulture);
+        result[6] = '$';
+        EncodeBase64(saltBytes, saltBytes.Length).CopyTo(result.Slice(7));
 
-        // Base65 encoded salt
-        result.Append(EncodeBase64(saltBytes, saltBytes.Length));
-
-        return result.ToString();
-    }
-
-    internal static bool TryEncodeBase64(ReadOnlySpan<byte> byteArray, int length, Span<char> destination, out int charsWritten)
-    {
-        charsWritten = 0;
-
-        if (length <= 0 || length > byteArray.Length)
-            return false;
-
-        int encodedSize = (int)Math.Ceiling((length * 4D) / 3);
-        if (destination.Length < encodedSize)
-            return false;
-
-        int pos = 0;
-        int off = 0;
-        while (off < length)
-        {
-            int c1 = byteArray[off++] & 0xff;
-            destination[pos++] = Base64Code[(c1 >> 2) & 0x3f];
-            c1 = (c1 & 0x03) << 4;
-
-            if (off >= length)
-            {
-                destination[pos++] = Base64Code[c1 & 0x3f];
-                break;
-            }
-
-            int c2 = byteArray[off++] & 0xff;
-            c1 |= (c2 >> 4) & 0x0f;
-            destination[pos++] = Base64Code[c1 & 0x3f];
-            c1 = (c2 & 0x0f) << 2;
-
-            if (off >= length)
-            {
-                destination[pos++] = Base64Code[c1 & 0x3f];
-                break;
-            }
-
-            c2 = byteArray[off++] & 0xff;
-            c1 |= (c2 >> 6) & 0x03;
-            destination[pos++] = Base64Code[c1 & 0x3f];
-            destination[pos++] = Base64Code[c2 & 0x3f];
-        }
-
-        charsWritten = pos;
-        return true;
+        return result.ToArray();
     }
 
     internal static ReadOnlySpan<char> EncodeBase64(ReadOnlySpan<byte> byteArray, int length)

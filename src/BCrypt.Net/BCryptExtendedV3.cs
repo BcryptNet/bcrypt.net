@@ -47,6 +47,8 @@ public sealed class BCryptExtendedV3 : BCryptCore
     /// <returns>The hashed password.</returns>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static string HashPassword(string hmacKey, string inputKey, string salt, HashType hashType = DefaultEnhancedHashType) =>
+        CreatePasswordHash(inputKey, salt.AsSpan(), hashType, (key, type, version) => EnhancedHash(hmacKey,key, type, version));
+    public static string HashPassword(string hmacKey, string inputKey, ReadOnlySpan<char> salt, HashType hashType = DefaultEnhancedHashType) =>
         CreatePasswordHash(inputKey, salt, hashType, (key, type, version) => EnhancedHash(hmacKey,key, type, version));
 
     /// <summary>

@@ -527,7 +527,7 @@ namespace BCryptNet.UnitTests
                 for (int j = 0; j < _testVectors.Length / 3; j++)
                 {
                     string plain = _testVectors[j, 0];
-                    string salt = BCrypt.GenerateSalt(i);
+                    var salt = BCrypt.GenerateSalt(i);
                     string hashed1 = BCrypt.HashPassword(plain, salt);
                     string hashed2 = BCrypt.HashPassword(plain, hashed1);
                     Assert.Equal(hashed1, hashed2);
@@ -544,7 +544,7 @@ namespace BCryptNet.UnitTests
             for (int j = 0; j < _testVectors.Length / 3; j++)
             {
                 string plain = _testVectors[j, 0];
-                string salt = BCrypt.GenerateSalt(31);
+                var salt = BCrypt.GenerateSalt(31);
                 string hashed1 = BCrypt.HashPassword(plain, salt);
                 string hashed2 = BCrypt.HashPassword(plain, hashed1);
                 Assert.Equal(hashed1, hashed2);
@@ -563,7 +563,7 @@ namespace BCryptNet.UnitTests
             for (int i = 0; i < _testVectors.Length / 3; i++)
             {
                 string plain = _testVectors[i, 0];
-                string salt = BCrypt.GenerateSalt();
+                var salt = BCrypt.GenerateSalt();
                 string hashed1 = BCrypt.HashPassword(plain, salt);
                 string hashed2 = BCrypt.HashPassword(plain, hashed1);
                 Assert.Equal(hashed1, hashed2);
