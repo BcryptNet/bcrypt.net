@@ -268,12 +268,18 @@ public partial class BCryptCore
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="SaltParseException"></exception>
-    internal static string CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, HashType hashType = HashType.None, Func<string, HashType, char, byte[]> enhancedHashKeyGen = null)
+    internal static string CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, HashType hashType = HashType.None, EnhancedHashDelegate enhancedHashKeyGen = null)
     {
         Span<char> outputBuffer = stackalloc char[60];
         CreatePasswordHash(inputKey, salt, outputBuffer, out var outputBufferWritten, hashType, enhancedHashKeyGen);
         return new string(outputBuffer[..outputBufferWritten]);
     }
+
+    #if NETCOREAPP
+    internal delegate Span<byte> EnhancedHashDelegate(ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision);
+    #else
+    internal delegate byte[] EnhancedHashDelegate(string inputKey, HashType hashType, char bcryptMinorRevision);
+    #endif
 
     /// <summary>
     /// Create Password Hash Base
@@ -289,7 +295,7 @@ public partial class BCryptCore
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="SaltParseException"></exception>
     internal static void CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer, out int outputBufferWritten, HashType hashType = HashType.None,
-        Func<string, HashType, char, byte[]> enhancedHashKeyGen = null)
+        EnhancedHashDelegate enhancedHashKeyGen = null)
     {
         if (salt.IsEmpty)
         {
@@ -369,7 +375,7 @@ public partial class BCryptCore
                     throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(hashType));
                 }
 
-                Span<byte> eInputBytes = enhancedHashKeyGen(new string(inputKey), hashType, bcryptMinorRevision);
+                Span<byte> eInputBytes = enhancedHashKeyGen(inputKey, hashType, bcryptMinorRevision);
                 if (!HashBytes(eInputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int written))
                     throw new BcryptAuthenticationException("Couldn't hash input");
 

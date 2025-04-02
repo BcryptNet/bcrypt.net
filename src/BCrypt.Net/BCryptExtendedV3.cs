@@ -71,27 +71,26 @@ public sealed class BCryptExtendedV3 : BCryptCore
     /// Hashes key, base64 encodes before returning byte array
     /// </summary>
     /// <param name="hmacKey">Key used in HMAC hashing</param>
-    /// <param name="inputString"></param>
+    /// <param name="inputKey"></param>
     /// <param name="bcryptMinorRevision">(Default: 'a')</param>
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA3 HMAC 384 - https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.hmacsha3_256)</param>
     /// <returns></returns>
-    private static byte[] EnhancedHash(string hmacKey, string inputString, HashType hashType, char bcryptMinorRevision = 'a')
+    private static Span<byte> EnhancedHash(ReadOnlySpan<char> hmacKey, ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision = 'a')
     {
         switch (hashType)
         {
             case HashType.SHA256:
-                using (var sha = new HMACSHA3_256(SafeUTF8.GetBytes(hmacKey)))
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString))) +
-                                             (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                using (var sha = new HMACSHA3_256(BCryptCore.SafeUTF8.GetBytes(hmacKey.ToString())))
+                    return BCryptCore.SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(BCryptCore.SafeUTF8.GetBytes(inputKey.ToString()))) +
+                                                        (bcryptMinorRevision >= 'a' ? BCryptCore.Nul : BCryptCore.EmptyString)).AsSpan();
             case HashType.SHA384:
-                using (var sha = new HMACSHA3_384(SafeUTF8.GetBytes(hmacKey)))
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString))) +
-                                             (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                using (var sha = new HMACSHA3_384(BCryptCore.SafeUTF8.GetBytes(hmacKey.ToString())))
+                    return BCryptCore.SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(BCryptCore.SafeUTF8.GetBytes(inputKey.ToString()))) +
+                                                        (bcryptMinorRevision >= 'a' ? BCryptCore.Nul : BCryptCore.EmptyString));
             case HashType.SHA512:
-                using (var sha = new HMACSHA3_512(SafeUTF8.GetBytes(hmacKey)))
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString))) +
-                                             (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
-
+                using (var sha = new HMACSHA3_512(BCryptCore.SafeUTF8.GetBytes(hmacKey.ToString())))
+                    return BCryptCore.SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(BCryptCore.SafeUTF8.GetBytes(inputKey.ToString()))) +
+                                                        (bcryptMinorRevision >= 'a' ? BCryptCore.Nul : BCryptCore.EmptyString));
             case HashType.None:
             default:
                 throw new ArgumentOutOfRangeException(nameof(hashType), hashType, null);

@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP
+﻿#if !NETCOREAPP
 using System.Globalization;
 using System.Security.Cryptography;
 
@@ -54,21 +54,21 @@ public sealed class BCryptExtendedV2 : BCryptCore
     /// <param name="bcryptMinorRevision">(Default: 'a')</param>
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA384)</param>
     /// <returns></returns>
-    private static Span<byte> EnhancedHash(ReadOnlySpan<char> inputString, HashType hashType, char bcryptMinorRevision = 'a')
+    private static byte[] EnhancedHash(string inputString, HashType hashType, char bcryptMinorRevision = 'a')
     {
         switch (hashType)
         {
             case HashType.SHA256:
                 using (var sha = SHA256.Create())
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString.ToString()))) +
+                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString))) +
                                              (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
             case HashType.SHA384:
                 using (var sha = SHA384.Create())
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString.ToString()))) +
+                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString))) +
                                              (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
             case HashType.SHA512:
                 using (var sha = SHA512.Create())
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString.ToString()))) +
+                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString))) +
                                              (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
             default:
                 throw new ArgumentOutOfRangeException(nameof(hashType), hashType, null);
