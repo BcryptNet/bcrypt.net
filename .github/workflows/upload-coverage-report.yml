@@ -18,17 +18,17 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
+      uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
       with:
         egress-policy: audit
 
     - name: 'Download coverage results'
-      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
       with:
         name: coverage-results
 
     - name: Add Code Coverage PR Comment
-      uses: marocchino/sticky-pull-request-comment@52423e01640425a022ef5fd42c6fb5f633a02728 # v2.9.1
+      uses: marocchino/sticky-pull-request-comment@67d0dec7b07ed060a405f9b2a64b8ab319fdd7db # v2.9.2
       if: github.event_name == 'pull_request'
       with:
         recreate: true
