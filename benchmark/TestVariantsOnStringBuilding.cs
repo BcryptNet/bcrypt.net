@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 using BCryptNet.BenchMarks._3._2._1;
 using BCryptNet.BenchMarks.EncodeB64;
@@ -16,6 +18,7 @@ namespace BCryptNet.BenchMarks
     [KeepBenchmarkFiles]
     [MarkdownExporterAttribute.GitHub]
     [ReturnValueValidator(failOnError: true)]
+    [IterationTime(500)]
     public class TestVariantsOnStringBuilding
     {
         private readonly string bcryptMinorRevision = "a";
@@ -45,7 +48,7 @@ namespace BCryptNet.BenchMarks
 
         [Benchmark]
         [BenchmarkCategory("StringAppend", "AppendChar")]
-        public string Original_StrBuilder_SinEncoding_AppendChar()
+        public string StrBuilder_SinEncoding_UsingAppendFormatAndAppendChar()
         {
             // Generate result string
             StringBuilder result = new StringBuilder();
@@ -58,7 +61,7 @@ namespace BCryptNet.BenchMarks
 
         [Benchmark]
         [BenchmarkCategory("StringAppend", "AppendChar")]
-        public string Original_StrBuilder_SinEncoding_AppendChar_Sized()
+        public string SizedStrBuilder_SinEncoding_UsingAppendFormatAndAppendChar()
         {
             // Generate result string
             StringBuilder result = new StringBuilder(60);
@@ -71,10 +74,14 @@ namespace BCryptNet.BenchMarks
 
         [Benchmark]
         [BenchmarkCategory("StringAppend", "AppendChar")]
-        public string Original_StrBuilder_SinEncoding_AppendChar_Sized_PRFmt()
+        public string SizedStrBuilder_SinEncoding_UsingAppendStringAndChar()
         {
             var result = new StringBuilder(60);
-            result.Append("$2").Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2")).Append('$');
+            result.Append("$2");
+            result.Append(bcryptMinorRevision);
+            result.Append('$');
+            result.Append(workFactor.ToString("D2"));
+            result.Append('$');
             result.Append(EncodedSaltAsChars);
             result.Append(EncodedHashAsChars);
 
@@ -83,34 +90,47 @@ namespace BCryptNet.BenchMarks
 
         [Benchmark]
         [BenchmarkCategory("StringAppend", "AppendChar")]
-        public string Original_StrBuilder_SinEncoding_AppendChar_Sized_PRFmt_MoreChar()
+        public string SizedStrBuilder_SinEncoding_UsingAppendStringAndChar_v2()
         {
             var result = new StringBuilder(60);
-            result.Append('$').Append('2').Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2", CultureInfo.InvariantCulture)).Append('$')
-                .Append(EncodedSaltAsChars)
-                .Append(EncodedHashAsChars);
+            result.Append('$');
+            result.Append('2');
+            result.Append(bcryptMinorRevision);
+            result.Append('$');
+            result.Append(workFactor.ToString("D2", CultureInfo.InvariantCulture));
+            result.Append('$');
+            result.Append(EncodedSaltAsChars);
+            result.Append(EncodedHashAsChars);
 
             return result.ToString();
         }
 
         [Benchmark]
         [BenchmarkCategory("StringAppend", "AppendChar")]
-        public string Original_StrBuilder_SinEncoding_AppendChar_Sized_PRFmt_MoreString()
+        public string SizedStrBuilder_SinEncoding_UsingAppendStrings_HashSaltAsChar()
         {
             var result = new StringBuilder(60);
-            result.Append("$2").Append(bcryptMinorRevision).Append("$").Append(workFactor.ToString("D2")).Append("$")
-                .Append(EncodedSaltAsChars)
-                .Append(EncodedHashAsChars);
+            result.Append("$2");
+            result.Append(bcryptMinorRevision);
+            result.Append("$");
+            result.Append(workFactor.ToString("D2"));
+            result.Append("$");
+            result.Append(EncodedSaltAsChars);
+            result.Append(EncodedHashAsChars);
 
             return result.ToString();
         }
 
         [Benchmark]
         [BenchmarkCategory("StringAppend", "AppendString")]
-        public string Original_StrBuilder_SinEncoding_AppendChar_Sized_PRFmt_StringNotChar()
+        public string SizedStrBuilder_SinEncoding_UsingAppendStrings_HashSaltAsString_WorkFactorToString()
         {
             var result = new StringBuilder(60);
-            result.Append("$2").Append(bcryptMinorRevision).Append("$").Append(workFactor.ToString("D2")).Append("$");
+            result.Append("$2");
+            result.Append(bcryptMinorRevision);
+            result.Append("$");
+            result.Append(workFactor.ToString("D2"));
+            result.Append("$");
             result.Append(salt);
             result.Append(hash);
 
@@ -119,26 +139,36 @@ namespace BCryptNet.BenchMarks
 
         [Benchmark]
         [BenchmarkCategory("StringAppend", "AppendString")]
-        public string Original_StrBuilder_SinEncoding_AppendChar_Sized_FROMSTRING_PRFmt_plusfmt()
+        public string SizedStrBuilder_SinEncoding_UsingAppendStrings_WorkFactorInterpolated()
         {
             var result = new StringBuilder(60);
-            result.Append("$2")
-                .Append(bcryptMinorRevision)
-                .Append("$")
-                .Append($"{workFactor:00}")
-                .Append("$")
-                .Append(salt)
-                .Append(hash);
+            result.Append("$2");
+            result.Append(bcryptMinorRevision);
+            result.Append("$");
+            result.Append($"{workFactor:00}");
+            result.Append("$");
+            result.Append(salt);
+            result.Append(hash);
 
             return result.ToString();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static char[] Concatenate(char[] array1, char[] array2)
         {
             char[] result = new char[array1.Length + array2.Length];
             array1.CopyTo(result, 0);
             array2.CopyTo(result, array1.Length);
             return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string ConcatenateToString(char[] array1, char[] array2)
+        {
+            Span<char> result = stackalloc char[array1.Length + array2.Length];
+            array1.CopyTo(result);
+            array2.CopyTo(result.Slice(array1.Length));
+            return new string(result);
         }
 
         [Benchmark]
@@ -150,9 +180,16 @@ namespace BCryptNet.BenchMarks
 
         [Benchmark]
         [BenchmarkCategory("StringFmt", "AppendChar")]
-        public string StringInterpolation_WithCharMerged()
+        public string StringInterpolation_WithCharsConcat()
         {
             return $"$2{bcryptMinorRevision}${workFactor:00}${new string(Concatenate(EncodedSaltAsChars, EncodedHashAsChars))}";
+        }
+
+        [Benchmark]
+        [BenchmarkCategory("StringFmt", "AppendChar")]
+        public string StringInterpolation_WithAllocConcat()
+        {
+            return $"$2{bcryptMinorRevision}${workFactor:00}${ConcatenateToString(EncodedSaltAsChars, EncodedHashAsChars)}";
         }
 
         [Benchmark]

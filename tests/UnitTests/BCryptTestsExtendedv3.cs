@@ -161,12 +161,12 @@ namespace BCryptNet.UnitTests
 
             string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
             string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
-            string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPO/jMqrnJc5PFWasgccSlw6RlvYsWV4sS";
+            string expectedHash = "$2a$12$WApznUOJfkEGSmYRfnkrPO/jMqrnJc5PFWasgccSlw6RlvYsWV4sS";
 
             string newPassword = "my new password";
-            string hashed = BCryptExtendedV3.HashPassword(hmacKey,currentKey, salt);
-            Assert.Equal(hashed, currentHash);
-            var replHash = BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey, currentKey, currentHash, newPassword, workFactor: 5, forceWorkFactor: true);
+            string hashed = BCryptExtendedV3.HashPassword(hmacKey, currentKey, salt);
+            Assert.Equal(expectedHash, hashed);
+            var replHash = BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey, currentKey, expectedHash, newPassword, workFactor: 5, forceWorkFactor: true);
             Assert.Contains("$05$", replHash);
             Trace.Write(".");
         }
@@ -208,7 +208,7 @@ namespace BCryptNet.UnitTests
             Trace.Write("BCrypt.HashPassword with naughty strings: ");
             var hmacKey = Guid.NewGuid().ToString();
 
-            string h1 = BCryptExtendedV3.HashPassword(hmacKey,pw1, BCrypt.GenerateSalt());
+            string h1 = BCryptExtendedV3.HashPassword(hmacKey,pw1, BCryptCore.GenerateSalt());
             Assert.True(BCryptExtendedV3.Verify(hmacKey,pw1, h1));
 
             Trace.Write(".");
@@ -221,7 +221,7 @@ namespace BCryptNet.UnitTests
         public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworks(string password)
         {
             var hmacKey = Guid.NewGuid().ToString();
-            var x = BCryptExtendedV3.GenerateSalt();
+            var x = BCryptCore.GenerateSalt();
             string hash = BCryptExtendedV3.HashPassword(hmacKey,password, x);
 
             var t1 = BCryptExtendedV3.Verify(hmacKey,password, hash);
@@ -235,7 +235,7 @@ namespace BCryptNet.UnitTests
         public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworksSetB(string password, string leader)
         {
             var hmacKey = Guid.NewGuid().ToString();
-            var x = BCryptExtendedV3.GenerateSalt();
+            var x = BCryptCore.GenerateSalt();
             string hash = BCryptExtendedV3.HashPassword(hmacKey,password, x);
 
             Assert.False(ContainsNoNullBytes(SafeUtf8.GetBytes(password)));

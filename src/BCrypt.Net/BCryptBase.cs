@@ -359,7 +359,7 @@ public partial class BCryptCore
         {
             case HashType.None:
                 bool appendNul = bcryptMinorRevision >= 'a';
-                Span<byte> utf8Buffer = stackalloc byte[Encoding.UTF8.GetMaxByteCount(inputKey.Length + (appendNul ? 1 : 0))];
+                Span<byte> utf8Buffer = stackalloc byte[SafeUTF8.GetMaxByteCount(inputKey.Length + (appendNul ? 1 : 0))];
                 int bytesWritten = SafeUTF8.GetBytes(inputKey, utf8Buffer);
                 if (appendNul) utf8Buffer[bytesWritten++] = 0;
                 Span<byte> inputBytes = utf8Buffer[..bytesWritten];
@@ -529,6 +529,7 @@ public partial class BCryptCore
     /// <param name="encodedSpan">The string to decode.</param>
     /// <param name="destination"></param>
     /// <returns>The decoded byte array.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int DecodeBase64(ReadOnlySpan<char> encodedSpan, Span<byte> destination)
     {
         int outputLength = 0;

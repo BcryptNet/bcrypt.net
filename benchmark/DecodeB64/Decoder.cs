@@ -140,7 +140,6 @@ namespace BCryptNet.BenchMarks.DecodeB64
             }
 
             return ret.ToArray();
-
         }
         internal static byte[] DecodeBase64StandardSized(string encodedString, int maximumBytes)
         {
@@ -249,7 +248,7 @@ namespace BCryptNet.BenchMarks.DecodeB64
 
         }
 
-        public static int DecodeBase64(ReadOnlySpan<char> encodedSpan, Span<byte> destination)
+        public static int DecodeBase64SpanBuffer(ReadOnlySpan<char> encodedSpan, Span<byte> destination)
         {
             int outputLength = 0;
             int position = 0;

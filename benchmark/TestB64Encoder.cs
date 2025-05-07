@@ -13,6 +13,7 @@ namespace BCryptNet.BenchMarks
     [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]
     [MarkdownExporterAttribute.GitHub]
+    [IterationTime(500)]
     public class TestB64Encoder
     {
         private static readonly byte[] SaltBytes = BCryptBaseLine.BCrypt.DecodeBase64("sGBxdT2q8Qd84NyZEkwTY.", 16);

@@ -1,4 +1,5 @@
 ﻿#if NETCOREAPP
+using System.Diagnostics;
 using System.Globalization;
 using System.Security.Cryptography;
 
@@ -64,18 +65,67 @@ public sealed class BCryptExtendedV3 : BCryptCore
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA384)</param>
     /// <returns>The hashed password.</returns>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
-    public static string HashPassword(string hmacKey, ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, HashType hashType = DefaultEnhancedHashType) =>
-        CreatePasswordHash(inputKey, salt, hashType, (key, type, version) => EnhancedHash(hmacKey,key, type, version));
+    public static string HashPassword(string hmacKey, ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, HashType hashType = DefaultEnhancedHashType)
+    {
+        return CreatePasswordHash(inputKey, salt, hashType, (key, type, version) => EnhancedHash(hmacKey, key, type, version));
+    }
 
     /// <summary>
-    /// Hashes key, base64 encodes before returning byte array
+    /// HMAC-SHA3 hashes input key before bcrypt hashing
     /// </summary>
     /// <param name="hmacKey">Key used in HMAC hashing</param>
     /// <param name="inputKey"></param>
-    /// <param name="bcryptMinorRevision">(Default: 'a')</param>
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA3 HMAC 384 - https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.hmacsha3_256)</param>
+    /// <param name="bcryptMinorRevision">(Default: 'a')</param>
     /// <returns></returns>
-    private static Span<byte> EnhancedHash(ReadOnlySpan<char> hmacKey, ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision = 'a')
+    private static byte[] EnhancedHash(ReadOnlySpan<char> hmacKey, ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision = 'a')
+    {
+        ushort hashLen = hashType switch
+        {
+            HashType.SHA256 => 32,
+            HashType.SHA384 => 48,
+            HashType.SHA512 => 64,
+            _ => throw new ArgumentOutOfRangeException(nameof(hashType))
+        };
+
+        Span<byte> keyBytes = stackalloc byte[SafeUTF8.GetMaxByteCount(hmacKey.Length)];
+        Span<byte> dataBytes = stackalloc byte[SafeUTF8.GetMaxByteCount(inputKey.Length)];
+        Span<byte> hash = stackalloc byte[hashLen];
+
+        // UTF8 encode key and data
+        int keyByteLen = SafeUTF8.GetBytes(hmacKey, keyBytes);
+        int dataByteLen = SafeUTF8.GetBytes(inputKey, dataBytes);
+
+        // Perform HMAC
+        bool success = hashType switch
+        {
+            HashType.SHA256 => HMACSHA3_256.TryHashData(keyBytes[..keyByteLen], dataBytes[..dataByteLen], hash, out int len) && len == 32,
+            HashType.SHA384 => HMACSHA3_384.TryHashData(keyBytes[..keyByteLen], dataBytes[..dataByteLen], hash, out int len) && len == 48,
+            HashType.SHA512 => HMACSHA3_512.TryHashData(keyBytes[..keyByteLen], dataBytes[..dataByteLen], hash, out int len) && len == 64,
+            _ => throw new ArgumentOutOfRangeException(nameof(hashType))
+        };
+
+        if (!success)
+            throw new BcryptAuthenticationException($"HMAC-{hashType} failed");
+
+        // Base64 encode
+        Span<char> base64Chars = stackalloc char[(hashLen + 2) / 3 * 4];
+        if (!Convert.TryToBase64Chars(hash, base64Chars, out int base64Len))
+            throw new BcryptAuthenticationException("Base64 encoding failed in EnhancedHash");
+
+        // Append `Nul` only **after** base64 encoding
+        Span<char> finalBase64 = stackalloc char[base64Len + (bcryptMinorRevision >= 'a' ? 1 : 0)];
+        base64Chars[..base64Len].CopyTo(finalBase64);
+        if (bcryptMinorRevision >= 'a') finalBase64[base64Len] = '\0';
+
+        // UTF8 encode final base64 result
+        Span<byte> utf8Buffer = stackalloc byte[SafeUTF8.GetMaxByteCount(finalBase64.Length)];
+        int utf8Len = SafeUTF8.GetBytes(finalBase64, utf8Buffer);
+
+        return utf8Buffer[..utf8Len].ToArray();
+    }
+
+    private static Span<byte> EnhancedHashOld(ReadOnlySpan<char> hmacKey, ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision = 'a')
     {
         switch (hashType)
         {
