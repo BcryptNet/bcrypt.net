@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
+      uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
       with:
         egress-policy: audit
 
@@ -44,7 +44,7 @@ jobs:
         fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
  
     - name: 'Setup .NET SDK'
-      uses: actions/setup-dotnet@87b7050bc53ea08284295505d98d2aa94301e852 # v4.2.0
+      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
       with:
         dotnet-version: 9.0.x
 
@@ -77,92 +77,45 @@ jobs:
         Get-ChildItem -Path ${{ env.nupkgDirectory }} -Recurse -Force
 
     - name: Upload unsigned nupkgs
-      uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: build-artifacts
         path: ${{ env.nupkgDirectory }}/*
         retention-days: 7
 
-  sign:
-    name: Sign
-    needs: build
-    runs-on: windows-latest
-    if:  ${{ inputs.perform_sign }} 
-    environment: release
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-    - name: 'Setup .NET SDK'
-      uses: actions/setup-dotnet@87b7050bc53ea08284295505d98d2aa94301e852 # v4.2.0
+  # publish:
+  #   name: Publish to nuget
+  #   needs: sign
+  #   runs-on: ubuntu-latest
+  #   if:  ${{ inputs.perform_publish }}
+  #   environment: release
+  #   permissions:
+  #     id-token: write
+  #   steps:
+  #   - name: 'Harden Runner'
+  #     uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
+  #     with:
+  #       egress-policy: audit
 
-    - name: 'Install Sign CLI'
-      run: dotnet tool install --tool-path ./sign  --prerelease sign
+  #   - name: 'Setup .NET SDK'
+  #     uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
 
-    - name: 'Gather nupkgs from build output'
-      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
-      with:
-        name: build-artifacts
-        path : ${{ env.nupkgDirectory }}
+  #   - name: 'Gather nupkgs from signing output'
+  #     uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+  #     with:
+  #       name: signed-artifacts
+  #       path : ${{ env.nupkgDirectory }}
 
-    - name: List assets to be signed
-      shell: pwsh
-      run: >
-        Get-ChildItem -Path ${{ env.nupkgDirectory }} -Include *.nupkg -Recurse -Force
+  #   - name: List assets to be published
+  #     shell: pwsh
+  #     run: >
+  #       Get-ChildItem -Path ${{ env.nupkgDirectory }} -Filter *.nupkg -Recurse -Force
 
-    - name: Authenticate to Azure
-      uses: azure/login@a65d910e8af852a8061c627c456678983e180302 # 2.2.0
-      with:
-        allow-no-subscriptions : true
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-    - name: Sign
-      shell: pwsh
-      run: >
-        ./sign/sign code azure-key-vault *.nupkg --base-directory ${{ env.nupkgDirectory }} --azure-key-vault-url "${{ secrets.AZURE_KEY_VAULT_URL }}" --azure-key-vault-certificate "${{ secrets.AZURE_KEY_VAULT_CERTIFICATE }}"
-
-    - name: Upload signed nupkgs
-      uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
-      with:
-        name: signed-artifacts
-        path: ${{ env.nupkgDirectory }}/*
-        retention-days: 7
-
-  publish:
-    name: Publish to nuget
-    needs: sign
-    runs-on: ubuntu-latest
-    if:  ${{ inputs.perform_publish }}
-    environment: release
-    permissions:
-      id-token: write
-    steps:
-    - name: 'Harden Runner'
-      uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
-      with:
-        egress-policy: audit
-
-    - name: 'Setup .NET SDK'
-      uses: actions/setup-dotnet@87b7050bc53ea08284295505d98d2aa94301e852 # v4.2.0
-
-    - name: 'Gather nupkgs from signing output'
-      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
-      with:
-        name: signed-artifacts
-        path : ${{ env.nupkgDirectory }}
-
-    - name: List assets to be published
-      shell: pwsh
-      run: >
-        Get-ChildItem -Path ${{ env.nupkgDirectory }} -Filter *.nupkg -Recurse -Force
-
-      # Use --skip-duplicate to prevent errors if a package with the same version already exists.
-      # This allows a retry of a failed workflow, already published packages will be skipped without error.
-    - name: Publish NuGet package
-      shell: pwsh
-      run: >
-        foreach($file in (Get-ChildItem "${{ env.nupkgDirectory }}" -Recurse -Filter *.nupkg)) {
-          dotnet nuget push $file --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
-        }
+  #     # Use --skip-duplicate to prevent errors if a package with the same version already exists.
+  #     # This allows a retry of a failed workflow, already published packages will be skipped without error.
+  #   - name: Publish NuGet package
+  #     shell: pwsh
+  #     run: >
+  #       foreach($file in (Get-ChildItem "${{ env.nupkgDirectory }}" -Recurse -Filter *.nupkg)) {
+  #         dotnet nuget push $file --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+  #       }
