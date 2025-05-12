@@ -73,7 +73,7 @@ jobs:
       if: always()
 
     - name: 'Generate Coverage Reports'
-      uses: danielpalme/ReportGenerator-GitHub-Action@cc137d2b561c02b63ae869ffbe8f68af9d904bf4 # 5.4.6
+      uses: danielpalme/ReportGenerator-GitHub-Action@c9576654e2fea2faa7b69e59550b3805bf6a9977 # 5.4.7
       with:
         reports: "tests/**/coverage.cobertura.xml"
         targetdir: "${{ github.workspace }}"
