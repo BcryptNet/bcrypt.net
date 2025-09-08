@@ -20,6 +20,7 @@ IN THE SOFTWARE.
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using Xunit;
@@ -132,6 +133,78 @@ namespace BCryptNet.UnitTests
             var hash = @"$2y$12$Y7LETq.zS/D1DqYlh4I6beRvX8nF/VEJKnjOLGz6d9.jJKleH.d0a";
             Assert.True(HashParser.IsValidHash(hash, out _));
             Assert.True(BCrypt.Verify(pass, hash));
+        }
+
+
+
+        private static SecureString AsSecureString(string text)
+        {
+            var result = new SecureString();
+            foreach (var c in text) result.AppendChar(c);
+            result.MakeReadOnly();
+            return result;
+        }
+
+        [Fact()]
+        public void TestSecureHashPassword()
+        {
+            Trace.Write("BCryptSafeString.HashPassword()[Secure]: ");
+            var sw = Stopwatch.StartNew();
+
+            for (int i = 0; i < _testVectors.Length / 3; i++)
+            {
+                var pass = _testVectors[i, 0];
+                var secureString = AsSecureString(pass);
+                if(string.IsNullOrEmpty(pass)) continue;
+                var hash = BCryptSafeString.HashPassword(secureString);
+                var doesValidate = BCrypt.Verify(pass, hash);
+                Assert.True(doesValidate);
+                Trace.Write(".");
+            }
+
+
+            Trace.WriteLine(sw.ElapsedMilliseconds);
+            Trace.WriteLine("");
+        }
+
+        [Fact()]
+        public void TestSecureStringHashPassword()
+        {
+            Trace.Write("BCryptSafeString.HashPassword(): ");
+            var sw = Stopwatch.StartNew();
+            for (var r = 0; r < _revisions.Length; r++)
+            {
+                for (int i = 0; i < _testVectors.Length / 3; i++)
+                {
+                    string plain = _testVectors[i, 0];
+                    if(string.IsNullOrEmpty(plain)) continue;
+                    string salt;
+                    if (r > 0)
+                    {
+                        //Check hash that goes in one end comes out the next the same
+                        salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
+
+                        string hashed = BCryptSafeString.HashPassword(AsSecureString(plain), salt);
+
+                        Assert.StartsWith("$2" + _revisions[r], hashed);
+                        Trace.WriteLine(hashed);
+                    }
+                    else
+                    {
+                        salt = _testVectors[i, 1];
+                        var expected = _testVectors[i, 2];
+
+                        string hashed = BCryptSafeString.HashPassword(AsSecureString(plain), salt);
+                        Assert.Equal(hashed, expected);
+                    }
+
+
+                    Trace.Write(".");
+                }
+            }
+
+            Trace.WriteLine(sw.ElapsedMilliseconds);
+            Trace.WriteLine("");
         }
 
         [Fact]

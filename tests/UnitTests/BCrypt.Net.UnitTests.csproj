@@ -3,7 +3,7 @@
         <AssemblyName>BCrypt.Net.UnitTests</AssemblyName>
         <RootNamespace>BCryptNet.UnitTests</RootNamespace>
         <TargetFrameworks>net9.0;net48</TargetFrameworks>
-        <Configurations>Debug</Configurations>
+        <Configurations>Debug;Release</Configurations>
         <LangVersion>default</LangVersion>
 
         <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>

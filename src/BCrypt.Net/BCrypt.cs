@@ -167,8 +167,7 @@ namespace BCryptNet
         ///  You should generally leave generating salts to the library.
         /// </remarks>
         /// <param name="inputKey">The password to hash.</param>
-        /// <param name="salt">The log2 of the number of rounds of hashing to apply - the work
-        ///                          factor therefore increases as 2^workFactor. Default is 11</param>
+        /// <param name="salt">the salt to hash with (best generated using <see cref="BCrypt.GenerateSalt(int,char)"/>)</param>
         /// <returns>The hashed password.</returns>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         public static string HashPassword(string inputKey, string salt)

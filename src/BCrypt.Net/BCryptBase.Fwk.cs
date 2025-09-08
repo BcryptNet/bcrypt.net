@@ -29,18 +29,21 @@ namespace BCryptNet;
 public partial class BCryptCore
 {
     #if !NETCOREAPP
+
+    internal delegate byte[] EnhancedHashDelegate(string inputKey, HashType hashType, char bcryptMinorRevision);
+
     /// <summary>
     /// Create Password Hash Base
     /// </summary>
-    /// <param name="inputKey"></param>
-    /// <param name="salt"></param>
-    /// <param name="hashType"></param>
-    /// <param name="enhancedHashKeyGen"></param>
+    /// <param name="inputKey">The password or string to hash.</param>
+    /// <param name="salt">the salt to hash with (best generated using <see cref="BCrypt.GenerateSalt(int,char)"/>)</param>
+    /// <param name="hashType">SHA Based Hash to use</param>
+    /// <param name="enhancedHashKeyGen">Delegate</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="SaltParseException"></exception>
-    internal static string CreatePasswordHash(string inputKey, string salt, HashType hashType = HashType.None, Func<string, HashType, char, byte[]> enhancedHashKeyGen = null)
+    internal static string CreatePasswordHash(string inputKey, string salt, HashType hashType = HashType.None, EnhancedHashDelegate enhancedHashKeyGen = null)
     {
         if (string.IsNullOrEmpty(salt))
         {

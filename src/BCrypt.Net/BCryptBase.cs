@@ -212,8 +212,32 @@ public partial class BCryptCore
     private uint[] _p;
     private uint[] _s;
 
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+    internal static void ZeroMemory(Span<byte> buffer)
+    {
+        // NoOptimize to prevent the optimizer from deciding this call is unnecessary
+        // NoInlining to prevent the inliner from forgetting that the method was no-optimize
+        buffer.Clear();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+    internal static void ZeroMemory(Span<char> buffer)
+    {
+        // NoOptimize to prevent the optimizer from deciding this call is unnecessary
+        // NoInlining to prevent the inliner from forgetting that the method was no-optimize
+        buffer.Clear();
+    }
+
     // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+#if NETCOREAPP
+    internal static bool SecureEquals(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
+    {
+        if (a.Length != b.Length)
+        {
+            return false;
+        }
+#else
     internal static bool SecureEquals(byte[] a, byte[] b)
     {
         if (a == null && b == null)
@@ -225,9 +249,10 @@ public partial class BCryptCore
         {
             return false;
         }
-
+#endif
+        int length = a.Length;
         int diff = 0;
-        for (var i = 0; i < a.Length; i++)
+        for (var i = 0; i < length; i++)
         {
             diff |= (a[i] ^ b[i]);
         }
@@ -257,6 +282,8 @@ public partial class BCryptCore
     }
 
 #if NETCOREAPP
+    internal delegate Span<byte> EnhancedHashDelegate(ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision);
+
     /// <summary>
     /// Create Password Hash Base
     /// </summary>
@@ -275,12 +302,6 @@ public partial class BCryptCore
         return new string(outputBuffer[..outputBufferWritten]);
     }
 
-    #if NETCOREAPP
-    internal delegate Span<byte> EnhancedHashDelegate(ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision);
-    #else
-    internal delegate byte[] EnhancedHashDelegate(string inputKey, HashType hashType, char bcryptMinorRevision);
-    #endif
-
     /// <summary>
     /// Create Password Hash Base
     /// </summary>
@@ -294,7 +315,9 @@ public partial class BCryptCore
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="SaltParseException"></exception>
-    internal static void CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer, out int outputBufferWritten, HashType hashType = HashType.None,
+    internal static void CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt,
+        Span<char> outputBuffer, out int outputBufferWritten,
+        HashType hashType = HashType.None,
         EnhancedHashDelegate enhancedHashKeyGen = null)
     {
         if (salt.IsEmpty)
@@ -363,10 +386,10 @@ public partial class BCryptCore
                 int bytesWritten = SafeUTF8.GetBytes(inputKey, utf8Buffer);
                 if (appendNul) utf8Buffer[bytesWritten++] = 0;
                 Span<byte> inputBytes = utf8Buffer[..bytesWritten];
-                if (!HashBytes(inputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int hashBytesWriten))
+                if (!HashBytes(inputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int hashBytesWritten))
                     throw new BcryptAuthenticationException("Couldn't hash input");
-
-                outputBufferWritten = hashBytesWriten;
+                ZeroMemory(inputBytes);
+                outputBufferWritten = hashBytesWritten;
                 return;
 
             default:
@@ -378,7 +401,7 @@ public partial class BCryptCore
                 Span<byte> eInputBytes = enhancedHashKeyGen(inputKey, hashType, bcryptMinorRevision);
                 if (!HashBytes(eInputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int written))
                     throw new BcryptAuthenticationException("Couldn't hash input");
-
+                ZeroMemory(eInputBytes);
                 outputBufferWritten = written;
 
                 return;
@@ -442,6 +465,7 @@ public partial class BCryptCore
         pos += hashEncoded.Length;
 
         charsWritten = pos;
+
         return true;
     }
 
