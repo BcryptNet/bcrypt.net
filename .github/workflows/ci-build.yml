@@ -107,7 +107,7 @@ jobs:
         retention-days: 5
 
     - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@afb2984f4d89672b2f9d9c13ae23d53779671984 # v2.19.0
+      uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf # v2.21.0
       if: always()
       with:
         files: "tests/**/TestResults.xml"
