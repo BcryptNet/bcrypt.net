@@ -221,16 +221,11 @@ public partial class BCryptCore
     }
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-    internal static void ZeroMemory(Span<char> buffer)
-    {
-        // NoOptimize to prevent the optimizer from deciding this call is unnecessary
-        // NoInlining to prevent the inliner from forgetting that the method was no-optimize
-        buffer.Clear();
-    }
+    internal static void ZeroMemory(Span<char> buffer) => buffer.Clear();
 
     // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-#if NETCOREAPP
+#if NET5_0_OR_GREATER
     internal static bool SecureEquals(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
     {
         if (a.Length != b.Length)
@@ -252,7 +247,7 @@ public partial class BCryptCore
 #endif
         int length = a.Length;
         int diff = 0;
-        for (var i = 0; i < length; i++)
+        for (int i = 0; i < length; i++)
         {
             diff |= (a[i] ^ b[i]);
         }
@@ -281,7 +276,7 @@ public partial class BCryptCore
         Array.Copy(SOrig, _s, SOrig.Length);
     }
 
-#if NETCOREAPP
+#if NET5_0_OR_GREATER
     internal delegate Span<byte> EnhancedHashDelegate(ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision);
 
     /// <summary>

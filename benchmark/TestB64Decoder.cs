@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NET5_0_OR_GREATER
+using System;
 using System.Collections.Generic;
 using BCryptNet.BenchMarks.DecodeB64;
 using BenchmarkDotNet.Attributes;
@@ -84,3 +85,4 @@ namespace BCryptNet.BenchMarks
         }
     }
 }
+#endif

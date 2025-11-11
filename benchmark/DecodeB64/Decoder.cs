@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NET5_0_OR_GREATER
+using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -279,3 +280,4 @@ namespace BCryptNet.BenchMarks.DecodeB64
         }
     }
 }
+#endif

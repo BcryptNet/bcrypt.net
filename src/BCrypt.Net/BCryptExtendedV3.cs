@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP
+﻿#if NET5_0_OR_GREATER
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Cryptography;

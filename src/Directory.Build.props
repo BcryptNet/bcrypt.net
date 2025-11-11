@@ -51,10 +51,6 @@
     </When>
   </Choose>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
-  </ItemGroup>
-
   <!-- Release configuration
          Enable sbom generation -->
   <Choose>

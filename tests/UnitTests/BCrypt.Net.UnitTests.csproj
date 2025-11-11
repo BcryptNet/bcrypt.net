@@ -2,8 +2,8 @@
     <PropertyGroup>
         <AssemblyName>BCrypt.Net.UnitTests</AssemblyName>
         <RootNamespace>BCryptNet.UnitTests</RootNamespace>
-        <TargetFrameworks>net9.0;net48</TargetFrameworks>
-        <Configurations>Debug;Release</Configurations>
+        <TargetFrameworks>net10.0;net48</TargetFrameworks>
+        <Configurations>Debug;Release;All</Configurations>
         <LangVersion>default</LangVersion>
 
         <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>

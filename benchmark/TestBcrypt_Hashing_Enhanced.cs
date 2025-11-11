@@ -54,11 +54,13 @@ namespace BCryptNet.BenchMarks
 
         private static readonly string Hmackey = Guid.NewGuid().ToString();
 
+#if NET5_0_OR_GREATER
         [Benchmark]
         [ArgumentsSource(nameof(Data))]
         public string TestHashValidateEnhancedNet8Plus(string key, string salt)
         {
             return BCryptExtendedV3.HashPassword(Hmackey, key, salt);
         }
+#endif
     }
 }

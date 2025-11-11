@@ -25,7 +25,7 @@ namespace BCryptNet.UnitTests;
 
 public class Base64Tests
 {
-#if NETCOREAPP
+#if NET5_0_OR_GREATER
     [Fact]
     public void EncodeBase64_ValidInput_ReturnsCorrectBase64Encoding()
     {

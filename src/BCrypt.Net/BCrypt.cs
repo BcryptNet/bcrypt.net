@@ -167,19 +167,19 @@ namespace BCryptNet
         ///  You should generally leave generating salts to the library.
         /// </remarks>
         /// <param name="inputKey">The password to hash.</param>
-        /// <param name="salt">the salt to hash with (best generated using <see cref="BCrypt.GenerateSalt(int,char)"/>)</param>
+        /// <param name="salt">the salt to hash with (best generated using <see cref="BCryptCore.GenerateSalt(int,char)"/>)</param>
         /// <returns>The hashed password.</returns>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         public static string HashPassword(string inputKey, string salt)
         {
-#if NETCOREAPP
+#if NET5_0_OR_GREATER
             return HashPassword(inputKey.AsSpan(), salt.AsSpan());
 #else
             return CreatePasswordHash(inputKey, salt);
 #endif
         }
 
-#if NETCOREAPP
+#if NET5_0_OR_GREATER
         /// <summary>
         ///  Hash a password using the OpenBSD BCrypt scheme with a manually supplied salt/>.
         /// </summary>

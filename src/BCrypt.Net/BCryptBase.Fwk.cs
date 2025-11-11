@@ -16,8 +16,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 // */
-
+#if !NETCOREAPP
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
@@ -28,7 +29,7 @@ namespace BCryptNet;
 /// </summary>
 public partial class BCryptCore
 {
-    #if !NETCOREAPP
+
 
     internal delegate byte[] EnhancedHashDelegate(string inputKey, HashType hashType, char bcryptMinorRevision);
 
@@ -36,7 +37,7 @@ public partial class BCryptCore
     /// Create Password Hash Base
     /// </summary>
     /// <param name="inputKey">The password or string to hash.</param>
-    /// <param name="salt">the salt to hash with (best generated using <see cref="BCrypt.GenerateSalt(int,char)"/>)</param>
+    /// <param name="salt">the salt to hash with (best generated using <see cref="BCryptCore.GenerateSalt(int,char)"/>)</param>
     /// <param name="hashType">SHA Based Hash to use</param>
     /// <param name="enhancedHashKeyGen">Delegate</param>
     /// <returns></returns>
@@ -413,6 +414,7 @@ public partial class BCryptCore
     /// <param name="saltBytes"> The salt byte array to hash with.</param>
     /// <param name="workFactor"> The binary logarithm of the number of rounds of hashing to apply.</param>
     /// <returns>A byte array containing the hashed result.</returns>
+    [SuppressMessage("Major Code Smell", "S127:\"for\" loop stop conditions should be invariant")]
     internal byte[] CryptRaw(byte[] inputBytes, byte[] saltBytes, int workFactor)
     {
         int i;
@@ -472,6 +474,5 @@ public partial class BCryptCore
 
         return ret;
     }
-#endif
-
 }
+#endif

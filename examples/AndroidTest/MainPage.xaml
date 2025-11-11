@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AndroidTest.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+            <Image
+                Source="dotnet_bot.png"
+                HeightRequest="185"
+                Aspect="AspectFit"
+                SemanticProperties.Description="dot net bot in a race car number eight" />
+
+            <Label
+                Text="Hello BCrypt!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+
+            <Label
+                Text="Generic &#10;.NET Multi-platform App UI"
+                Style="{StaticResource SubHeadline}"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Test App for BCrypt on Android" />
+
+            <Button
+                x:Name="GenerateBtn"
+                Text="Click me" 
+                SemanticProperties.Hint="Generates a BCrypt hash from the password 'correct horse battery staple'"
+                Clicked="OnGenerateClick"
+                HorizontalOptions="Fill" />
+
+            <Label
+                x:Name="HashLabel"
+                Text=""
+                Style="{StaticResource TextDisplay}"
+                SemanticProperties.HeadingLevel="Level3"
+                SemanticProperties.Description="Displays the generated BCrypt hash" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -162,6 +162,7 @@ namespace BCryptNet.BenchMarks
             return result;
         }
 
+#if NET5_0_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ConcatenateToString(char[] array1, char[] array2)
         {
@@ -170,6 +171,7 @@ namespace BCryptNet.BenchMarks
             array2.CopyTo(result.Slice(array1.Length));
             return new string(result);
         }
+#endif
 
         [Benchmark]
         [BenchmarkCategory("StringFmt", "AppendChar")]
@@ -185,12 +187,14 @@ namespace BCryptNet.BenchMarks
             return $"$2{bcryptMinorRevision}${workFactor:00}${new string(Concatenate(EncodedSaltAsChars, EncodedHashAsChars))}";
         }
 
+#if NET5_0_OR_GREATER
         [Benchmark]
         [BenchmarkCategory("StringFmt", "AppendChar")]
         public string StringInterpolation_WithAllocConcat()
         {
             return $"$2{bcryptMinorRevision}${workFactor:00}${ConcatenateToString(EncodedSaltAsChars, EncodedHashAsChars)}";
         }
+#endif
 
         [Benchmark]
         [BenchmarkCategory("StringFmt", "AppendString")]
