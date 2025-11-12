@@ -15,7 +15,8 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <LangVersion>latest</LangVersion>
 
-    <BCryptVersion Condition="'$(BCryptVersion)' == ''">5.0.0-prerelease.g5300270033</BCryptVersion>
+    <BCryptDefaultCurrent>5.0.0-prerelease.g5300270033</BCryptDefaultCurrent>
+    <BCryptVersion Condition="'$(BCryptVersion)' == ''">$(BCryptDefaultCurrent)</BCryptVersion>
     <DefineConstants Condition="$([System.String]::new('$(BCryptVersion)').StartsWith('5'))">$(DefineConstants);POSTV5</DefineConstants>
   </PropertyGroup>
 

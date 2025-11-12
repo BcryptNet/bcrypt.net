@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 
@@ -10,7 +11,7 @@ namespace ReleaseBenchmark;
 [GcServer(true)]
 [KeepBenchmarkFiles]
 [MarkdownExporterAttribute.GitHub]
-// [ReturnValueValidator(failOnError: true)]
+[ReturnValueValidator(failOnError: true)]
 public abstract class Benchmark
 {
     protected static Job BaseJob = Job.Default;
@@ -21,15 +22,37 @@ public abstract class Benchmark
         yield return ["~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2a$12$WApznUOJfkEGSmYRfnkrPO", "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC"];
     }
 
-    [Benchmark]
-    [BenchmarkCategory("Hash")]
-    [ArgumentsSource(nameof(Data))]
-    public string TestHashValidate(string key, string salt, string hash)
-    {
+    private const string Key = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
+    private const string Salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
 #if POSTV5
-        return BCryptNet.BCrypt.HashPassword(key, salt);
+    private ReadOnlySpan<char> KeySpan => Key.AsSpan();
+    private ReadOnlySpan<char> SaltSpan => Salt.AsSpan();
+#endif
+
+//     [Benchmark(Baseline = true)]
+//     [BenchmarkCategory("Hash")]
+//     [ArgumentsSource(nameof(Data))]
+//     public string TestHashValidate(string key, string salt, string hash)
+//     {
+// #if POSTV5
+//         return BCryptNet.BCrypt.HashPassword(key, salt);
+// #else
+//         return BCrypt.Net.BCrypt.HashPassword(key, salt);
+// #endif
+//     }
+
+    [Benchmark]
+    [BenchmarkCategory("HashSpan")]
+    public string TestSpanBasedHashing()
+    {
+#if POSTV5 && NETCOREAPP
+        return BCryptNet.BCrypt.HashPassword(KeySpan, SaltSpan);
+#elif POSTV5
+        return BCryptNet.BCrypt.HashPassword(Key, Salt);
 #else
-        return BCrypt.Net.BCrypt.HashPassword(key, salt);
+        return BCrypt.Net.BCrypt.HashPassword(Key, Salt);
 #endif
     }
+
+
 }

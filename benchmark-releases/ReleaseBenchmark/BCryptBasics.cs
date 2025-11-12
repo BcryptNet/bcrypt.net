@@ -12,6 +12,12 @@ public class BCryptBasics : Benchmark
     {
         public Config()
         {
+            BaseJob = Job.Default
+                .WithWarmupCount(10)
+                .WithIterationCount(10)
+                .WithInvocationCount(1)
+                .WithUnrollFactor(1);
+
             var versions = new[]
             {
                 ("2.0.0", new Runtime[] {ClrRuntime.Net462, ClrRuntime.Net481}, false),
@@ -21,7 +27,7 @@ public class BCryptBasics : Benchmark
                 (VersionInfo.BCryptVersion, [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0],true)
             };
 
-            foreach (var (version, runtimes, prerelease) in versions)
+            foreach (var (version, runtimes, _) in versions)
             {
                 // var job = BaseJob.WithNuGet(new NuGetReferenceList
                 // {
@@ -34,10 +40,5 @@ public class BCryptBasics : Benchmark
                 }
             }
         }
-    }
-
-    [GlobalSetup]
-    public void Setup()
-    {
     }
 }
