@@ -268,3 +268,4 @@ __pycache__/
 /assets/*.nupkg
 
 /benchmark/BenchmarkDotNet.Artifacts
+/examples/Api/WebApi/app.db*

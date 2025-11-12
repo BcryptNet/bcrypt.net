@@ -1,1 +1,1 @@
-dotnet run --configuration Release --framework net48 --runtimes net48 netcoreapp90 --filter * --join
+dotnet run --configuration Release --framework net48 --runtimes net48 net80 net90 net10_0 --filter * --join
