@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 
 namespace BCryptNet
 {
-    #if NETFRAMEWORK
+    #if NETFRAMEWORK || NETSTANDARD
     /// <summary>
     ///     Exception used to signal errors that occur during use salt parsing
     /// </summary>

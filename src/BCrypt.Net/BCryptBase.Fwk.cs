@@ -16,7 +16,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 // */
-#if NETFRAMEWORK
+#if NETFRAMEWORK || NETSTANDARD
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -29,8 +29,6 @@ namespace BCryptNet;
 /// </summary>
 public partial class BCryptCore
 {
-
-
     internal delegate byte[] EnhancedHashDelegate(string inputKey, HashType hashType, char bcryptMinorRevision);
 
     /// <summary>

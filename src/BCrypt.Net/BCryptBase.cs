@@ -225,7 +225,7 @@ public partial class BCryptCore
 
     // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
     internal static bool SecureEquals(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
     {
         if (a.Length != b.Length)
@@ -276,7 +276,7 @@ public partial class BCryptCore
         Array.Copy(SOrig, _s, SOrig.Length);
     }
 
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
     internal delegate Span<byte> EnhancedHashDelegate(ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision);
 
     /// <summary>

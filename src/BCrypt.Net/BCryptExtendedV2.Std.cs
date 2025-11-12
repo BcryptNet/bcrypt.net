@@ -1,4 +1,4 @@
-﻿#if NETFRAMEWORK
+﻿#if NETFRAMEWORK || NETSTANDARD
 using System.Globalization;
 using System.Security.Cryptography;
 

@@ -17,7 +17,7 @@
 // IN THE SOFTWARE.
 // */
 
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;

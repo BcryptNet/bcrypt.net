@@ -26,7 +26,7 @@ using Xunit;
 
 namespace BCryptNet.UnitTests
 {
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
 
     /// <summary>
     /// BCrypt tests
@@ -245,7 +245,7 @@ namespace BCryptNet.UnitTests
             Assert.False(BCryptExtendedV3.Verify(hmacKey,"", hash), "Null should be treated as part of password as per spec");
         }
 
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
 
 #else
         [Fact]

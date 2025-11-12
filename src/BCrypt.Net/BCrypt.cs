@@ -172,14 +172,14 @@ namespace BCryptNet
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         public static string HashPassword(string inputKey, string salt)
         {
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
             return HashPassword(inputKey.AsSpan(), salt.AsSpan());
 #else
             return CreatePasswordHash(inputKey, salt);
 #endif
         }
 
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
         /// <summary>
         ///  Hash a password using the OpenBSD BCrypt scheme with a manually supplied salt/>.
         /// </summary>

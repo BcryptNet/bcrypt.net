@@ -303,7 +303,7 @@ namespace BCryptNet.UnitTests
             Trace.WriteLine("");
         }
 
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
         /**
          * Test method for 'BCrypt.HashPassword(string, string)'
          */
@@ -763,7 +763,7 @@ namespace BCryptNet.UnitTests
             Assert.Equal(libHash, hash);
         }
 
-        #if NET5_0_OR_GREATER
+        #if NETCOREAPP
 
         #else
         [Fact]
@@ -793,7 +793,7 @@ namespace BCryptNet.UnitTests
         }
         #endif
 
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
 
 #else
         [Fact]
