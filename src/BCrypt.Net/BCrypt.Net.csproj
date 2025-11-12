@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <None Remove="PublicAPI.Shipped.txt" />
+    <None Remove="create-preview-release.cmd" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -47,5 +48,26 @@
       <Pack>True</Pack>
       <PackagePath>/</PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="BCryptBase.Core.cs">
+      <DependentUpon>BCryptBase.cs</DependentUpon>
+    </Compile>
+    <Compile Update="BCryptBase.Fwk.cs">
+      <DependentUpon>BCryptBase.cs</DependentUpon>
+    </Compile>
+    <Compile Update="BCryptBase.Std.cs">
+      <DependentUpon>BCryptBase.cs</DependentUpon>
+    </Compile>
+    <Compile Update="BCryptExtendedV2.Fwk.cs">
+      <DependentUpon>BCryptExtendedV2.cs</DependentUpon>
+    </Compile>
+    <Compile Update="BCryptExtendedV2.Std.cs">
+      <DependentUpon>BCryptExtendedV2.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SafeStringExtension.Fwk.cs">
+      <DependentUpon>SafeStringExtension.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>
