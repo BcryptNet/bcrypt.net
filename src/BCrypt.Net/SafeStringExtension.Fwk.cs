@@ -17,7 +17,7 @@
 // IN THE SOFTWARE.
 // */
 
-#if NETFRAMEWORK || NETSTANDARD
+#if NETFRAMEWORK && SECURESTRING
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;

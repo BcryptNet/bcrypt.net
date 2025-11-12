@@ -1,18 +1,22 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>BCryptNet.BenchMarks</RootNamespace>
-    <AssemblyName>BCryptNet.BenchMarks</AssemblyName>
+    <RootNamespace>ReleaseBenchmark</RootNamespace>
+    <AssemblyName>ReleaseBenchmark</AssemblyName>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net10.0;net48</TargetFrameworks>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <Configurations>Release;Debug;All</Configurations>
     <Platforms>AnyCPU</Platforms>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <!--Disable Debug Symbols https://github.com/dotnet/BenchmarkDotNet/pull/2029/-->
     <DebugSymbols>false</DebugSymbols>
     <DebugType>portable</DebugType>
     <CompileUsingReferenceAssemblies>false</CompileUsingReferenceAssemblies>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <LangVersion>latest</LangVersion>
+
+    <BCryptVersion Condition="'$(BCryptVersion)' == ''">5.0.0-prerelease.g8ea268d034</BCryptVersion>
+    <DefineConstants Condition="'$(BCryptVersion)' == '5.0.0-prerelease.g8ea268d034'">$(DefineConstants);POSTV5</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -33,6 +37,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="$(BCryptVersion)" />
     <PackageReference Include="BenchmarkDotNet" Version="0.15.6" />
   </ItemGroup>
 
@@ -44,7 +49,4 @@
     <Reference Include="System" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\src\BCrypt.Net\BCrypt.Net.csproj" />
-  </ItemGroup>
 </Project>
