@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-WebApi-45D99850-F294-4CA1-8E1B-72AFB991E4F2</UserSecretsId>
@@ -21,11 +21,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="[9.0,)"/>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="[9.0,)"/>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="[9.0,)"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="[9.0,)"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="[9.0,)"/>
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="[10.0,)"/>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="[10.0,)"/>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="[10.0,)"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="[10.0,)"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="[10.0,)"/>
   </ItemGroup>
 
   <ItemGroup>
