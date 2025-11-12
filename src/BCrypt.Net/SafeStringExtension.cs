@@ -52,10 +52,8 @@ public sealed class BCryptSafeString : BCryptCore
 
     private static unsafe string GetBCryptHashFromSecureString(SecureString secureString, BCryptDelegate func)
     {
-        if (secureString == null)
-            throw new ArgumentNullException(nameof(secureString));
-        if (func == null)
-            throw new ArgumentNullException(nameof(func));
+        ArgumentNullException.ThrowIfNull(secureString);
+        ArgumentNullException.ThrowIfNull(func);
 
         int length = secureString.Length;
         if (length == 0)
@@ -75,7 +73,7 @@ public sealed class BCryptSafeString : BCryptCore
                 throw new InvalidOperationException("Failed to convert SecureString to BSTR");
 
             // Convert the BSTR pointer directly to ReadOnlySpan<char>
-            // Note: This assumes the BSTR is null-terminated and we're working with the actual content
+            // Note: This assumes the BSTR is null-terminated & we're working with the actual content
             ReadOnlySpan<char> inputSpan = new ReadOnlySpan<char>(sourceStringPointer.ToPointer(), length);
 
             return func(inputSpan);
@@ -89,6 +87,5 @@ public sealed class BCryptSafeString : BCryptCore
             }
         }
     }
-
 }
 #endif

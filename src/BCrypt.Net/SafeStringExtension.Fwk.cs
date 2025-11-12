@@ -17,7 +17,7 @@
 // IN THE SOFTWARE.
 // */
 
-#if !NETCOREAPP
+#if NETFRAMEWORK
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -57,7 +57,7 @@ public sealed class BCryptSafeString : BCryptCore
 
     private delegate string SandboxedSecureString(string inputKey);
 
-    private static unsafe string GetBCryptHashFromSecureString(SecureString secureString, SandboxedSecureString func)
+    private static string GetBCryptHashFromSecureString(SecureString secureString, SandboxedSecureString func)
     {
         if (secureString == null)
             throw new ArgumentNullException(nameof(secureString));
