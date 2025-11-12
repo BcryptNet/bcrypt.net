@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 namespace BCryptNet;
 
 /// <summary>
-/// BCrypt Enhanced (post v3.5)
+/// BCrypt Enhanced (post Bcrypt v3.5)
 /// Created to be compatible with other programming-language implementations of pre-hashed keys
 /// i.e. passlib in python / php bcrypt and sha
 /// </summary>

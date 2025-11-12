@@ -125,28 +125,6 @@ public sealed class BCryptExtendedV3 : BCryptCore
         return utf8Buffer[..utf8Len].ToArray();
     }
 
-    private static Span<byte> EnhancedHashOld(ReadOnlySpan<char> hmacKey, ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision = 'a')
-    {
-        switch (hashType)
-        {
-            case HashType.SHA256:
-                using (var sha = new HMACSHA3_256(BCryptCore.SafeUTF8.GetBytes(hmacKey.ToString())))
-                    return BCryptCore.SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(BCryptCore.SafeUTF8.GetBytes(inputKey.ToString()))) +
-                                                        (bcryptMinorRevision >= 'a' ? BCryptCore.Nul : BCryptCore.EmptyString)).AsSpan();
-            case HashType.SHA384:
-                using (var sha = new HMACSHA3_384(BCryptCore.SafeUTF8.GetBytes(hmacKey.ToString())))
-                    return BCryptCore.SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(BCryptCore.SafeUTF8.GetBytes(inputKey.ToString()))) +
-                                                        (bcryptMinorRevision >= 'a' ? BCryptCore.Nul : BCryptCore.EmptyString));
-            case HashType.SHA512:
-                using (var sha = new HMACSHA3_512(BCryptCore.SafeUTF8.GetBytes(hmacKey.ToString())))
-                    return BCryptCore.SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(BCryptCore.SafeUTF8.GetBytes(inputKey.ToString()))) +
-                                                        (bcryptMinorRevision >= 'a' ? BCryptCore.Nul : BCryptCore.EmptyString));
-            case HashType.None:
-            default:
-                throw new ArgumentOutOfRangeException(nameof(hashType), hashType, null);
-        }
-    }
-
     /// <summary>
     /// Compares the users stored hash with their password
     /// in a time-safe manner

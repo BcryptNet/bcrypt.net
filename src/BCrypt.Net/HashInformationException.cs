@@ -7,7 +7,7 @@ namespace BCryptNet
     ///     Exception used to signal errors that occur during use of the hash information methods
     /// </summary>
     [Serializable]
-    public sealed class HashInformationException : Exception
+    public class HashInformationException : Exception
     {
         /// <summary>
         ///     Default Constructor

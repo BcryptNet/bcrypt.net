@@ -16,7 +16,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 // */
-#if NETFRAMEWORK
+#if NETSTANDARD
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -25,11 +25,11 @@ using System.Text;
 namespace BCryptNet;
 
 /// <summary>
-/// .Net Framework (pre-span) implementation
+/// .Net Standard implementation
 /// </summary>
 public partial class BCryptCore
 {
-    internal delegate byte[] EnhancedHashDelegate(string inputKey, HashType hashType, char bcryptMinorRevision);
+    internal delegate Span<byte> EnhancedHashDelegate(ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision);
 
     /// <summary>
     /// Create Password Hash Base
@@ -42,11 +42,11 @@ public partial class BCryptCore
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="SaltParseException"></exception>
-    internal static string CreatePasswordHash(string inputKey, string salt, HashType hashType = HashType.None, EnhancedHashDelegate enhancedHashKeyGen = null)
+    internal static string CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, HashType hashType = HashType.None, EnhancedHashDelegate enhancedHashKeyGen = null)
     {
-        if (string.IsNullOrEmpty(salt))
+        if (salt.IsEmpty)
         {
-            throw new ArgumentException("Invalid salt: salt cannot be null or empty", nameof(salt));
+            throw new ArgumentException("Invalid salt: salt cannot be empty", nameof(salt));
         }
 
         if (hashType == HashType.None && inputKey.Length > 72)
@@ -84,13 +84,11 @@ public partial class BCryptCore
         }
 
         // Extract number of rounds
-        if (salt[startingOffset + 2] > '$')
+        if (!int.TryParse(salt.Slice(startingOffset, 2).ToString(),
+                NumberStyles.None, CultureInfo.InvariantCulture, out int workFactor))
         {
             throw new SaltParseException("Missing salt rounds");
         }
-
-        // Extract details from salt
-        int workFactor = Convert.ToInt16(salt.Substring(startingOffset, 2), CultureInfo.InvariantCulture);
 
         // Throw if log rounds are out of range on hash, deals with custom salts
         if (workFactor < 1 || workFactor > 31)
@@ -102,7 +100,7 @@ public partial class BCryptCore
         switch (hashType)
         {
             case HashType.None:
-                inputBytes = SafeUTF8.GetBytes(inputKey + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                inputBytes = SafeUTF8.GetBytes(inputKey.ToString() + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
                 break;
             default:
                 if (enhancedHashKeyGen == null)
@@ -110,12 +108,11 @@ public partial class BCryptCore
                     throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(hashType));
                 }
 
-                inputBytes = enhancedHashKeyGen(inputKey, hashType, bcryptMinorRevision);
+                inputBytes = enhancedHashKeyGen(inputKey, hashType, bcryptMinorRevision).ToArray();
                 break;
         }
 
-
-        return HashBytes(inputBytes, salt.Substring(startingOffset + 3, 22), bcryptMinorRevision, workFactor);
+        return HashBytes(inputBytes, salt.Slice(startingOffset + 3, 22).ToString(), bcryptMinorRevision, workFactor);
     }
 
     internal static string HashBytes(byte[] inputBytes, string extractedSalt, char bcryptMinorRevision, int workFactor)
@@ -284,7 +281,7 @@ public partial class BCryptCore
     /// <summary>Blowfish encipher a single 64-bit block encoded as two 32-bit halves.</summary>
     /// <param name="blockArray">An array containing the two 32-bit half blocks. The plaintext to be encrypted</param>
     /// <param name="offset">    The position in the array of the blocks.</param>
-    private void Encipher(uint[] blockArray, int offset)
+    private void Encipher(Span<uint> blockArray, int offset)
     {
         uint block = blockArray[offset];
         uint r = blockArray[offset + 1];
@@ -320,7 +317,7 @@ public partial class BCryptCore
     /// <param name="data">The string to extract the data from.</param>
     /// <param name="offset"> [in, out] The current offset.</param>
     /// <returns>The next word of material from data.</returns>
-    private static uint StreamToWord(byte[] data, ref int offset)
+    private static uint StreamToWord(ReadOnlySpan<byte> data, ref int offset)
     {
         int i;
         uint word = 0;
@@ -336,12 +333,12 @@ public partial class BCryptCore
 
     /// <summary>Key the Blowfish cipher.</summary>
     /// <param name="keyBytes">The key byte array.</param>
-    private void Key(byte[] keyBytes)
+    private void Key(ReadOnlySpan<byte> keyBytes)
     {
         int i;
         int kOfP = 0;
 
-        uint[] lr = { 0, 0 };
+        Span<uint> lr = stackalloc uint[2] { 0, 0 };
         int pLen = _p.Length, sLen = _s.Length;
 
         for (i = 0; i < pLen; i++)
@@ -371,14 +368,13 @@ public partial class BCryptCore
     /// <param name="saltBytes"> Salt byte array.</param>
     /// <param name="inputBytes">Input byte array.</param>
     // ReSharper disable once InconsistentNaming
-    private void EKSKey(byte[] saltBytes, byte[] inputBytes)
-
+    private void EKSKey(ReadOnlySpan<byte> saltBytes, ReadOnlySpan<byte> inputBytes)
     {
         int i;
         int passwordOffset = 0;
         int saltOffset = 0;
 
-        uint[] lr = { 0, 0 };
+        Span<uint> lr = stackalloc uint[2] { 0, 0 };
         int pLen = _p.Length, sLen = _s.Length;
 
         for (i = 0; i < pLen; i++)
@@ -413,13 +409,13 @@ public partial class BCryptCore
     /// <param name="workFactor"> The binary logarithm of the number of rounds of hashing to apply.</param>
     /// <returns>A byte array containing the hashed result.</returns>
     [SuppressMessage("Major Code Smell", "S127:\"for\" loop stop conditions should be invariant")]
-    internal byte[] CryptRaw(byte[] inputBytes, byte[] saltBytes, int workFactor)
+    internal byte[] CryptRaw(ReadOnlySpan<byte> inputBytes, ReadOnlySpan<byte> saltBytes, int workFactor)
     {
         int i;
         int j;
 
-        uint[] cdata = new uint[BfCryptCiphertext.Length];
-        Array.Copy(BfCryptCiphertext, cdata, BfCryptCiphertext.Length);
+        Span<uint> cdata = stackalloc uint[BfCryptCiphertext.Length];
+        BfCryptCiphertext.CopyTo(cdata);
 
         int clen = cdata.Length;
 

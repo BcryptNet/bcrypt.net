@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD
+﻿#if NETFRAMEWORK
 using System.Globalization;
 using System.Security.Cryptography;
 
@@ -30,7 +30,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static string HashPassword(string inputKey, int workFactor = DefaultRounds,
         HashType hashType = DefaultEnhancedHashType) =>
-        CreatePasswordHash(inputKey.AsSpan(), GenerateSalt(workFactor).AsSpan(), hashType,
+        CreatePasswordHash(inputKey, GenerateSalt(workFactor), hashType,
             (s, type, version) => EnhancedHash(s, type, version));
 
     /// <summary>
@@ -45,7 +45,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
     /// <returns>The hashed password.</returns>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static string HashPassword(string inputKey, string salt, HashType hashType = DefaultEnhancedHashType) =>
-        CreatePasswordHash(inputKey.AsSpan(), salt.AsSpan(), hashType, (s, type, version) => EnhancedHash(s, type, version));
+        CreatePasswordHash(inputKey, salt, hashType, (s, type, version) => EnhancedHash(s, type, version));
 
     /// <summary>
     /// Hashes key, base64 encodes before returning byte array
@@ -54,7 +54,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
     /// <param name="bcryptMinorRevision">(Default: 'a')</param>
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA384)</param>
     /// <returns></returns>
-    private static Span<byte> EnhancedHash(ReadOnlySpan<char> inputString, HashType hashType, char bcryptMinorRevision = 'a')
+    private static byte[] EnhancedHash(string inputString, HashType hashType, char bcryptMinorRevision = 'a')
     {
         switch (hashType)
         {
@@ -86,7 +86,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
     public static bool Verify(string text, string hash, HashType hashType = DefaultEnhancedHashType)
     {
         return SecureEquals(SafeUTF8.GetBytes(hash),
-            SafeUTF8.GetBytes(CreatePasswordHash(text.AsSpan(), hash.AsSpan(), hashType,
+            SafeUTF8.GetBytes(CreatePasswordHash(text, hash, hashType,
                 (s, type, version) => EnhancedHash(s, type, version))));
     }
 
@@ -183,7 +183,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
             workFactor = currentWorkFactor;
         }
 
-        return CreatePasswordHash(newKey.AsSpan(), GenerateSalt(workFactor).AsSpan(), hashType,
+        return CreatePasswordHash(newKey, GenerateSalt(workFactor), hashType,
             (s, type, version) => EnhancedHash(s, type, version));
     }
 }

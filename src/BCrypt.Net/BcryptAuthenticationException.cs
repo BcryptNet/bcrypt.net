@@ -6,7 +6,7 @@ namespace BCryptNet
     #if NETFRAMEWORK || NETSTANDARD
     /// <summary>Exception for signalling hash validation errors. </summary>
     [Serializable]
-    public sealed class BcryptAuthenticationException : Exception
+    public class BcryptAuthenticationException : Exception
     {
         /// <summary>
         ///     Default Constructor

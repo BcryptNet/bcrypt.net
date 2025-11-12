@@ -8,9 +8,12 @@
     <RootNamespace>BCryptNet</RootNamespace>
     <DebugSymbols>false</DebugSymbols>
     <ImplicitUsings>true</ImplicitUsings>
-    <SecureString>true</SecureString>
     <Configurations>Debug;Release;All</Configurations>
     <Platforms>AnyCPU</Platforms>
+
+    <SecureString>true</SecureString>
+    <DefineConstants Condition="'$(SecureString)' == 'true'">$(DefineConstants);SECURESTRING</DefineConstants>
+    <AllowUnsafeBlocks Condition="'$(SecureString)' == 'true'">true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -25,10 +28,6 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net462'">
     <PackageReference Include="System.Memory" />
   </ItemGroup>
-
-  <PropertyGroup Condition="'$(SecureString)' == 'true'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
 
   <ItemGroup>
     <None Remove="PublicAPI.Shipped.txt" />
