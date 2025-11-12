@@ -77,7 +77,7 @@ public static class HashParser
             return false;
         }
 
-        if (!hash.StartsWith("$2"))
+        if (!hash.StartsWith("$2", StringComparison.Ordinal))
         {
             // Not a bcrypt hash
             format = null;
