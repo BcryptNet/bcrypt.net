@@ -751,7 +751,7 @@ namespace BCryptNet.BenchMarks._4._0._3
             /// <summary>Blowfish encipher a single 64-bit block encoded as two 32-bit halves.</summary>
             /// <param name="blockArray">An array containing the two 32-bit half blocks.</param>
             /// <param name="offset">    The position in the array of the blocks.</param>
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
         private void Encipher(Span<uint> blockArray, int offset)
 #else
             private void Encipher(uint[] blockArray, int offset)
@@ -791,7 +791,7 @@ namespace BCryptNet.BenchMarks._4._0._3
             /// <param name="data">The string to extract the data from.</param>
             /// <param name="offset"> [in,out] The current offset.</param>
             /// <returns>The next word of material from data.</returns>
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
         private static uint StreamToWord(ReadOnlySpan<byte> data, ref int offset)
 #else
             private static uint StreamToWord(byte[] data, ref int offset)
@@ -820,7 +820,7 @@ namespace BCryptNet.BenchMarks._4._0._3
 
             /// <summary>Key the Blowfish cipher.</summary>
             /// <param name="keyBytes">The key byte array.</param>
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
         private void Key(ReadOnlySpan<byte> keyBytes)
 #else
             private void Key(byte[] keyBytes)
@@ -828,7 +828,7 @@ namespace BCryptNet.BenchMarks._4._0._3
             {
                 int i;
                 int koffp = 0;
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
             Span<uint> lr = stackalloc uint[2] { 0, 0 };
 #else
                 uint[] lr = { 0, 0 };
@@ -862,7 +862,7 @@ namespace BCryptNet.BenchMarks._4._0._3
             /// <param name="saltBytes"> Salt byte array.</param>
             /// <param name="inputBytes">Input byte array.</param>
             // ReSharper disable once InconsistentNaming
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
         private void EKSKey(ReadOnlySpan<byte> saltBytes, ReadOnlySpan<byte> inputBytes)
 #else
             private void EKSKey(byte[] saltBytes, byte[] inputBytes)
@@ -871,7 +871,7 @@ namespace BCryptNet.BenchMarks._4._0._3
                 int i;
                 int passwordOffset = 0;
                 int saltOffset = 0;
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
             Span<uint> lr = stackalloc uint[2] { 0, 0 };
 #else
                 uint[] lr = { 0, 0 };
@@ -909,7 +909,7 @@ namespace BCryptNet.BenchMarks._4._0._3
             /// <param name="saltBytes"> The salt byte array to hash with.</param>
             /// <param name="workFactor"> The binary logarithm of the number of rounds of hashing to apply.</param>
             /// <returns>A byte array containing the hashed result.</returns>
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
         internal byte[] CryptRaw(ReadOnlySpan<byte> inputBytes, ReadOnlySpan<byte> saltBytes, int workFactor)
 #else
             internal byte[] CryptRaw(byte[] inputBytes, byte[] saltBytes, int workFactor)
@@ -918,7 +918,7 @@ namespace BCryptNet.BenchMarks._4._0._3
                 int i;
                 int j;
 
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
             Span<uint> cdata = stackalloc uint[BfCryptCiphertext.Length];
             BfCryptCiphertext.CopyTo(cdata);
 #else

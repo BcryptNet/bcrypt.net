@@ -29,13 +29,14 @@ namespace BCryptNet.BenchMarks;
 
 #pragma warning disable 1591
 [MemoryDiagnoser]
-/*[RPlotExporter]*/[RankColumn]
-//[GcServer(true)]
+[RPlotExporter]
+[RankColumn]
+[GcServer(true)]
 [Orderer(SummaryOrderPolicy.Declared)]
 [KeepBenchmarkFiles]
 [MarkdownExporterAttribute.GitHub]
 // [ReturnValueValidator(failOnError: true)]
-public class TestBcryptHashingEnhancedValidation
+public class EnhancedHashingValidation
 {
     public IEnumerable<object[]> Data()
     {
@@ -47,7 +48,7 @@ public class TestBcryptHashingEnhancedValidation
     private readonly string _bCryptV4PerfMerge1EnhancedHash = BCryptV4.BCrypt.EnhancedHashPassword("~!@#$%^&*()      ~!@#$%^&*()PNBFRD", BCryptV4.HashType.SHA384, 12);
     private readonly string _bCryptExtendedV2EnhancedHash = BCryptExtendedV2.HashPassword("~!@#$%^&*()      ~!@#$%^&*()PNBFRD", 12, HashType.SHA384);
     private static readonly string Hmackey = Guid.NewGuid().ToString();
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
     private readonly string _bCryptExtendedV3EnhancedHash = BCryptExtendedV3.HashPassword(Hmackey, "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", 12, HashType.SHA384);
 #endif
 
@@ -78,7 +79,7 @@ public class TestBcryptHashingEnhancedValidation
     {
         return BCryptExtendedV2.Verify(key, _bCryptExtendedV2EnhancedHash);
     }
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public bool TestHashValidateEnhancedNet8Plus(string key)

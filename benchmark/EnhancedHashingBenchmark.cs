@@ -11,13 +11,14 @@ using BenchmarkDotNet.Order;
 namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
-    /*[RPlotExporter]*/[RankColumn]
-    //[GcServer(true)]
+    [RPlotExporter]
+    [RankColumn]
+    [GcServer(true)]
     [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]
     [MarkdownExporterAttribute.GitHub]
-    // [ReturnValueValidator(failOnError: true)]
-    public class TestBcryptHashingEnhanced
+    [ReturnValueValidator(failOnError: true)]
+    public class EnhancedHashingBenchmark
     {
         public IEnumerable<object[]> Data()
         {
@@ -54,7 +55,7 @@ namespace BCryptNet.BenchMarks
 
         private static readonly string Hmackey = Guid.NewGuid().ToString();
 
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
         [Benchmark]
         [ArgumentsSource(nameof(Data))]
         public string TestHashValidateEnhancedNet8Plus(string key, string salt)

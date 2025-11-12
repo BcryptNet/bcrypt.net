@@ -1,5 +1,4 @@
-﻿#if NET5_0_OR_GREATER
-using System;
+﻿using System;
 using System.Collections.Generic;
 using BCryptNet.BenchMarks.DecodeB64;
 using BenchmarkDotNet.Attributes;
@@ -10,17 +9,17 @@ using BenchmarkDotNet.Order;
 namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
-    /*[RPlotExporter]*/
+    [RPlotExporter]
     [RankColumn]
-    //[GcServer(true)]
+    [GcServer(true)]
     [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]
     [MarkdownExporterAttribute.GitHub]
-    // [ReturnValueValidator(failOnError: true)]
     [IterationTime(500)]
-    public class TestB64Decoder
+    public class B64DecoderBenchmark
     {
-        public TestB64Decoder()
+#if NETCOREAPP
+        public B64DecoderBenchmark()
         {
             var salt = "DCq7YPn5Rq63x1Lad4cll.";
             var original = Convert.ToBase64String(DecodeB64Methods.DecodeBase64StandardUnSized(salt, 16));
@@ -30,6 +29,7 @@ namespace BCryptNet.BenchMarks
                 exceptions.Add(new Exception($"DecodeBase64StandardSized failed: {original} vs {Convert.ToBase64String(DecodeB64Methods.DecodeBase64StandardSized(salt, 16))}"));
             if (!Convert.ToBase64String(DecodeB64Methods.DecodeBase64StringCreateSpan(salt, 16)).Equals(original))
                 exceptions.Add(new Exception($"DecodeBase64StringCreateSpan failed: {original} vs {Convert.ToBase64String(DecodeB64Methods.DecodeBase64StringCreateSpan(salt, 16))}"));
+
             if (!Convert.ToBase64String(DecodeB64Methods.DecodeBase64ToBytes(salt, 16)).Equals(original))
                 exceptions.Add(new Exception($"DecodeBase64ToBytes failed: {original} vs {Convert.ToBase64String(DecodeB64Methods.DecodeBase64ToBytes(salt, 16))}"));
 
@@ -41,6 +41,31 @@ namespace BCryptNet.BenchMarks
             if (exceptions.Count > 0)
                 throw new AggregateException(exceptions);
         }
+#else
+        public B64DecoderBenchmark()
+        {
+            var salt = "DCq7YPn5Rq63x1Lad4cll.";
+            var original = Convert.ToBase64String(DecodeB64Methods.DecodeBase64StandardUnSized(salt, 16));
+            var exceptions = new List<Exception>();
+
+            if (!Convert.ToBase64String(DecodeB64Methods.DecodeBase64StandardSized(salt, 16)).Equals(original))
+                exceptions.Add(new Exception($"DecodeBase64StandardSized failed: {original} vs {Convert.ToBase64String(DecodeB64Methods.DecodeBase64StandardSized(salt, 16))}"));
+
+            if (!Convert.ToBase64String(DecodeB64Methods.DecodeBase64ToBytes(salt, 16)).Equals(original))
+                exceptions.Add(new Exception($"DecodeBase64ToBytes failed: {original} vs {Convert.ToBase64String(DecodeB64Methods.DecodeBase64ToBytes(salt, 16))}"));
+
+            byte[] saltBuffer = new byte[16];
+            int written = DecodeB64Methods.DecodeBase64SpanBuffer(salt, saltBuffer);
+            byte[] result = new byte[written];
+            Array.Copy(saltBuffer, 0, result, 0, written);
+            if (!Convert.ToBase64String(result).Equals(original))
+                exceptions.Add(new Exception($"DecodeBase64SpanBuffer failed: {original} vs {Convert.ToBase64String(result)}"));
+
+            if (exceptions.Count > 0)
+                throw new AggregateException(exceptions);
+        }
+#endif
+
 
         [Benchmark(Baseline = true)]
         [Arguments("DCq7YPn5Rq63x1Lad4cll.")]
@@ -58,6 +83,7 @@ namespace BCryptNet.BenchMarks
             return DecodeB64Methods.DecodeBase64StandardSized(salt, 16);
         }
 
+#if NETCOREAPP
         [Benchmark]
         [Arguments("DCq7YPn5Rq63x1Lad4cll.")]
         [Arguments("HqWuK6/Ng6sg9gQzbLrgb.")]
@@ -65,6 +91,7 @@ namespace BCryptNet.BenchMarks
         {
             return DecodeB64Methods.DecodeBase64StringCreateSpan(salt, 16);
         }
+#endif
 
         [Benchmark]
         [Arguments("DCq7YPn5Rq63x1Lad4cll.")]
@@ -74,6 +101,7 @@ namespace BCryptNet.BenchMarks
             return DecodeB64Methods.DecodeBase64ToBytes(salt, 16);
         }
 
+#if NETCOREAPP
         [Benchmark]
         [Arguments("DCq7YPn5Rq63x1Lad4cll.")]
         [Arguments("HqWuK6/Ng6sg9gQzbLrgb.")]
@@ -83,6 +111,6 @@ namespace BCryptNet.BenchMarks
             int written = DecodeB64Methods.DecodeBase64SpanBuffer(salt, saltBuffer);
             return saltBuffer[..written].ToArray();
         }
+#endif
     }
 }
-#endif

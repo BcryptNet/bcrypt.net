@@ -29,13 +29,14 @@ namespace BCryptNet.BenchMarks;
 
 #pragma warning disable 1591
 [MemoryDiagnoser]
-/*[RPlotExporter]*/[RankColumn]
-//[GcServer(true)]
+[RPlotExporter]
+[RankColumn]
+[GcServer(true)]
 [Orderer(SummaryOrderPolicy.Declared)]
 [KeepBenchmarkFiles]
 [MarkdownExporterAttribute.GitHub]
 // [ReturnValueValidator(failOnError: true)]
-public class TestBcrypt_Hashing_Validation
+public class EnhancedValidationBenchmark
 {
     public IEnumerable<object[]> Data()
     {

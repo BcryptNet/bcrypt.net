@@ -8,13 +8,13 @@ using BenchmarkDotNet.Order;
 namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
-    /*[RPlotExporter]*/[RankColumn]
-    //[GcServer(true)]
+    [RPlotExporter][RankColumn]
+    [GcServer(true)]
     [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]
     [MarkdownExporterAttribute.GitHub]
     [IterationTime(500)]
-    public class TestB64Encoder
+    public class B64EncoderBenchmark
     {
         private static readonly byte[] SaltBytes = BCryptBaseLine.BCrypt.DecodeBase64("sGBxdT2q8Qd84NyZEkwTY.", 16);
 

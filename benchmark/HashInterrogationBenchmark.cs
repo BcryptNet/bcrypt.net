@@ -10,13 +10,14 @@ using BenchmarkDotNet.Order;
 namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
-    /*[RPlotExporter]*/[RankColumn]
-    //[GcServer(true)]
+    [RPlotExporter]
+    [RankColumn]
+    [GcServer(true)]
     [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]
     [MarkdownExporterAttribute.GitHub]
     // [ReturnValueValidator(failOnError: true)]
-    public class TestBcrypt_Hash_Interrogation
+    public class HashInterrogationBenchmark
     {
         [Benchmark(Baseline = true)]
         [Arguments("$2a$12$k42ZFHFWqBp3vWli.nIn8uYyIkbvYRvodzbfbK18SSsY.CsIQPlxO")]

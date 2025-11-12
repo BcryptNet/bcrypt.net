@@ -1,5 +1,4 @@
-﻿#if NET5_0_OR_GREATER
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -80,6 +79,8 @@ namespace BCryptNet.BenchMarks.DecodeB64
             return result;
         }
 
+#if NETCOREAPP
+
         internal static byte[] DecodeBase64StringCreateSpan(string encodedString, int maximumBytes)
         {
 
@@ -142,6 +143,7 @@ namespace BCryptNet.BenchMarks.DecodeB64
 
             return ret.ToArray();
         }
+#endif
         internal static byte[] DecodeBase64StandardSized(string encodedString, int maximumBytes)
         {
             int sourceLength = encodedString.Length;
@@ -280,4 +282,4 @@ namespace BCryptNet.BenchMarks.DecodeB64
         }
     }
 }
-#endif
+

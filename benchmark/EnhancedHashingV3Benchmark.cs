@@ -16,7 +16,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 // */
-#if NET5_0_OR_GREATER
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -26,15 +25,15 @@ using BenchmarkDotNet.Order;
 namespace BCryptNet.BenchMarks;
 
 [MemoryDiagnoser]
-/*[RPlotExporter]*/
+[RPlotExporter]
 [RankColumn]
-//[GcServer(true)]
+[GcServer(true)]
 [Orderer(SummaryOrderPolicy.Declared)]
 [KeepBenchmarkFiles]
 [MarkdownExporterAttribute.GitHub]
 // [ReturnValueValidator(failOnError: true)]
 [IterationTime(500)]
-public class TestEnhancedV3_Hmac
+public class EnhancedHashingV3Benchmark
 {
     // Store the strings as fields
     private const string HmacKeyString = "SuperSecureHMACKey";
@@ -44,7 +43,7 @@ public class TestEnhancedV3_Hmac
 
     private const HashType hashType = HashType.SHA256;
     private const char BcryptMinorRevision = 'a';
-
+#if NETCOREAPP
     [Benchmark(Baseline = true)]
     public byte[] OldMethod() => EnhancedHashOld(HmacKey, InputKey, hashType, BcryptMinorRevision).ToArray();
 
@@ -113,6 +112,7 @@ public class TestEnhancedV3_Hmac
 
         return utf8Buffer[..utf8Len].ToArray();
     }
+#endif
 
     public enum HashType
     {
@@ -122,4 +122,3 @@ public class TestEnhancedV3_Hmac
         SHA512
     }
 }
-#endif

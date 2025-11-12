@@ -12,14 +12,15 @@ using BenchmarkDotNet.Order;
 namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
-    /*[RPlotExporter]*/[RankColumn]
-    //[GcServer(true)]
+    [RPlotExporter]
+    [RankColumn]
+    [GcServer(true)]
     [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]
     [MarkdownExporterAttribute.GitHub]
     [ReturnValueValidator(failOnError: true)]
     [IterationTime(500)]
-    public class TestVariantsOnStringBuilding
+    public class StringBuildingVariantsBenchmark
     {
         private readonly string bcryptMinorRevision = "a";
         private static readonly string hash = "TV4S6ytwfsfvkgY8jIucDrjc8deX1s.";
@@ -162,7 +163,7 @@ namespace BCryptNet.BenchMarks
             return result;
         }
 
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ConcatenateToString(char[] array1, char[] array2)
         {
@@ -187,7 +188,7 @@ namespace BCryptNet.BenchMarks
             return $"$2{bcryptMinorRevision}${workFactor:00}${new string(Concatenate(EncodedSaltAsChars, EncodedHashAsChars))}";
         }
 
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
         [Benchmark]
         [BenchmarkCategory("StringFmt", "AppendChar")]
         public string StringInterpolation_WithAllocConcat()

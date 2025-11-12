@@ -12,15 +12,16 @@ using BenchmarkDotNet.Order;
 namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
-    /*[RPlotExporter]*/[RankColumn]
-    //[GcServer(true)]
+    [RPlotExporter]
+    [RankColumn]
+    [GcServer(true)]
     [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]
     [MarkdownExporterAttribute.GitHub]
-    // [ReturnValueValidator(failOnError: true)]
-    public class TestBcrypt_Hashing
+    [ReturnValueValidator(failOnError: true)]
+    public class HashingBenchmark
     {
-        public IEnumerable<object[]> Data()
+        public static IEnumerable<object[]> Data()
         {
             yield return ["~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2a$10$LgfYWkbzEvQ4JakH7rOvHe", "$2a$10$LgfYWkbzEvQ4JakH7rOvHe0y8pHKF9OaFgwUZ2q7W2FFZmZzJYlfS"];
             yield return ["~!@#$%^&*()      ~!@#$%^&*()PNBFRD", "$2a$12$WApznUOJfkEGSmYRfnkrPO", "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC"];
