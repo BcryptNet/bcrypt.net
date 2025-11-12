@@ -3,7 +3,7 @@
     <RootNamespace>ReleaseBenchmark</RootNamespace>
     <AssemblyName>ReleaseBenchmark</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0;net10.0;net48;net462</TargetFrameworks>
+    <TargetFrameworks>net8.0;net10.0;net481;net462</TargetFrameworks>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <Configurations>Release;Debug;All</Configurations>
     <Platforms>AnyCPU</Platforms>
@@ -15,9 +15,23 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <LangVersion>latest</LangVersion>
 
-    <BCryptVersion Condition="'$(BCryptVersion)' == ''">5.0.0-prerelease.gf86f9271e6</BCryptVersion>
+    <BCryptVersion Condition="'$(BCryptVersion)' == ''">5.0.0-prerelease.g5300270033</BCryptVersion>
     <DefineConstants Condition="$([System.String]::new('$(BCryptVersion)').StartsWith('5'))">$(DefineConstants);POSTV5</DefineConstants>
   </PropertyGroup>
+
+  <Target Name="GenerateVersionFile" BeforeTargets="BeforeBuild">
+    <WriteLinesToFile
+      File="Generated/VersionInfo.cs"
+      Overwrite="true"
+      Lines="namespace ReleaseBenchmark {
+    internal static class VersionInfo {
+        internal const string BCryptVersion = &quot;$(BCryptVersion)&quot;%3B
+    }
+}" />
+    <ItemGroup>
+      <Compile Include="Generated/VersionInfo.cs" />
+    </ItemGroup>
+  </Target>
 
   <PropertyGroup>
     <IsTestProject>true</IsTestProject>

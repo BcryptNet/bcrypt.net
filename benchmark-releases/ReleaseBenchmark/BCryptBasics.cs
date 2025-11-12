@@ -18,7 +18,7 @@ public class BCryptBasics : Benchmark
                 ("2.1.4", [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0], false),
                 ("3.5.0", [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0], false),
                 ("4.0.3", [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0], false),
-                ("5.0.0-prerelease.g8ea268d034", [ClrRuntime.Net462, ClrRuntime.Net48, CoreRuntime.Core80, CoreRuntime.Core10_0],true)
+                (VersionInfo.BCryptVersion, [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0],true)
             };
 
             foreach (var (version, runtimes, prerelease) in versions)
