@@ -145,6 +145,7 @@ namespace BCryptNet.UnitTests
             return result;
         }
 
+#if !NET48_OR_GREATER
         [Fact()]
         public void TestSecureHashPassword()
         {
@@ -166,6 +167,7 @@ namespace BCryptNet.UnitTests
             Trace.WriteLine(sw.ElapsedMilliseconds);
             Trace.WriteLine("");
         }
+
 
         [Fact()]
         public void TestSecureStringHashPassword()
@@ -206,7 +208,7 @@ namespace BCryptNet.UnitTests
             Trace.WriteLine(sw.ElapsedMilliseconds);
             Trace.WriteLine("");
         }
-
+#endif
         [Fact]
         // If you're using WoldLabForum just use BCrypt and an appropriate level of cost;
         // DoublebCrypt implementation in the codebase simply hashes with the same salt which is pointless.

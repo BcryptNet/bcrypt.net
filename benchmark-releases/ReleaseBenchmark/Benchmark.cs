@@ -5,6 +5,12 @@ using BenchmarkDotNet.Jobs;
 namespace ReleaseBenchmark;
 
 [MemoryDiagnoser]
+[RPlotExporter]
+[RankColumn]
+[GcServer(true)]
+[KeepBenchmarkFiles]
+[MarkdownExporterAttribute.GitHub]
+// [ReturnValueValidator(failOnError: true)]
 public abstract class Benchmark
 {
     protected static Job BaseJob = Job.Default;
@@ -23,7 +29,7 @@ public abstract class Benchmark
 #if POSTV5
         return BCryptNet.BCrypt.HashPassword(key, salt);
 #else
-        return BCrypt.Net.BCrypt.HashPassword(key, salt, enhancedEntropy: false);
+        return BCrypt.Net.BCrypt.HashPassword(key, salt);
 #endif
     }
 }

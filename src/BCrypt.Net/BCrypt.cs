@@ -174,7 +174,7 @@ namespace BCryptNet
         {
 #if NETCOREAPP
             return HashPassword(inputKey.AsSpan(), salt.AsSpan());
-#elif NETSTANDARD
+#elif NETSTANDARD || NET48_OR_GREATER
             return CreatePasswordHash(inputKey.AsSpan(), salt.AsSpan());
 #else
             return CreatePasswordHash(inputKey, salt);

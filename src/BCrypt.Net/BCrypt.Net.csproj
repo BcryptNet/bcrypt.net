@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0;netstandard2.1;net8.0;net10.0</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netstandard2.0;netstandard2.1;net462;net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netstandard2.0;netstandard2.1;net462;net48;net8.0;net10.0</TargetFrameworks>
 
     <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next</AssemblyName>
@@ -25,7 +25,7 @@
     <Reference Include="System" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net462'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net462' or '$(TargetFramework)' == 'net48'">
     <PackageReference Include="System.Memory" />
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-﻿#if NETFRAMEWORK
+﻿#if NETFRAMEWORK && !NET48_OR_GREATER
 using System.Globalization;
 using System.Security.Cryptography;
 

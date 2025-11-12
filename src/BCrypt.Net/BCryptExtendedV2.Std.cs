@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD
+﻿#if NETSTANDARD || NET48_OR_GREATER
 using System.Globalization;
 using System.Security.Cryptography;
 

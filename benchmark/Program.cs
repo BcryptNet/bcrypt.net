@@ -15,7 +15,6 @@ namespace BCryptNet.BenchMarks
         {
             var config = DefaultConfig.Instance
                     .AddJob(Job.Default.WithRuntime(CoreRuntime.Core80))
-                    .AddJob(Job.Default.WithRuntime(CoreRuntime.Core90))
                     .AddJob(Job.Default.WithRuntime(CoreRuntime.Core10_0))
                     .AddJob(Job.Default.WithRuntime(ClrRuntime.Net481))
                 ;

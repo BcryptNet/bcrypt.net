@@ -3,7 +3,7 @@
     <RootNamespace>ReleaseBenchmark</RootNamespace>
     <AssemblyName>ReleaseBenchmark</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0;net10.0;net48</TargetFrameworks>
+    <TargetFrameworks>net8.0;net10.0;net48;net462</TargetFrameworks>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <Configurations>Release;Debug;All</Configurations>
     <Platforms>AnyCPU</Platforms>
@@ -15,8 +15,8 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <LangVersion>latest</LangVersion>
 
-    <BCryptVersion Condition="'$(BCryptVersion)' == ''">5.0.0-prerelease.g8ea268d034</BCryptVersion>
-    <DefineConstants Condition="'$(BCryptVersion)' == '5.0.0-prerelease.g8ea268d034'">$(DefineConstants);POSTV5</DefineConstants>
+    <BCryptVersion Condition="'$(BCryptVersion)' == ''">5.0.0-prerelease.gf86f9271e6</BCryptVersion>
+    <DefineConstants Condition="$([System.String]::new('$(BCryptVersion)').StartsWith('5'))">$(DefineConstants);POSTV5</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

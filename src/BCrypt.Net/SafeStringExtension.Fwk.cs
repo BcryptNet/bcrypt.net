@@ -17,7 +17,7 @@
 // IN THE SOFTWARE.
 // */
 
-#if NETFRAMEWORK && SECURESTRING
+#if NETFRAMEWORK && SECURESTRING  && !NET48_OR_GREATER
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
