@@ -1,7 +1,7 @@
 ﻿using System.Runtime.Serialization;
 
 namespace BCryptNet;
-#if NETFRAMEWORK || NETSTANDARD
+#if PRE_CORE
     /// <summary>
     ///     Exception used to signal errors that occur during use of the hash information methods
     /// </summary>

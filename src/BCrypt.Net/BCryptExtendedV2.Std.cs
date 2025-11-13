@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD || NET48_OR_GREATER
+﻿#if PRE_CORE
 using System.Globalization;
 using System.Security.Cryptography;
 

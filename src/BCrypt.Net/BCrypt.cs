@@ -174,12 +174,27 @@ public sealed class BCrypt : BCryptCore
     {
 #if NETCOREAPP
             return HashPassword(inputKey.AsSpan(), salt.AsSpan());
-#elif NETSTANDARD || NET48_OR_GREATER
-        return CreatePasswordHash(inputKey.AsSpan(), salt.AsSpan());
 #else
-            return CreatePasswordHash(inputKey, salt);
+        return CreatePasswordHash(inputKey.AsSpan(), salt.AsSpan());
 #endif
     }
+
+#if PRE_CORE
+    /// <summary>
+    ///  Hash a password using the OpenBSD BCrypt scheme with a manually supplied salt/>.
+    /// </summary>
+    /// <remarks>
+    ///  You should generally leave generating salts to the library.
+    /// </remarks>
+    /// <param name="inputKey">The password to hash.</param>
+    /// <param name="salt">the salt to hash with (best generated using <see cref="BCryptCore.GenerateSalt(int,char)"/>)</param>
+    /// <returns>The hashed password.</returns>
+    /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
+    public static string HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char>  salt)
+    {
+        return CreatePasswordHash(inputKey, salt);
+    }
+#endif
 
 #if NETCOREAPP
         /// <summary>

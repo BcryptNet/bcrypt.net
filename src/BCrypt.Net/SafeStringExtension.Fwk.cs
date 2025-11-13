@@ -17,7 +17,7 @@
 // IN THE SOFTWARE.
 // */
 
-#if NETFRAMEWORK && SECURESTRING  && !NET48_OR_GREATER
+#if PRE_CORE && SECURESTRING
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -52,7 +52,7 @@ public sealed class BCryptSafeString : BCryptCore
 
     private static string HashPassword(string inputKey, string salt)
     {
-        return CreatePasswordHash(inputKey, salt);
+        return CreatePasswordHash(inputKey.AsSpan(), salt.AsSpan());
     }
 
     private delegate string SandboxedSecureString(string inputKey);

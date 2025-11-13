@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0;netstandard2.1;net8.0;net10.0</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netstandard2.0;netstandard2.1;net462;net48;net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netstandard2.0;netstandard2.1;net462;net8.0;net10.0</TargetFrameworks>
 
     <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
     <AssemblyName>BCrypt.Net-Next</AssemblyName>
@@ -25,9 +25,25 @@
     <Reference Include="System" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net462' or '$(TargetFramework)' == 'net48'">
-    <PackageReference Include="System.Memory" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'
+                         or '$(TargetFramework)' == 'netstandard2.1'
+                         or '$(TargetFramework)' == 'net462'
+                         or '$(TargetFramework)' == 'net472'
+                         or '$(TargetFramework)' == 'net48'
+                         or '$(TargetFramework)' == 'net481'">
+    <PackageReference Include="System.Memory"  />
   </ItemGroup>
+
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'
+                         or '$(TargetFramework)' == 'netstandard2.1'
+                         or '$(TargetFramework)' == 'net462'
+                         or '$(TargetFramework)' == 'net472'
+                         or '$(TargetFramework)' == 'net48'
+                         or '$(TargetFramework)' == 'net481'">
+    <DefineConstants>$(DefineConstants);PRE_CORE</DefineConstants>
+  </PropertyGroup>
+  
 
   <ItemGroup>
     <None Remove="PublicAPI.Shipped.txt" />
@@ -54,14 +70,8 @@
     <Compile Update="BCryptBase.Core.cs">
       <DependentUpon>BCryptBase.cs</DependentUpon>
     </Compile>
-    <Compile Update="BCryptBase.Fwk.cs">
-      <DependentUpon>BCryptBase.cs</DependentUpon>
-    </Compile>
     <Compile Update="BCryptBase.Std.cs">
       <DependentUpon>BCryptBase.cs</DependentUpon>
-    </Compile>
-    <Compile Update="BCryptExtendedV2.Fwk.cs">
-      <DependentUpon>BCryptExtendedV2.cs</DependentUpon>
     </Compile>
     <Compile Update="BCryptExtendedV2.Std.cs">
       <DependentUpon>BCryptExtendedV2.cs</DependentUpon>

@@ -3,7 +3,7 @@
     <RootNamespace>ReleaseBenchmark</RootNamespace>
     <AssemblyName>ReleaseBenchmark</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0;net10.0;net481;net462</TargetFrameworks>
+    <TargetFrameworks>net8.0;net10.0;net48;net462</TargetFrameworks>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <Configurations>Release;Debug;All</Configurations>
     <Platforms>AnyCPU</Platforms>
@@ -15,9 +15,10 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <LangVersion>latest</LangVersion>
 
-    <BCryptDefaultCurrent>5.0.0-prerelease.g5300270033</BCryptDefaultCurrent>
+    <BCryptDefaultCurrent>5.0.0-prerelease.gf05289e5ce</BCryptDefaultCurrent>
     <BCryptVersion Condition="'$(BCryptVersion)' == ''">$(BCryptDefaultCurrent)</BCryptVersion>
     <DefineConstants Condition="$([System.String]::new('$(BCryptVersion)').StartsWith('5'))">$(DefineConstants);POSTV5</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'net481'">$(DefineConstants);NET48_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
   <Target Name="GenerateVersionFile" BeforeTargets="BeforeBuild">
@@ -46,17 +47,19 @@
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <NoWarn>NU5105;NU1507;CS1591;CS0618</NoWarn>
+    <WarningsAsErrors>;NU1605;NU1603</WarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <NoWarn>NU5105;NU1507;CS1591;CS0618</NoWarn>
+    <WarningsAsErrors>;NU1605;NU1603</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="$(BCryptVersion)" />
-    <PackageReference Include="BenchmarkDotNet" Version="0.15.6" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.7" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48' or '$(TargetFramework)' == 'net481'">
     <PackageReference Include="System.Collections.Immutable" Version="10.0.0" />
     <PackageReference Include="System.Reflection.Metadata" Version="10.0.0" />
     <PackageReference Include="NETStandard.Library" Version="2.0.3" />
