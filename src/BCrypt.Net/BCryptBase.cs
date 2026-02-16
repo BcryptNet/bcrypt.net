@@ -20,6 +20,7 @@ IN THE SOFTWARE.
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace BCryptNet;
 
@@ -209,6 +210,8 @@ public partial class BCryptCore
     // Expanded Blowfish key
     private uint[] _p;
     private uint[] _s;
+    private static readonly ThreadLocal<uint[]> s_p = new(() => new uint[POrig.Length], trackAllValues: false);
+    private static readonly ThreadLocal<uint[]> s_s = new(() => new uint[SOrig.Length], trackAllValues: false);
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
     internal static void ZeroMemory(Span<byte> buffer)
@@ -271,8 +274,8 @@ public partial class BCryptCore
     /// <summary>Initializes the Blowfish key schedule.</summary>
     private void InitializeKey()
     {
-        _p = new uint[POrig.Length];
-        _s = new uint[SOrig.Length];
+        _p = s_p.Value!;
+        _s = s_s.Value!;
         Array.Copy(POrig, _p, POrig.Length);
         Array.Copy(SOrig, _s, SOrig.Length);
     }
