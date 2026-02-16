@@ -36,7 +36,7 @@ public partial class BCryptCore
     /// </summary>
     /// <param name="inputKey">The password or string to hash.</param>
     /// <param name="salt">the salt to hash with (best generated using <see cref="BCryptCore.GenerateSalt(int,char)"/>)</param>
-    /// <param name="hashType">SHA Based Hash to use</param>
+    /// <param name="hashType">SHA-Based Hash to use</param>
     /// <param name="enhancedHashKeyGen">Delegate</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
