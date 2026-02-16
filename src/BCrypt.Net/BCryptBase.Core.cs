@@ -137,7 +137,7 @@ public partial class BCryptCore
                 Span<byte> inputBytes = utf8Buffer[..bytesWritten];
                 if (!HashBytes(inputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int hashBytesWritten))
                     throw new BcryptAuthenticationException("Couldn't hash input");
-                ZeroMemory(inputBytes);
+                ZeroMemory(utf8Buffer);
                 outputBufferWritten = hashBytesWritten;
                 return;
 
@@ -181,39 +181,48 @@ public partial class BCryptCore
         var bCrypt = new BCrypt();
 
         Span<byte> saltBuffer = stackalloc byte[BCryptSaltLen];
-        int written = DecodeBase64(extractedSalt, saltBuffer);
-        var saltBytes = saltBuffer[..written];
-
         Span<byte> hashBuffer = stackalloc byte[BfCryptCiphertext.Length * 4];
-        var hashBytes = bCrypt.CryptRaw(inputBytes, saltBytes, workFactor, hashBuffer);
 
-        // Ensure the destination is large enough
-        // "$2x$10$" + base64(16 bytes) + base64(23 bytes) = 60 characters
-        if (destination.Length < 60)
-            return false;
+        try
+        {
+            int written = DecodeBase64(extractedSalt, saltBuffer);
+            var saltBytes = saltBuffer[..written];
 
-        int pos = 0;
-        destination[pos++] = '$';
-        destination[pos++] = '2';
-        destination[pos++] = bcryptMinorRevision;
-        destination[pos++] = '$';
+            var hashBytes = bCrypt.CryptRaw(inputBytes, saltBytes, workFactor, hashBuffer);
 
-        // Write work factor as 2-digit number
-        if (!workFactor.TryFormat(destination[pos..], out int wfChars, "D2", CultureInfo.InvariantCulture))
-            return false;
-        pos += wfChars;
+            // Ensure the destination is large enough
+            // "$2x$10$" + base64(16 bytes) + base64(23 bytes) = 60 characters
+            if (destination.Length < 60)
+                return false;
 
-        destination[pos++] = '$';
+            int pos = 0;
+            destination[pos++] = '$';
+            destination[pos++] = '2';
+            destination[pos++] = bcryptMinorRevision;
+            destination[pos++] = '$';
 
-        // Write base64-encoded salt
-        pos += EncodeBase64(saltBytes, saltBytes.Length, destination[pos..]);
+            // Write work factor as 2-digit number
+            if (!workFactor.TryFormat(destination[pos..], out int wfChars, "D2", CultureInfo.InvariantCulture))
+                return false;
+            pos += wfChars;
 
-        // Write base64-encoded hash
-        pos += EncodeBase64(hashBytes, (BfCryptCiphertextLength * 4) - 1, destination[pos..]);
+            destination[pos++] = '$';
 
-        charsWritten = pos;
+            // Write base64-encoded salt
+            pos += EncodeBase64(saltBytes, saltBytes.Length, destination[pos..]);
 
-        return true;
+            // Write base64-encoded hash
+            pos += EncodeBase64(hashBytes, (BfCryptCiphertextLength * 4) - 1, destination[pos..]);
+
+            charsWritten = pos;
+
+            return true;
+        }
+        finally
+        {
+            ZeroMemory(hashBuffer);
+            ZeroMemory(saltBuffer);
+        }
     }
 
     internal static ReadOnlySpan<char> GenerateSalt(int workFactor = DefaultRounds, char bcryptMinorRevision = DefaultHashVersion)
