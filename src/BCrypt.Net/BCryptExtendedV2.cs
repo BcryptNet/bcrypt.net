@@ -31,7 +31,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
     public static string HashPassword(string inputKey, int workFactor = DefaultRounds,
         HashType hashType = DefaultEnhancedHashType) =>
         CreatePasswordHash(inputKey, GenerateSalt(workFactor), hashType,
-            (s, type, version) => EnhancedHash(s, type, version));
+            (s, type, version, dest) => { var r = EnhancedHash(s, type, version); r.CopyTo(dest); return r.Length; });
 
     /// <summary>
     ///  Pre-hash a password with SHA384 then using the OpenBSD BCrypt scheme with a manually supplied salt/>.
@@ -45,7 +45,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
     /// <returns>The hashed password.</returns>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static string HashPassword(string inputKey, string salt, HashType hashType = DefaultEnhancedHashType) =>
-        CreatePasswordHash(inputKey, salt, hashType, (s, type, version) => EnhancedHash(s, type, version));
+        CreatePasswordHash(inputKey, salt, hashType, (s, type, version, dest) => { var r = EnhancedHash(s, type, version); r.CopyTo(dest); return r.Length; });
 
     /// <summary>
     /// Hashes key, base64 encodes before returning byte array
@@ -87,7 +87,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
     {
         return SecureEquals(SafeUTF8.GetBytes(hash),
             SafeUTF8.GetBytes(CreatePasswordHash(text, hash, hashType,
-                (s, type, version) => EnhancedHash(s, type, version))));
+                (s, type, version, dest) => { var r = EnhancedHash(s, type, version); r.CopyTo(dest); return r.Length; })));
     }
 
     /// <summary>
@@ -184,7 +184,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
         }
 
         return CreatePasswordHash(newKey, GenerateSalt(workFactor), hashType,
-            (s, type, version) => EnhancedHash(s, type, version));
+            (s, type, version, dest) => { var r = EnhancedHash(s, type, version); r.CopyTo(dest); return r.Length; });
     }
 }
 #endif

@@ -24,6 +24,13 @@ using System.Security;
 
 namespace BCryptNet;
 
+/// <summary>
+/// This class provides secure implementations for hashing passwords using the OpenBSD BCrypt algorithm
+/// with a focus on allowing sensitive data through <see cref="SecureString"/>.
+/// </summary>
+/// <remarks>
+/// <para>This class extends the core functionality provided by <see cref="BCryptCore"/>.</para>
+/// </remarks>
 public sealed class BCryptSafeString : BCryptCore
 {
     /// <summary>

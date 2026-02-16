@@ -31,7 +31,7 @@ namespace BCryptNet;
 /// </summary>
 public partial class BCryptCore
 {
-    internal delegate Span<byte> EnhancedHashDelegate(ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision);
+    internal delegate int EnhancedHashDelegate(ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision, Span<byte> destination);
 
     /// <summary>
     /// Create Password Hash Base
@@ -147,10 +147,12 @@ public partial class BCryptCore
                     throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(hashType));
                 }
 
-                Span<byte> eInputBytes = enhancedHashKeyGen(inputKey, hashType, bcryptMinorRevision);
+                Span<byte> eInputBuffer = stackalloc byte[128];
+                int eInputLen = enhancedHashKeyGen(inputKey, hashType, bcryptMinorRevision, eInputBuffer);
+                Span<byte> eInputBytes = eInputBuffer[..eInputLen];
                 if (!HashBytes(eInputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int written))
                     throw new BcryptAuthenticationException("Couldn't hash input");
-                ZeroMemory(eInputBytes);
+                ZeroMemory(eInputBuffer);
                 outputBufferWritten = written;
 
                 return;

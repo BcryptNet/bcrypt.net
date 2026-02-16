@@ -6,7 +6,7 @@ namespace BCryptNet
 {
     #if PRE_CORE
     /// <summary>
-    ///     Exception used to signal errors that occur during use salt parsing
+    ///     Exception used to signal errors that occur during salt-parsing
     /// </summary>
     [Serializable]
     public sealed class SaltParseException : Exception
@@ -14,12 +14,12 @@ namespace BCryptNet
         /// <summary>
         ///     Default Constructor
         /// </summary>
-        protected SaltParseException()
+        private SaltParseException()
         {
         }
 
         /// <inheritdoc />
-        protected SaltParseException(SerializationInfo info, StreamingContext streamingContext) : base(info, streamingContext)
+        private SaltParseException(SerializationInfo info, StreamingContext streamingContext) : base(info, streamingContext)
         {
         }
 
@@ -42,7 +42,7 @@ namespace BCryptNet
     }
 #else
     /// <summary>
-    ///     Exception used to signal errors that occur during salt parsing
+    ///     Exception used to signal errors that occur during salt-parsing
     /// </summary>
     public sealed class SaltParseException : Exception
     {
