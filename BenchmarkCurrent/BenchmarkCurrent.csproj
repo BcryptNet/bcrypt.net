@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>BenchmarkCurrent</RootNamespace>
+    <AssemblyName>BenchmarkCurrent</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <Configurations>Release;Debug;All</Configurations>
+    <Platforms>AnyCPU</Platforms>
+    <!--Disable Debug Symbols https://github.com/dotnet/BenchmarkDotNet/pull/2029/-->
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <CompileUsingReferenceAssemblies>false</CompileUsingReferenceAssemblies>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IsPublishable>false</IsPublishable>
+    <IsPackable>false</IsPackable>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\bcrypt.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>true</DelaySign>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>NU5105;NU1507;CS1591;CS0618</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <NoWarn>NU5105;NU1507;CS1591;CS0618</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.15.8" />
+    <PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.3.36812.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\BCrypt.Net\BCrypt.Net.csproj" />
+  </ItemGroup>
+</Project>
