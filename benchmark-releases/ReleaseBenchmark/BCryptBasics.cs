@@ -12,28 +12,17 @@ public class BCryptBasics : Benchmark
     {
         public Config()
         {
-            BaseJob = Job.Default
-                .WithWarmupCount(10)
-                .WithIterationCount(10)
-                .WithInvocationCount(1)
-                .WithUnrollFactor(1);
-
             var versions = new[]
             {
-                ("2.0.0", new Runtime[] {ClrRuntime.Net462, ClrRuntime.Net481}, false),
-                ("2.1.4", [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0], false),
-                ("3.5.0", [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0], false),
-                ("4.0.3", [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0], false),
-                (VersionInfo.BCryptVersion, [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0],true)
+                ("2.0.0", new Runtime[] {ClrRuntime.Net462, ClrRuntime.Net481}),
+                ("2.1.4", [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0]),
+                ("3.5.0", [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0]),
+                ("4.0.3", [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0]),
+                (VersionInfo.BCryptVersion, [ClrRuntime.Net462, ClrRuntime.Net481, CoreRuntime.Core80, CoreRuntime.Core10_0])
             };
 
-            foreach (var (version, runtimes, _) in versions)
+            foreach (var (version, runtimes) in versions)
             {
-                // var job = BaseJob.WithNuGet(new NuGetReferenceList
-                // {
-                //     new NuGetReference("BCrypt.Net-Next", version.Trim(), prerelease: prerelease)
-                // });
-
                 foreach (var runtime in runtimes)
                 {
                     AddJob(BaseJob.WithRuntime(runtime).WithMsBuildArguments($"/p:BCryptVersion={version}"));

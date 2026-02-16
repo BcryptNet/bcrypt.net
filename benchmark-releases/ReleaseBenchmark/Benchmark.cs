@@ -1,7 +1,7 @@
 ﻿using System;
 // ReSharper disable once RedundantUsingDirective
-using BCryptNet;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
 
 namespace ReleaseBenchmark;
@@ -10,10 +10,10 @@ namespace ReleaseBenchmark;
 [GcServer(true)]
 [KeepBenchmarkFiles]
 [MarkdownExporterAttribute.GitHub]
-[ReturnValueValidator(failOnError: true)]
 public abstract class Benchmark
 {
     protected static Job BaseJob = Job.MediumRun;
+    private readonly Consumer _consumer = new();
 
     private const string Key = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
     private const string Salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
@@ -24,19 +24,25 @@ public abstract class Benchmark
 
     [Benchmark]
     [BenchmarkCategory("HashSpan")]
-    public string TestHashing()
+    public void TestHashing()
     {
 #if POSTV5 && NETCOREAPP
         Span<char> outputBuffer = stackalloc char[60];
         BCryptNet.BCrypt.HashPassword(KeySpan, SaltSpan, outputBuffer, out int outputBufferWritten);
-        return new string(outputBuffer[..outputBufferWritten]);
-        // return BCryptNet.BCrypt.HashPassword(KeySpan, SaltSpan);
-#elif POSTV5 && !NETFRAMEWORK
-        return BCryptNet.BCrypt.HashPassword(KeySpan, SaltSpan);
-#elif POSTV5
-        return BCryptNet.BCrypt.HashPassword(Key, Salt);
+        _consumer.Consume(outputBufferWritten);
+        if (outputBufferWritten > 0)
+        {
+            _consumer.Consume(outputBuffer[0]);
+        }
+#elif POSTV5 && NET48_OR_GREATER
+        var hash = BCryptNet.BCrypt.HashPassword(KeySpan, SaltSpan);
+        _consumer.Consume(hash);
+#elif POSTV5 && NET462
+        var hash = BCryptNet.BCrypt.HashPassword(Key, Salt);
+        _consumer.Consume(hash);
 #else
-        return BCrypt.Net.BCrypt.HashPassword(Key, Salt);
+        var hash = BCrypt.Net.BCrypt.HashPassword(Key, Salt);
+        _consumer.Consume(hash);
 #endif
     }
 

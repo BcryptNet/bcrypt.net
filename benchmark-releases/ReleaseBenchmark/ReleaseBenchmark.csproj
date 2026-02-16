@@ -15,7 +15,7 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <LangVersion>latest</LangVersion>
 
-    <BCryptDefaultCurrent>5.0.0-prerelease.g8e8c5244ad</BCryptDefaultCurrent>
+    <BCryptDefaultCurrent>5.0.0-prerelease.g1003abb019</BCryptDefaultCurrent>
     <BCryptVersion Condition="'$(BCryptVersion)' == ''">$(BCryptDefaultCurrent)</BCryptVersion>
     <DefineConstants Condition="$([System.String]::new('$(BCryptVersion)').StartsWith('5'))">$(DefineConstants);POSTV5</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'net481'">$(DefineConstants);NET48_OR_GREATER</DefineConstants>
@@ -49,7 +49,7 @@
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48' or '$(TargetFramework)' == 'net481'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462' or '$(TargetFramework)' == 'net481'">
     <PackageReference Include="System.Collections.Immutable" Version="10.0.3" />
     <PackageReference Include="System.Reflection.Metadata" Version="10.0.3" />
     <PackageReference Include="NETStandard.Library" Version="2.0.3" />
