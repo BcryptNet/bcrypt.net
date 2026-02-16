@@ -18,7 +18,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/BcryptNet/bcrypt.net</PackageProjectUrl>
     <RepositoryUrl>https://github.com/BcryptNet/bcrypt.net</RepositoryUrl>
-    
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssemblyOriginatorKeyFile>../bcrypt.pfx</AssemblyOriginatorKeyFile>
