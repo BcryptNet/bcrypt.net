@@ -35,7 +35,7 @@ namespace BCryptNet;
 ///        get faster.
 ///  </para>
 ///  <para>
-///        To hash a password using the defaults, call the <see cref="HashPassword(string,int)"/> (which will generate a random salt and hash at default cost), like this:
+///        To hash a password using the defaults, call the <see cref="BCrypt.HashPassword(string,int)"/> (which will generate a random salt and hash at default cost), like this:
 ///  </para>
 ///  <code>string pw_hash = BCrypt.HashPassword(plain_password);</code>
 ///  <para>
@@ -43,7 +43,7 @@ namespace BCryptNet;
 ///  </para>
 ///  <para>
 ///        To check whether a plaintext password matches one that has been hashed previously,
-///        use the <see cref="Verify"/> method:
+///        use the <see cref="BCrypt.Verify"/> method:
 /// </para>
 ///  <code>
 ///     if (BCrypt.Verify(candidate_password, stored_hash))
