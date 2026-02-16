@@ -76,7 +76,6 @@ namespace BCryptNet.UnitTests
 
         private readonly char[] _revisions = { 'a', 'x', 'y', 'b' };
 
-
         private readonly string TwoPointZeroVersionPass64 = "585292059d6b430b931e77f046bb20cca5f99e9adc8a4359aadd93afa03e60c3";
         private readonly string[] TwoPointZeroVersionGeneratedHashes64 = new[]
         {
@@ -513,7 +512,6 @@ namespace BCryptNet.UnitTests
             }
 
         }
-
 
         // [Theory()]
         // [InlineData("\u2605\u2605\u2605\u2605\u2605\u2605\u2605\u2605")]
