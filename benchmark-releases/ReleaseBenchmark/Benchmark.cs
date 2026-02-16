@@ -1,4 +1,5 @@
 ﻿using System;
+// ReSharper disable once RedundantUsingDirective
 using BCryptNet;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;

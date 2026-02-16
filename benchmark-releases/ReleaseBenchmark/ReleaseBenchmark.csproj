@@ -22,14 +22,7 @@
   </PropertyGroup>
 
   <Target Name="GenerateVersionFile" BeforeTargets="BeforeBuild">
-    <WriteLinesToFile
-      File="Generated/VersionInfo.cs"
-      Overwrite="true"
-      Lines="namespace ReleaseBenchmark {
-    internal static class VersionInfo {
-        internal const string BCryptVersion = &quot;$(BCryptVersion)&quot;%3B
-    }
-}" />
+    <WriteLinesToFile File="Generated/VersionInfo.cs" Overwrite="true" ContinueOnError="true" Lines="namespace ReleaseBenchmark {&#xD;&#xA;    internal static class VersionInfo {&#xD;&#xA;        internal const string BCryptVersion = &quot;$(BCryptVersion)&quot;%3B&#xD;&#xA;    }&#xD;&#xA;}" />
     <ItemGroup>
       <Compile Include="Generated/VersionInfo.cs" />
     </ItemGroup>
@@ -56,15 +49,19 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="$(BCryptVersion)" />
-    <PackageReference Include="BenchmarkDotNet" Version="0.15.7" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net48' or '$(TargetFramework)' == 'net481'">
-    <PackageReference Include="System.Collections.Immutable" Version="10.0.0" />
-    <PackageReference Include="System.Reflection.Metadata" Version="10.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="10.0.3" />
+    <PackageReference Include="System.Reflection.Metadata" Version="10.0.3" />
     <PackageReference Include="NETStandard.Library" Version="2.0.3" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <Reference Include="System" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Generated\" />
   </ItemGroup>
 
 </Project>
