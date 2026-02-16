@@ -303,7 +303,7 @@ public partial class BCryptCore
     /// <param name="destination"></param>
     /// <returns>The decoded byte array.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int DecodeBase64(ReadOnlySpan<char> encodedSpan, Span<byte> destination)
+    internal static int DecodeBase64(ReadOnlySpan<char> encodedSpan, Span<byte> destination)
     {
         int outputLength = 0;
         int position = 0;
