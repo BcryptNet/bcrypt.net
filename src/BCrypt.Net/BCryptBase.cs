@@ -221,6 +221,9 @@ public partial class BCryptCore
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
     internal static void ZeroMemory(Span<char> buffer) => buffer.Clear();
 
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+    internal static void ZeroMemory(uint[] buffer) => Array.Clear(buffer, 0, buffer.Length);
+
     // Compares two byte arrays for equality. The method is specifically written so that the loop is not optimised.
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
 #if NETCOREAPP
