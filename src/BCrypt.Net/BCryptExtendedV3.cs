@@ -241,7 +241,7 @@ public sealed class BCryptExtendedV3 : BCryptCore
         }
 
         // Extract details from salt
-        int currentWorkFactor = Convert.ToInt16(currentHash.Substring(startingOffset, 2), CultureInfo.InvariantCulture);
+        int currentWorkFactor = int.Parse(currentHash.AsSpan(startingOffset, 2), NumberStyles.None, CultureInfo.InvariantCulture);
 
         // Never downgrade work-factor (unless forced)
         if (!forceWorkFactor && currentWorkFactor > workFactor)
