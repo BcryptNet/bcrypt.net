@@ -19,4 +19,5 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\BCrypt.Net\BCrypt.Net.csproj"/>
     </ItemGroup>
+  
 </Project>
