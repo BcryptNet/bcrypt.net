@@ -438,35 +438,43 @@ public partial class BCryptCore
         }
 
         InitializeKey();
-        EKSKey(saltBytes, inputBytes);
-
-        for (i = 0; i != rounds; i++)
+        try
         {
-            Key(inputBytes);
-            Key(saltBytes);
-        }
+            EKSKey(saltBytes, inputBytes);
 
-        for (i = 0; i < 64; i++)
-        {
-            for (j = 0; j < (clen >> 1); j++)
+            for (i = 0; i != rounds; i++)
             {
-                Encipher(cdata, j << 1);
+                Key(inputBytes);
+                Key(saltBytes);
             }
-        }
 
-        // Convert ciphertext to output byte-array
-        byte[] ret = new byte[clen * 4];
-        for (i = 0, j = 0; i < clen; i++)
+            for (i = 0; i < 64; i++)
+            {
+                for (j = 0; j < (clen >> 1); j++)
+                {
+                    Encipher(cdata, j << 1);
+                }
+            }
+
+            // Convert ciphertext to output byte-array
+            byte[] ret = new byte[clen * 4];
+            for (i = 0, j = 0; i < clen; i++)
+            {
+                // per-line extract first byte by shifting cdata word at index right 24 bits
+                // using >> op then isolate the least significant byte using mask 0xff
+                ret[j++] = (byte)((cdata[i] >> 24) & 0xff);
+                ret[j++] = (byte)((cdata[i] >> 16) & 0xff);
+                ret[j++] = (byte)((cdata[i] >> 8) & 0xff);
+                ret[j++] = (byte)(cdata[i] & 0xff);
+            }
+
+            return ret;
+        }
+        finally
         {
-            // per-line extract first byte by shifting cdata word at index right 24 bits
-            // using >> op then isolate the least significant byte using mask 0xff
-            ret[j++] = (byte)((cdata[i] >> 24) & 0xff);
-            ret[j++] = (byte)((cdata[i] >> 16) & 0xff);
-            ret[j++] = (byte)((cdata[i] >> 8) & 0xff);
-            ret[j++] = (byte)(cdata[i] & 0xff);
+            ZeroMemory(_p);
+            ZeroMemory(_s);
         }
-
-        return ret;
     }
 }
 #endif

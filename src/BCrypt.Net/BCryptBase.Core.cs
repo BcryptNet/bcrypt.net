@@ -358,38 +358,46 @@ public partial class BCryptCore
         }
 
         InitializeKey();
-        EKSKey(saltBytes, inputBytes);
-
-        int i, j;
-
-        for (i = 0; i != rounds; i++)
+        try
         {
-            Key(inputBytes);
-            Key(saltBytes);
-        }
+            EKSKey(saltBytes, inputBytes);
 
-        for (i = 0; i < 64; i++)
-        {
-            for (j = 0; j < (clen >> 1); j++)
+            int i, j;
+
+            for (i = 0; i != rounds; i++)
             {
-                Encipher(cdata, j << 1);
+                Key(inputBytes);
+                Key(saltBytes);
             }
-        }
 
-        // Convert ciphertext to output byte-array
-        for (i = 0, j = 0; i < clen; i++)
+            for (i = 0; i < 64; i++)
+            {
+                for (j = 0; j < (clen >> 1); j++)
+                {
+                    Encipher(cdata, j << 1);
+                }
+            }
+
+            // Convert ciphertext to output byte-array
+            for (i = 0, j = 0; i < clen; i++)
+            {
+                // per-line extract first byte by shifting cdata word at index right 24 bits
+                // using >> op then isolate the least significant byte using mask 0xff
+                destination[j++] = (byte)((cdata[i] >> 24) & 0xff);
+                destination[j++] = (byte)((cdata[i] >> 16) & 0xff);
+                destination[j++] = (byte)((cdata[i] >> 8) & 0xff);
+                destination[j++] = (byte)(cdata[i] & 0xff);
+            }
+
+            return destination;
+        }
+        finally
         {
-            // per-line extract first byte by shifting cdata word at index right 24 bits
-            // using >> op then isolate the least significant byte using mask 0xff
-            destination[j++] = (byte)((cdata[i] >> 24) & 0xff);
-            destination[j++] = (byte)((cdata[i] >> 16) & 0xff);
-            destination[j++] = (byte)((cdata[i] >> 8) & 0xff);
-            destination[j++] = (byte)(cdata[i] & 0xff);
+            ZeroMemory(_p);
+            ZeroMemory(_s);
         }
-
-        return destination;
     }
-
+    
     /// <summary>Blowfish encipher a single 64-bit block encoded as two 32-bit halves.</summary>
     /// <param name="blockArray">An array containing the two 32-bit half blocks. The plaintext to be encrypted</param>
     /// <param name="offset">    The position in the array of the blocks.</param>
