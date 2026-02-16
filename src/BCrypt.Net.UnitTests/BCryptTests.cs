@@ -162,7 +162,7 @@ if (password_verify($pass,$hash)) {
             Assert.False(BCrypt.Verify(pass, passwordHashTwoRound));
 
             // This will pass, but is open to timing attacks  (Taken from sample in https://github.com/BcryptNet/bcrypt.net/issues/119)
-            Assert.True(string.Equals(passwordHashTwoRound, doubleBcryptSaltGiven));
+            Assert.Equal(passwordHashTwoRound, doubleBcryptSaltGiven);
 
             // This will pass and effectively behaves the same as WCF
             Assert.True(BCrypt.Verify(BCrypt.HashPassword(pass, passwordHashTwoRound), passwordHashTwoRound));

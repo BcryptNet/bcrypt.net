@@ -1,33 +1,31 @@
 [![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 
-
 # bcrypt.net - next
 
 Porting of bcrypt.codeplex.com with enhanced security, missing fixes, features and better .net support.
 
 [![Build status](https://github.com/BcryptNet/bcrypt.net/actions/workflows/dotnet.yml/badge.svg)]()
 
-
 # Nuget
 
-Download using nuget or Paket (https://fsprojects.github.io/Paket/)
+Download using nuget or Paket (<https://fsprojects.github.io/Paket/>)
 
-Package: https://www.nuget.org/packages/BCrypt.Net-Next/
+Package: <https://www.nuget.org/packages/BCrypt.Net-Next/>
 [![NuGet](https://img.shields.io/nuget/v/BCrypt.Net-Next.svg?style=flat-square)](https://www.nuget.org/packages/BCrypt.Net-Next)
 
-Signed Package - https://www.nuget.org/packages/BCrypt.Net-Next.StrongName/
+Signed Package - <https://www.nuget.org/packages/BCrypt.Net-Next.StrongName/>
 [![NuGet Signed Package](https://img.shields.io/nuget/v/BCrypt.Net-Next.StrongName.svg?style=plastic)](https://www.nuget.org/packages/BCrypt.Net-Next.StrongName)
 
 # How to use
 
-There are various examples in our [test-harness folder](https://github.com/BcryptNet/bcrypt.net/tree/main/IntegrationTest/TestVariousVersionsOfDotNet) and [unit-tests](https://github.com/BcryptNet/bcrypt.net/blob/main/src/BCrypt.Net.UnitTests/BCryptTests.cs) 
-
+There are various examples in our [test-harness folder](https://github.com/BcryptNet/bcrypt.net/tree/main/IntegrationTest/TestVariousVersionsOfDotNet) and [unit-tests](https://github.com/BcryptNet/bcrypt.net/blob/main/src/BCrypt.Net.UnitTests/BCryptTests.cs)
 
 The simplest usage is as follows...
 
 **To Hash a password:**
 
-## DotNet6
+## DotNet5+
+
 File-scoped namespaces are shown; imagine curly brackets if you need to.
 
 `Top level namespace`
@@ -49,12 +47,13 @@ I'd advise rather than enter the entire namespace you simply use the [import ali
 
 using BC = BCrypt.Net.BCrypt;
 
-namespace DotNetSix;
+namespace DotNetTen;
 
 string passwordHash =  BC.HashPassword("my password");
 ```
 
-### DotNet6
+### DotNetSix
+
 You can also do aliasing at the CSProj level; and wouldn't need to add the using statement at all
 
 This example would allow you to use an alias BC.HashPassword() in your code
@@ -75,8 +74,6 @@ This version would allow you to just call `Verify` and `HashPassword` in your co
     </ItemGroup>
 ```
 
-
-
 _Note: Although this library allows you to supply your own salt, it is **highly** advisable that you allow the library to generate the salt for you.
 These methods are supplied to maintain compatibility and for more advanced cross-platform requirements that may necessitate their use._
 
@@ -92,7 +89,7 @@ This implementation on hashing will generate a salt automatically for you with t
 
 To save you the maths a small table covering the iterations is provided below. The minimum allowed in this library is 4 for compatibility, the maximum is 31 (at 31 your processor will be wishing for death).
 
-```
+```text
 | Cost  | Iterations               |
 |-------|--------------------------|
 |   8   |    256 iterations        |
@@ -158,8 +155,8 @@ considering what actual effect on the resulting hash by those bytes.
 
 Other languages have handled this perceived issue by pre-hashing the passphrase/password to increase the used entropy, dropbox being one of the more public articles on this.
 
-- https://blogs.dropbox.com/tech/2016/09/how-dropbox-securely-stores-your-passwords/
-- https://crypto.stackexchange.com/questions/42415/dropbox-password-security
+- <https://blogs.dropbox.com/tech/2016/09/how-dropbox-securely-stores-your-passwords/>
+- <https://crypto.stackexchange.com/questions/42415/dropbox-password-security>
 
 You can opt into enhanced hashing simply using the following code (basically prefixing the method calls with Enhanced)
 
@@ -177,7 +174,7 @@ var enhancedHashPassword = BCrypt.EnhancedHashPassword(myPassword, hashType: Has
 var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword, hashType:HashType.SHA384);
 ```
 
-_Why SHA384?_ It's a good balance of performance, security, collision protection and is the only version that wasn't vulnerable to length extension attacks https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks .
+_Why SHA384?_ It's a good balance of performance, security, collision protection and is the only version that wasn't vulnerable to length extension attacks <https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks> .
 
 _Should I use Enhanced Entropy?_ You lose nothing by using it
 
@@ -187,7 +184,7 @@ _What does it do?_ We take the utf8 bytes of your password as inputBytes SHA has
 
 ## Compiling
 
-You'll need at least VS2022 with the current SDK https://www.microsoft.com/net/download;
+You'll need at least VS2022 with the current SDK <https://www.microsoft.com/net/download>;
 
 The nuget packages can be built by running `buildfornuget.cmd`
 or
@@ -214,7 +211,7 @@ For an overview of why BCrypt is important, see How to Safely Store a Password. 
 
 ## Why BCrypt
 
-### From How to Safely Store a Password:
+### From How to Safely Store a Password
 
 It uses a variant of the Blowfish encryption algorithm’s keying schedule and introduces a work factor, which allows you to determine how expensive the hash function will be. Because of this, BCrypt can keep up with Moore’s law. As computers get faster you can increase the work factor and the hash will get slower.
 
@@ -277,22 +274,23 @@ A future release of Solar's bcrypt code should also support 'b'.
 
 **There is no difference between 2a, 2x, 2y, and 2b. They all output the same result.**
 
-- https://github.com/spring-projects/spring-security/issues/3320
-- https://en.wikipedia.org/wiki/Crypt_(C)#Blowfish-based_scheme
-- http://undeadly.org/cgi?action=article&sid=20140224132743
-- http://marc.info/?l=openbsd-misc&m=139320023202696
-
+- <https://github.com/spring-projects/spring-security/issues/3320>
+- <https://en.wikipedia.org/wiki/Crypt_(C)#Blowfish-based_scheme>
+- <http://undeadly.org/cgi?action=article&sid=20140224132743>
+- <http://marc.info/?l=openbsd-misc&m=139320023202696>
 
 ### Refs
 
-* https://www.ecrypt.eu.org/csa/documents/D5.4-FinalAlgKeySizeProt.pdf
-* https://ico.org.uk/for-organisations/guide-to-data-protection/guide-to-the-general-data-protection-regulation-gdpr/security/passwords-in-online-services/
-* https://tools.ietf.org/id/draft-whited-kitten-password-storage-00.html#name-bcrypt
-* 
+- <https://www.ecrypt.eu.org/csa/documents/D5.4-FinalAlgKeySizeProt.pdf>
+- <https://ico.org.uk/for-organisations/guide-to-data-protection/guide-to-the-general-data-protection-regulation-gdpr/security/passwords-in-online-services/>
+- <https://tools.ietf.org/id/draft-whited-kitten-password-storage-00.html#name-bcrypt>
+-
 
 # Releases
 
-release notes are here https://github.com/BcryptNet/bcrypt.net/releases
+release notes are here <https://github.com/BcryptNet/bcrypt.net/releases>
+
+_v4.1.0_ - Add net10 target, remove older core targets (they'll fall back to netstandard2.1 or 2.0 as appropriate)
 
 _v4.0.3_ - Addition of .net 6 targeting; tidy up targets.
 
@@ -305,7 +303,7 @@ _v3.5.0_ - A bug in `Enhanced Hashing` was discovered that causes the hashes cre
 As part of the fix 3.5 release contains the ability to `Verify` and `HashPassword` were given an additional `v4CompatibleEnhancedEntropy` parameter.
 This allows the user to verify their Enhanced hash as normal; then re-hash + store using V4. This functionality is purely to allow migration and is removed in V4.
 
-_v3.3.3_ -Performance (heap reduction) for netcore and removal of regex https://github.com/BcryptNet/bcrypt.net/releases/tag/3.3.0
+_v3.3.3_ -Performance (heap reduction) for netcore and removal of regex <https://github.com/BcryptNet/bcrypt.net/releases/tag/3.3.0>
 
 _v2.1.3 -_
 
@@ -346,5 +344,5 @@ _v2.0.1 -_
 
 _v2.0.0 -_
 
-Fresh release packaged for the majority of .net & containing safe-equals to reduce the risks from timing attacks https://en.wikipedia.org/wiki/Timing_attack / https://cryptocoding.net/index.php/Coding_rules#Compare_secret_strings_in_constant_time
+Fresh release packaged for the majority of .net & containing safe-equals to reduce the risks from timing attacks <https://en.wikipedia.org/wiki/Timing_attack> / <https://cryptocoding.net/index.php/Coding_rules#Compare_secret_strings_in_constant_time>
 Technically the implementation details of BCrypt theoretically mitigate against timing attacks. But the Bcrypt.net official validation function was vulnerable to timing attacks as it returned as soon as a non-matching byte was found in the hash comparison.
