@@ -49,11 +49,6 @@ public partial class BCryptCore
             throw new ArgumentException("Invalid salt: salt cannot be empty", nameof(salt));
         }
 
-        if (hashType == HashType.None && inputKey.Length > 72)
-        {
-            throw new ArgumentException("Invalid input key: input key cannot exceed 72 characters for bCrypt", nameof(inputKey));
-        }
-
         if (enhancedHashKeyGen == null && hashType != HashType.None)
         {
             throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(hashType));
@@ -100,6 +95,12 @@ public partial class BCryptCore
         switch (hashType)
         {
             case HashType.None:
+                bool appendNul = bcryptMinorRevision >= 'a';
+                int inputByteCount = SafeUTF8.GetByteCount(inputKey.ToArray()) + (appendNul ? 1 : 0);
+                if (inputByteCount > 72)
+                {
+                    throw new ArgumentException("Invalid input key: input key cannot exceed 72 bytes for bCrypt", nameof(inputKey));
+                }
                 inputBytes = SafeUTF8.GetBytes(inputKey.ToString() + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
                 break;
             default:
