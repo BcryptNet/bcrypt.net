@@ -14,16 +14,13 @@
     <MSBuildWarningsAsMessages>NETSDK1069</MSBuildWarningsAsMessages>
     <NoWarn>NU5105;NU1507</NoWarn>
     <Features>strict</Features>
-
     <LangVersion>11.0</LangVersion>
+  </PropertyGroup>
 
-    <AssemblyOriginatorKeyFile>..\..\bcrypt.pub</AssemblyOriginatorKeyFile>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\bcrypt.snk</AssemblyOriginatorKeyFile>
     <DelaySign>true</DelaySign>
-
-<!--    <SignAssembly Condition=" '$(OS)' == 'Windows_NT' ">true</SignAssembly>-->
-<!--    <PublicSign Condition=" '$(OS)' == 'Windows_NT' ">true</PublicSign>-->
-<!--    <AssemblyDelaySignAttribute>true</AssemblyDelaySignAttribute>-->
-<!--    <AssemblyOriginatorKeyFile Condition=" '$(OS)' == 'Windows_NT' ">../../bcrypt.pfx</AssemblyOriginatorKeyFile>-->
   </PropertyGroup>
 
   <PropertyGroup>

@@ -3,7 +3,7 @@
     <RootNamespace>ReleaseBenchmark</RootNamespace>
     <AssemblyName>ReleaseBenchmark</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0;net10.0;net48;net462</TargetFrameworks>
+    <TargetFrameworks>net8.0;net10.0;net481;net462</TargetFrameworks>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <Configurations>Release;Debug;All</Configurations>
     <Platforms>AnyCPU</Platforms>
@@ -15,7 +15,7 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <LangVersion>latest</LangVersion>
 
-    <BCryptDefaultCurrent>5.0.0-prerelease.gf05289e5ce</BCryptDefaultCurrent>
+    <BCryptDefaultCurrent>5.0.0-prerelease.g8e8c5244ad</BCryptDefaultCurrent>
     <BCryptVersion Condition="'$(BCryptVersion)' == ''">$(BCryptDefaultCurrent)</BCryptVersion>
     <DefineConstants Condition="$([System.String]::new('$(BCryptVersion)').StartsWith('5'))">$(DefineConstants);POSTV5</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'net481'">$(DefineConstants);NET48_OR_GREATER</DefineConstants>
@@ -23,9 +23,6 @@
 
   <Target Name="GenerateVersionFile" BeforeTargets="BeforeBuild">
     <WriteLinesToFile File="Generated/VersionInfo.cs" Overwrite="true" ContinueOnError="true" Lines="namespace ReleaseBenchmark {&#xD;&#xA;    internal static class VersionInfo {&#xD;&#xA;        internal const string BCryptVersion = &quot;$(BCryptVersion)&quot;%3B&#xD;&#xA;    }&#xD;&#xA;}" />
-    <ItemGroup>
-      <Compile Include="Generated/VersionInfo.cs" />
-    </ItemGroup>
   </Target>
 
   <PropertyGroup>
