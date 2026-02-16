@@ -59,17 +59,14 @@ public sealed class BCryptExtendedV2 : BCryptCore
         switch (hashType)
         {
             case HashType.SHA256:
-                using (var sha = SHA256.Create())
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString.ToString()))) +
-                                             (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                return SafeUTF8.GetBytes(Convert.ToBase64String(SHA256.HashData(SafeUTF8.GetBytes(inputString.ToString()))) +
+                                         (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
             case HashType.SHA384:
-                using (var sha = SHA384.Create())
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString.ToString()))) +
-                                             (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                return SafeUTF8.GetBytes(Convert.ToBase64String(SHA384.HashData(SafeUTF8.GetBytes(inputString.ToString()))) +
+                                         (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
             case HashType.SHA512:
-                using (var sha = SHA512.Create())
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString.ToString()))) +
-                                             (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                return SafeUTF8.GetBytes(Convert.ToBase64String(SHA512.HashData(SafeUTF8.GetBytes(inputString.ToString()))) +
+                                         (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
             default:
                 throw new ArgumentOutOfRangeException(nameof(hashType), hashType, null);
         }
