@@ -204,14 +204,10 @@ public partial class BCryptCore
         destination[pos++] = '$';
 
         // Write base64-encoded salt
-        var s = EncodeBase64(saltBytes, saltBytes.Length);
-        s.TryCopyTo(destination[pos..]);
-        pos += s.Length;
+        pos += EncodeBase64(saltBytes, saltBytes.Length, destination[pos..]);
 
         // Write base64-encoded hash
-        var hashEncoded = EncodeBase64(hashBytes, (BfCryptCiphertextLength * 4) - 1);
-        hashEncoded.TryCopyTo(destination[pos..]);
-        pos += hashEncoded.Length;
+        pos += EncodeBase64(hashBytes, (BfCryptCiphertextLength * 4) - 1, destination[pos..]);
 
         charsWritten = pos;
 
@@ -243,54 +239,51 @@ public partial class BCryptCore
         result[3] = '$';
         workFactor.TryFormat(result.Slice(4, 2), out _, "D2", CultureInfo.InvariantCulture);
         result[6] = '$';
-        EncodeBase64(saltBytes, saltBytes.Length).CopyTo(result[7..]);
+        EncodeBase64(saltBytes, saltBytes.Length, result[7..]);
 
         return result.ToArray();
     }
 
-    internal static ReadOnlySpan<char> EncodeBase64(ReadOnlySpan<byte> byteArray, int length)
+    internal static int EncodeBase64(ReadOnlySpan<byte> byteArray, int length, Span<char> destination)
     {
         if (length <= 0 || length > byteArray.Length)
         {
             throw new ArgumentException("Invalid length", nameof(length));
         }
 
-        int encodedSize = (int)Math.Ceiling((length * 4D) / 3);
-        Span<char> encoded = stackalloc char[encodedSize];
-
         int pos = 0;
         int off = 0;
         while (off < length)
         {
-            //Process first byte in group
+            //Process the first byte in the group
             int c1 = byteArray[off++] & 0xff;
-            encoded[pos++] = Base64Code[(c1 >> 2) & 0x3f];
+            destination[pos++] = Base64Code[(c1 >> 2) & 0x3f];
             c1 = (c1 & 0x03) << 4;
             if (off >= length)
             {
-                encoded[pos++] = Base64Code[c1 & 0x3f];
+                destination[pos++] = Base64Code[c1 & 0x3f];
                 break;
             }
 
-            // second byte of group
+            // second byte of the group
             int c2 = byteArray[off++] & 0xff;
             c1 |= (c2 >> 4) & 0x0f;
-            encoded[pos++] = Base64Code[c1 & 0x3f];
+            destination[pos++] = Base64Code[c1 & 0x3f];
             c1 = (c2 & 0x0f) << 2;
             if (off >= length)
             {
-                encoded[pos++] = Base64Code[c1 & 0x3f];
+                destination[pos++] = Base64Code[c1 & 0x3f];
                 break;
             }
 
-            // third byte of group
+            // third byte of the group
             c2 = byteArray[off++] & 0xff;
             c1 |= (c2 >> 6) & 0x03;
-            encoded[pos++] = Base64Code[c1 & 0x3f];
-            encoded[pos++] = Base64Code[c2 & 0x3f];
+            destination[pos++] = Base64Code[c1 & 0x3f];
+            destination[pos++] = Base64Code[c2 & 0x3f];
         }
 
-        return encoded.ToArray();
+        return pos;
     }
 
     /// <summary>
@@ -397,7 +390,7 @@ public partial class BCryptCore
             ZeroMemory(_s);
         }
     }
-    
+
     /// <summary>Blowfish encipher a single 64-bit block encoded as two 32-bit halves.</summary>
     /// <param name="blockArray">An array containing the two 32-bit half blocks. The plaintext to be encrypted</param>
     /// <param name="offset">    The position in the array of the blocks.</param>

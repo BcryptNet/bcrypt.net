@@ -31,11 +31,14 @@ public class Base64Tests
     {
         // Arrange
         byte[] saltBytes = Encoding.UTF8.GetBytes("Hello, world!");
+        Span<char> destination = stackalloc char[18];
 
         // Act
+        int charsWritten = BCryptCore.EncodeBase64(saltBytes, saltBytes.Length, destination);
+
         // Assert
         string expectedResult = "QETqZE6qGFbtakviGO";
-        Assert.Equal(expectedResult, new string(BCryptCore.EncodeBase64(saltBytes, saltBytes.Length)));
+        Assert.Equal(expectedResult, new string(destination[..charsWritten]));
     }
 
     [Fact]
@@ -45,7 +48,8 @@ public class Base64Tests
         Assert.Throws<ArgumentException>(() =>
         {
             byte[] saltBytes = Encoding.UTF8.GetBytes("Hello, world!");
-            return new string(BCryptCore.EncodeBase64(saltBytes, -1));
+            Span<char> destination = stackalloc char[18];
+            BCryptCore.EncodeBase64(saltBytes, -1, destination);
         });
     }
 #else
