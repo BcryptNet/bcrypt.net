@@ -255,7 +255,7 @@ namespace BCryptNet.UnitTests
         public void BCryptMaintainsLengthRestrictionsFromPaper()
         {
             Trace.Write("BCrypt.HashPassword(): ");
-            var inBounds = "testtdsdddddddddddddddddddddddddddddddddddddddddddddddsddddddddddddddddd"; //72char
+            var inBounds = "testtdsdddddddddddddddddddddddddddddddddddddddddddddddsdddddddddddddddd"; //71char (as bcrypt version a will append null)
             var exceedsBounds = "testtdsdddddddddddddddddddddddddddddddddddddddddddddddsdddddddddddddddddd"; //73char
             var hashPassword = BCrypt.HashPassword(inBounds);
             Assert.Throws<ArgumentException>(() => BCrypt.HashPassword(exceedsBounds));
@@ -709,12 +709,24 @@ namespace BCryptNet.UnitTests
         [InlineData("RwiKnN>9xg3*C)1AZl.)y8f_:GCz,vt3T]PIV)[7kktZ")]
         [InlineData("<IMG SRC=&#0000106&#0000097&#0000118>")]
         [InlineData("ππππππππ")]
-        [InlineData("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬ")]
+        [InlineData("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЧШЩЪЫЬ")]
         [InlineData("ÅÍÎÏ˝ÓÔÒÚÆ☃")]
         [InlineData("사회과학원 어학연구소")]
         [InlineData("ﾟ･✿ヾ╲(｡◕‿◕｡)╱✿･ﾟ")]
         [InlineData("👾 🙇 💁 🙅 🙆 🙋 🙎 🙍")]
         public void TestNaughtyStringsHash(string pw1)
+        {
+            Trace.Write("BCrypt.HashPassword with naughty strings: ");
+
+            string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
+            Assert.True(BCrypt.Verify(pw1, h1));
+
+            Trace.Write(".");
+        }
+
+        [Theory]
+        [InlineData("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬ")]
+        public void TestStandardHashExceedsMaxLength(string pw1)
         {
             Trace.Write("BCrypt.HashPassword with naughty strings: ");
 
