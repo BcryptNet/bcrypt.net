@@ -371,10 +371,10 @@ public partial class BCryptCore
                 }
             }
 
-            // Convert ciphertext to output byte-array
+            // Convert ciphertext to an output byte-array
             for (i = 0, j = 0; i < clen; i++)
             {
-                // per-line extract first byte by shifting cdata word at index right 24 bits
+                // per-line extract the first byte by shifting cdata word at index right 24 bits
                 // using >> op then isolate the least significant byte using mask 0xff
                 destination[j++] = (byte)((cdata[i] >> 24) & 0xff);
                 destination[j++] = (byte)((cdata[i] >> 16) & 0xff);
@@ -392,7 +392,7 @@ public partial class BCryptCore
     }
 
     /// <summary>Blowfish encipher a single 64-bit block encoded as two 32-bit halves.</summary>
-    /// <param name="blockArray">An array containing the two 32-bit half blocks. The plaintext to be encrypted</param>
+    /// <param name="blockArray">An array containing the two 32-bit half-blocks. The plaintext to be encrypted</param>
     /// <param name="offset">    The position in the array of the blocks.</param>
     private void Encipher(Span<uint> blockArray, int offset)
     {
@@ -406,14 +406,14 @@ public partial class BCryptCore
             uint round;
             for (round = 0; round <= BlowfishNumRounds - 2;)
             {
-                // Feistel substitution on left word
+                // Feistel substitution on the left word
                 uint n = _s[(block >> 24) & 0xff];
                 n += _s[0x100 | ((block >> 16) & 0xff)];
                 n ^= _s[0x200 | ((block >> 8) & 0xff)];
                 n += _s[0x300 | (block & 0xff)];
                 r ^= n ^ _p[++round];
 
-                // Feistel substitution on right word
+                // Feistel substitution on the right word
                 n = _s[(r >> 24) & 0xff];
                 n += _s[0x100 | ((r >> 16) & 0xff)];
                 n ^= _s[0x200 | ((r >> 8) & 0xff)];

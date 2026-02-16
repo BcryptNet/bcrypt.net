@@ -122,6 +122,10 @@ public sealed class BCryptExtendedV3 : BCryptCore
         Span<byte> utf8Buffer = stackalloc byte[SafeUTF8.GetMaxByteCount(finalBase64.Length)];
         int utf8Len = SafeUTF8.GetBytes(finalBase64, utf8Buffer);
 
+        ZeroMemory(keyBytes);
+        ZeroMemory(dataBytes);
+        ZeroMemory(hash);
+
         return utf8Buffer[..utf8Len].ToArray();
     }
 
