@@ -140,9 +140,17 @@ public sealed class BCryptExtendedV3 : BCryptCore
     /// <returns></returns>
     public static bool Verify(string hmacKey, string inputKey, string hash, HashType hashType = DefaultEnhancedHashType)
     {
-        return SecureEquals(SafeUTF8.GetBytes(hash),
-            SafeUTF8.GetBytes(CreatePasswordHash(inputKey, hash, hashType,
-                (key, type, version) => EnhancedHash(hmacKey, key, type, version))));
+        Span<byte> hashBytes = stackalloc byte[60];
+        int hashLen = SafeUTF8.GetBytes(hash, hashBytes);
+
+        Span<char> computedHash = stackalloc char[60];
+        CreatePasswordHash(inputKey, hash, computedHash, out int computedHashLen, hashType,
+            (key, type, version) => EnhancedHash(hmacKey, key, type, version));
+
+        Span<byte> computedBytes = stackalloc byte[60];
+        int computedLen = SafeUTF8.GetBytes(computedHash[..computedHashLen], computedBytes);
+
+        return SecureEquals(hashBytes[..hashLen], computedBytes[..computedLen]);
     }
 
     /// <summary>

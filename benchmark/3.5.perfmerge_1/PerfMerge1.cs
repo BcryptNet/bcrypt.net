@@ -769,7 +769,7 @@ namespace BCryptNet.BenchMarks._3._5.perfmerge_1
             ///  <paramref name="hash"/>; the string will undergo SHA384 hashing to maintain the enhanced entropy work done during hashing
             /// </summary>
             /// <param name="text">The text to verify.</param>
-            /// <param name="hash"> The previously-hashed password.</param>
+            /// <param name="hash"> The previously hashed password.</param>
             /// <param name="hashType">HashType used (default SHA384)</param>
             /// <returns>true if the passwords match, false otherwise.</returns>
             public static bool EnhancedVerify(string text, string hash, HashType hashType = DefaultEnhancedHashType) => Verify(text, hash, true, hashType);
@@ -779,7 +779,7 @@ namespace BCryptNet.BenchMarks._3._5.perfmerge_1
             ///  <paramref name="hash"/>
             /// </summary>
             /// <param name="text">The text to verify.</param>
-            /// <param name="hash"> The previously-hashed password.</param>
+            /// <param name="hash"> The previously hashed password.</param>
             /// <param name="enhancedEntropy">Set to true,the string will undergo SHA384 hashing to make use of available entropy prior to bcrypt hashing</param>
             /// <param name="hashType">HashType used (default SHA384)</param>
             /// <returns>true if the passwords match, false otherwise.</returns>

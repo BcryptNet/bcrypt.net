@@ -140,13 +140,17 @@ public sealed class BCrypt : BCryptCore
     ///  <paramref name="hash"/>
     /// </summary>
     /// <param name="text">The text to verify.</param>
-    /// <param name="hash"> The previously-hashed password.</param>
+    /// <param name="hash"> The previously hashed password.</param>
     /// <returns>true if the passwords match, false otherwise.</returns>
     /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static bool Verify(string text, string hash)
     {
+#if NETCOREAPP
+        return Verify(text.AsSpan(), hash.AsSpan());
+#else
         return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash)));
+#endif
     }
 
     /// <summary>
@@ -229,6 +233,29 @@ public sealed class BCrypt : BCryptCore
         /// <returns>The hashed password.</returns>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         public static void HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer, out int outputBufferWritten) => CreatePasswordHash(inputKey, salt, outputBuffer, out outputBufferWritten);
+
+        /// <summary>
+        ///  Verifies that the hash of the given <paramref name="text"/> matches the provided
+        ///  <paramref name="hash"/>. Zero-allocation variant for .NET Core.
+        /// </summary>
+        /// <param name="text">The text to verify.</param>
+        /// <param name="hash"> The previously hashed password.</param>
+        /// <returns>true if the passwords match, false otherwise.</returns>
+        /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
+        /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
+        public static bool Verify(ReadOnlySpan<char> text, ReadOnlySpan<char> hash)
+        {
+            Span<byte> hashBytes = stackalloc byte[60];
+            int hashLen = SafeUTF8.GetBytes(hash, hashBytes);
+
+            Span<char> computedHash = stackalloc char[60];
+            CreatePasswordHash(text, hash, computedHash, out int computedHashLen);
+
+            Span<byte> computedBytes = stackalloc byte[60];
+            int computedLen = SafeUTF8.GetBytes(computedHash[..computedHashLen], computedBytes);
+
+            return SecureEquals(hashBytes[..hashLen], computedBytes[..computedLen]);
+        }
 #endif
 
     /// <summary>
