@@ -728,12 +728,7 @@ namespace BCryptNet.UnitTests
         [InlineData("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬ")]
         public void TestStandardHashExceedsMaxLength(string pw1)
         {
-            Trace.Write("BCrypt.HashPassword with naughty strings: ");
-
-            string h1 = BCrypt.HashPassword(pw1, BCrypt.GenerateSalt());
-            Assert.True(BCrypt.Verify(pw1, h1));
-
-            Trace.Write(".");
+            Assert.Throws<ArgumentException>(()=>BCrypt.HashPassword(pw1, BCrypt.GenerateSalt()));
         }
 
         [Theory()]
