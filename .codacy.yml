@@ -1,0 +1,10 @@
+exclude_paths:
+  - ".github/**"
+  - ".config/**"
+  - "coverage/**"
+  - "vendor/**"
+  - "docs/**"
+  - "examples/**"
+  - "assets/**"
+  - "tests/**"
+  - "benchmarks/**"

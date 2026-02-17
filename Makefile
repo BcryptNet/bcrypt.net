@@ -14,6 +14,14 @@ all:
 ci-test: ## Run tests in CI with code coverage
 	@dotnet run --configuration Release --coverage --coverage-output-format cobertura --report-github
 
-.PHONY: build-alpha-package:
+.PHONY: build-alpha-package
+build-alpha-package: # builds a package with a pre-release version suffix
 	@dotnet pack src/BCrypt.Net/BCrypt.Net.csproj --version-suffix 5.0.0-alpha -o artifacts
 
+.PHONY: build-package
+build-package: # builds a package with the version from the project file
+	@dotnet pack src/BCrypt.Net/BCrypt.Net.csproj -o artifacts
+
+.PHONY: benchmarks
+benchmarks:
+	$(MAKE) -C src/benchmarks/

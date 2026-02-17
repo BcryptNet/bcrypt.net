@@ -43,7 +43,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCrypt.Net.IdentityExtensio
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{4FA4B555-4BA9-49D0-84B2-1D222E0F4498}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagnosticBenchmarks", "benchmarks\Diagnostic-Benchmarks\DiagnosticBenchmarks.csproj", "{0BFE3C36-05D3-4A96-8694-1179FD705162}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Diagnostic-Benchmarks", "benchmarks\Diagnostic-Benchmarks\Diagnostic-Benchmarks.csproj", "{0BFE3C36-05D3-4A96-8694-1179FD705162}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Method-Benchmarks", "benchmarks\Method-Benchmarks\Method-Benchmarks.csproj", "{DC455EE9-99A8-4900-AFBA-661E5EFCE50F}"
 EndProject
