@@ -1,8 +1,14 @@
-name: CI Build
+name: CI PR Build
 
 on:
   workflow_dispatch:
   push:
+    branches:
+      - 'main'
+    paths-ignore:
+      - 'docs/**'
+      - '.github/**'
+  pull_request:
     branches:
       - 'main'
     paths-ignore:
@@ -39,7 +45,7 @@ jobs:
     - name: 'Setup .NET SDK'
       uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
       with:
-        dotnet-version: 10.0.x
+        dotnet-version: 10.x
 
     - name: 'Restore external dependencies'
       run: dotnet restore
@@ -47,14 +53,6 @@ jobs:
     - name: 'Build'
       id: build
       run: dotnet build --configuration Debug --no-restore
-
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      with:
-        name: build-artifacts
-        path: |
-          src/**/BCrypt.*.nupkg
-        retention-days: 5
 
     - name: 'Test'
       id: test
