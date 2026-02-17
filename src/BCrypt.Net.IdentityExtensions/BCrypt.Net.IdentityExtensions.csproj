@@ -9,11 +9,11 @@
     <DebugSymbols>false</DebugSymbols>
 
     <ImplicitUsings>true</ImplicitUsings>
-    <Configurations>Debug;Release;All;Benchmarks</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Release' or '$(Configuration)' == 'Benchmarks'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>

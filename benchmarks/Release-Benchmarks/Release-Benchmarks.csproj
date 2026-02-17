@@ -5,7 +5,7 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net10.0;net481;net462</TargetFrameworks>
     <ServerGarbageCollection>true</ServerGarbageCollection>
-    <Configurations>Release;Debug;All;Benchmarks</Configurations>
+    <Configurations>Release;Debug</Configurations>
     <Platforms>AnyCPU</Platforms>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <!--Disable Debug Symbols https://github.com/dotnet/BenchmarkDotNet/pull/2029/-->
@@ -30,6 +30,7 @@
     <WarningsAsErrors>;NU1605;NU1603</WarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <Optimize>true</Optimize>
     <NoWarn>NU5105;NU1507;CS1591;CS0618</NoWarn>
     <WarningsAsErrors>;NU1605;NU1603</WarningsAsErrors>
   </PropertyGroup>
