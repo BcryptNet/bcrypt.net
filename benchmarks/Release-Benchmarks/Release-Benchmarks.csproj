@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>ReleaseBenchmark</RootNamespace>
-    <AssemblyName>ReleaseBenchmark</AssemblyName>
+    <RootNamespace>Release-Benchmarks</RootNamespace>
+    <AssemblyName>Release-Benchmarks</AssemblyName>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net10.0;net481;net462</TargetFrameworks>
     <ServerGarbageCollection>true</ServerGarbageCollection>
@@ -15,7 +15,7 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <LangVersion>latest</LangVersion>
 
-    <BCryptDefaultCurrent>5.0.0-prerelease.g1003abb019</BCryptDefaultCurrent>
+    <BCryptDefaultCurrent>5.0.0-prerelease.gb7ae3b8233</BCryptDefaultCurrent>
     <BCryptVersion Condition="'$(BCryptVersion)' == ''">$(BCryptDefaultCurrent)</BCryptVersion>
     <DefineConstants Condition="$([System.String]::new('$(BCryptVersion)').StartsWith('5'))">$(DefineConstants);POSTV5</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'net481'">$(DefineConstants);NET48_OR_GREATER</DefineConstants>
@@ -55,5 +55,4 @@
   <ItemGroup>
     <Folder Include="Generated\" />
   </ItemGroup>
-
 </Project>

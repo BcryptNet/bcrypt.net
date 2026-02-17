@@ -18,7 +18,6 @@
 // */
 
 using System;
-using BenchmarkDotNet.Attributes;
 using Microsoft.VSDiagnostics;
 using BCryptNet;
 
