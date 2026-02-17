@@ -2,7 +2,7 @@
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
-Copyright (c) 2016/2025 Chris McKee (.Net-core port / patches / new features)
+Copyright (c) 2016/2026 Chris McKee (.Net-core port / patches / new features)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -30,7 +30,7 @@ namespace BCryptNet;
 ///  </para>
 ///  <para>
 ///        This password hashing system tries to thwart off-line password cracking using a
-///        computationally-intensive hashing algorithm, based on Bruce Schneier's Blowfish cipher.
+///        computationally intensive hashing algorithm, based on Bruce Schneier's Blowfish cipher.
 ///        The work factor of the algorithm is parameterised, so it can be increased as computers
 ///        get faster.
 ///  </para>
@@ -43,7 +43,7 @@ namespace BCryptNet;
 ///  </para>
 ///  <para>
 ///        To check whether a plaintext password matches one that has been hashed previously,
-///        use the <see cref="BCrypt.Verify"/> method:
+///        use the <see cref="BCrypt.Verify(string, string)"/> method:
 /// </para>
 ///  <code>
 ///     if (BCrypt.Verify(candidate_password, stored_hash))

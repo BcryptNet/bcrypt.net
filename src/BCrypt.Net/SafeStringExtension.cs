@@ -2,7 +2,7 @@
 // The MIT License (MIT)
 // Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 // Copyright (c) 2013 Ryan D. Emerle (.Net port)
-// Copyright (c) 2016/2025 Chris McKee (.Net-core port / patches / new features)
+// Copyright (c) 2016/2026 Chris McKee (.Net-core port / patches / new features)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 // (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -18,19 +18,35 @@
 // */
 
 #if NETCOREAPP && SECURESTRING
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 
 namespace BCryptNet;
 
+/// <summary>
+/// Provides methods for hashing passwords using the BCrypt algorithm with support
+/// for <see cref="SecureString"/> inputs. There are very limited use cases for this class,
+/// and it is not recommended for general use as securestring usage in general is discouraged in .net core/.net 5+.
+/// </summary>
 public sealed class BCryptSafeString : BCryptCore
 {
+    /// <summary>
+    /// Hashes a password using the BCrypt algorithm.
+    /// </summary>
+    /// <param name="inputKey">The password to be hashed, provided as a <see cref="SecureString"/>.</param>
+    /// <param name="salt">A cryptographic salt used for the hashing process.</param>
+    /// <returns>The hashed password as a string.</returns>
     public static string HashPassword(SecureString inputKey, string salt)
     {
         return GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, salt));
     }
 
+    /// <summary>
+    /// Hashes a password using the BCrypt algorithm.
+    /// </summary>
+    /// <param name="inputKey">The password to be hashed, provided as a <see cref="SecureString"/>.</param>
+    /// <param name="workFactor">The computational cost parameter defining the strength of the hash. Defaults to the predefined value of <see cref="BCryptCore.DefaultRounds"/>.</param>
+    /// <returns>The hashed password as a string.</returns>
     public static string HashPassword(SecureString inputKey, int workFactor = DefaultRounds)
     {
         return GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, workFactor));

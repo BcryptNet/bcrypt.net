@@ -12,6 +12,7 @@ on:
       - 'assets/*'
       - 'examples/*'
       - 'dists/*'
+      - 'benchmarks/*'
   pull_request:
     # The branches below must be a subset of the branches above
     branches:
@@ -23,6 +24,7 @@ on:
       - 'assets/*'
       - 'examples/*'
       - 'dists/*'
+      - 'benchmarks/*'
   schedule:
     - cron: '25 4 * * 2'
 

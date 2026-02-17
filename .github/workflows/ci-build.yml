@@ -56,14 +56,11 @@ jobs:
         name: build-artifacts
         path: |
           src/**/BCrypt.*.nupkg
-          src/**/BCrypt.*.dll
-          src/**/BCrypt.*.deps.json
-          src/**/BCrypt.*.xml
         retention-days: 5
 
     - name: 'Test'
       id: test
-      run: dotnet test --restore --collect:"XPlat Code Coverage" --logger junit --configuration Debug
+      run: dotnet run --configuration Release --coverage --coverage-output-format cobertura --report-github --project tests/UnitTests/BCrypt.Net.UnitTests.csproj
 
     - name: 'Create test summary'
       uses: test-summary/action@31493c76ec9e7aa675f1585d3ed6f1da69269a86 # v2.4
@@ -75,7 +72,7 @@ jobs:
     - name: 'Generate Coverage Reports'
       uses: danielpalme/ReportGenerator-GitHub-Action@c4c5175a441c6603ec614f5084386dabe0e2295b # v5.4.12
       with:
-        reports: "tests/**/coverage.cobertura.xml"
+        reports: "tests/**/*.cobertura.xml"
         targetdir: "${{ github.workspace }}"
         reporttypes: "Cobertura" 
         verbosity: "Info" 

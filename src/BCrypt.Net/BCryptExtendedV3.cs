@@ -71,11 +71,12 @@ public sealed class BCryptExtendedV3 : BCryptCore
     }
 
     /// <summary>
-    /// HMAC-SHA3 hashes input key before bcrypt hashing
+    /// HMAC-SHA3 hashes an input key before bcrypt hashing
     /// </summary>
     /// <param name="hmacKey">Key used in HMAC hashing</param>
-    /// <param name="inputKey"></param>
+    /// <param name="inputKey">Input key to be hashed.</param>
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA3 HMAC 384 - https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.hmacsha3_256)</param>
+    /// <param name="destination">Destination buffer for the hashed output.</param>
     /// <param name="bcryptMinorRevision">(Default: 'a')</param>
     /// <returns></returns>
     private static int EnhancedHash(ReadOnlySpan<char> hmacKey, ReadOnlySpan<char> inputKey, HashType hashType, Span<byte> destination, char bcryptMinorRevision = 'a')

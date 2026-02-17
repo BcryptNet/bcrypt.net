@@ -6,6 +6,7 @@
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>CS8002</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>

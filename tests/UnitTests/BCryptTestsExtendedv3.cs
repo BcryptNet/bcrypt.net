@@ -2,7 +2,7 @@
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
-Copyright (c) 2016/2025 Chris McKee (.Net-core port / patches / new features)
+Copyright (c) 2016/2026 Chris McKee (.Net-core port / patches / new features)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -61,10 +61,7 @@ namespace BCryptNet.UnitTests
         };
 
         private readonly char[] _revisions = { 'a', 'x', 'y', 'b' };
-
-
-        private readonly string TwoPointZeroVersionPass64 = "585292059d6b430b931e77f046bb20cca5f99e9adc8a4359aadd93afa03e60c3";
-
+        
         /**
          * Test method for 'BCrypt.HashPassword(string, string)'
          */

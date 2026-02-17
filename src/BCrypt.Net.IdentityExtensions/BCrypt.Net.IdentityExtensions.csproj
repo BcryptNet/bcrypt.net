@@ -13,33 +13,11 @@
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BCrypt.Net\BCrypt.Net.csproj" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <PackageIcon>logo.png</PackageIcon>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\..\logo.png">
-      <Pack>True</Pack>
-      <PackagePath>/</PackagePath>
-    </None>
-    <None Include="..\..\readme.md">
-      <Pack>True</Pack>
-      <PackagePath>/</PackagePath>
-    </None>
   </ItemGroup>
 </Project>

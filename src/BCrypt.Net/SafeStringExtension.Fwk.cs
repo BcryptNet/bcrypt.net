@@ -2,7 +2,7 @@
 // The MIT License (MIT)
 // Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 // Copyright (c) 2013 Ryan D. Emerle (.Net port)
-// Copyright (c) 2016/2025 Chris McKee (.Net-core port / patches / new features)
+// Copyright (c) 2016/2026 Chris McKee (.Net-core port / patches / new features)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 // (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -49,6 +49,24 @@ public sealed class BCryptSafeString : BCryptCore
         return GetBCryptHashFromSecureString(safeString, key => HashPassword(key, salt));
     }
 
+    /// <summary>
+    /// Hashes a password securely using the OpenBSD BCrypt algorithm.
+    /// </summary>
+    /// <remarks>
+    /// This method takes a <see cref="SecureString"/> and hashes it using the specified work factor.
+    /// The function ensures secure handling of the sensitive string in memory.
+    /// </remarks>
+    /// <param name="inputKey">The password to hash, provided as a <see cref="SecureString"/>.</param>
+    /// <param name="workFactor">
+    /// The log2 of the number of rounds of hashing to apply, representing the computational cost.
+    /// Higher values increase security but require more processing time.
+    /// The default value is determined by <see cref="BCryptCore.DefaultRounds"/>.
+    /// </param>
+    /// <returns>The hashed password as a string.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="inputKey"/> is null.</exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown if <paramref name="inputKey"/> is empty or is not marked as read-only before processing.
+    /// </exception>
     public static string HashPassword(SecureString inputKey, int workFactor = DefaultRounds)
     {
         return GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, workFactor));
