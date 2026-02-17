@@ -1,1 +1,0 @@
-dotnet pack BCrypt.Net.csproj --version-suffix 5.0.0-alpha2 -o artifacts

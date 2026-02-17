@@ -18,17 +18,6 @@
     <PackageReadmeFile>readme.md</PackageReadmeFile>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="$(SolutionDir)\logo.png">
-      <Pack>True</Pack>
-      <PackagePath>/</PackagePath>
-    </None>
-    <None Include="$(SolutionDir)\readme.md">
-      <Pack>True</Pack>
-      <PackagePath>/</PackagePath>
-    </None>
-  </ItemGroup>
-
   <PropertyGroup>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>

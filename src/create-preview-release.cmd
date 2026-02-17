@@ -1,0 +1,2 @@
+dotnet pack BCrypt.Net\BCrypt.Net.csproj --version-suffix 5.0.0-alpha2 -o artifacts
+dotnet pack BCrypt.Net.IdentityExtensions\BCrypt.Net.IdentityExtensions.csproj --version-suffix 5.0.0-alpha2 -o artifacts
