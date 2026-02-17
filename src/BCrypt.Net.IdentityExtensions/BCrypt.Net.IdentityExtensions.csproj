@@ -9,10 +9,15 @@
     <DebugSymbols>false</DebugSymbols>
 
     <ImplicitUsings>true</ImplicitUsings>
-    <Configurations>Debug;Release;All</Configurations>
+    <Configurations>Debug;Release;All;Benchmarks</Configurations>
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' or '$(Configuration)' == 'Benchmarks'">
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>

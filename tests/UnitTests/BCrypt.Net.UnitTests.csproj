@@ -3,7 +3,7 @@
         <AssemblyName>BCrypt.Net.UnitTests</AssemblyName>
         <RootNamespace>BCryptNet.UnitTests</RootNamespace>
       <TargetFramework>net10.0</TargetFramework>
-        <Configurations>Debug;Release;All</Configurations>
+        <Configurations>Debug;Release;All;Benchmarks</Configurations>
         <LangVersion>default</LangVersion>
 
         <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>

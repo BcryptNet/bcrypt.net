@@ -12,12 +12,12 @@ all:
 
 .PHONY: run-release-benchmark
 run-release-benchmark: # compares nuget releases of this package
-	@dotnet run --configuration Release --project benchmarks/Release-Benchmarks/Release-Benchmarks.csproj
+	@dotnet run --configuration Benchmarks --project benchmarks/Release-Benchmarks/Release-Benchmarks.csproj
 
 .PHONY: run-method-benchmarks
 run-method-benchmarks: # compares methods against older versions of this package
-	@dotnet run --configuration Release --project benchmarks/Method-Benchmarks/Method-Benchmarks.csproj
+	@dotnet run --configuration Benchmarks --project benchmarks/Method-Benchmarks/Method-Benchmarks.csproj
 
 .PHONY: run-diagnostic-benchmarks
 run-diagnostic-benchmarks: # benchmarks the main entry point with vs diagnostics enabled
-	@dotnet run --configuration Release --project benchmarks/Diagnostic-Benchmarks/Diagnostic-Benchmarks.csproj
+	@dotnet run --configuration Benchmarks --project benchmarks/Diagnostic-Benchmarks/Diagnostic-Benchmarks.csproj

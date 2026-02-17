@@ -44,13 +44,18 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
       with:
-        dotnet-version: 10.0.x
+        dotnet-version: 8.x
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
+      with:
+        dotnet-version: 10.x
 
     - name: Build
       run: dotnet build src/BCrypt.Net/BCrypt.Net.csproj --configuration Release --framework net8.0
 
     - name: Run Infer#
-      uses: microsoft/infersharpaction@v1.5
+      uses: microsoft/infersharpaction@b749060de518f410f92c87d37d2366e5e9d7c5fc #v1.5
       id: runinfersharp
       with:
         binary-path: src/BCrypt.Net/bin/Release/net8.0

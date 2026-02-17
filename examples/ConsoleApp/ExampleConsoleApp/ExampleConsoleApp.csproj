@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <OutputType>Exe</OutputType>
-        <Configurations>Debug;Release;All</Configurations>
+        <Configurations>Debug;Release;All;Benchmarks</Configurations>
         <Platforms>AnyCPU</Platforms>
 
     </PropertyGroup>

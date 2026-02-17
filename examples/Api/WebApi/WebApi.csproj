@@ -8,7 +8,7 @@
     <CompileUsingReferenceAssemblies>false</CompileUsingReferenceAssemblies>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <LangVersion>default</LangVersion>
-    <Configurations>Debug;Release;All</Configurations>
+    <Configurations>Debug;Release;All;Benchmarks</Configurations>
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 

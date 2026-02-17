@@ -8,7 +8,7 @@
     <RootNamespace>BCryptNet</RootNamespace>
     <DebugSymbols>false</DebugSymbols>
     <ImplicitUsings>true</ImplicitUsings>
-    <Configurations>Debug;Release;All</Configurations>
+    <Configurations>Debug;Release;All;Benchmarks</Configurations>
     <Platforms>AnyCPU</Platforms>
 
     <SecureString>true</SecureString>
@@ -16,7 +16,8 @@
     <AllowUnsafeBlocks Condition="'$(SecureString)' == 'true'">true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' or '$(Configuration)' == 'Benchmarks'">
+    <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <DocumentationFile>bin\Release\BCrypt.Net-Next.xml</DocumentationFile>
   </PropertyGroup>
