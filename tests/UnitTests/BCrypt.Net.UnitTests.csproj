@@ -18,13 +18,5 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\BCrypt.Net\BCrypt.Net.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="coverlet.msbuild">
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        <PrivateAssets>all</PrivateAssets>
-      </PackageReference>
-    </ItemGroup>
-  
+    </ItemGroup>  
 </Project>

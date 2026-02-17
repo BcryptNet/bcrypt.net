@@ -25,16 +25,6 @@
     <WriteLinesToFile File="Generated/VersionInfo.cs" Overwrite="true" ContinueOnError="true" Lines="namespace ReleaseBenchmark {&#xD;&#xA;    internal static class VersionInfo {&#xD;&#xA;        internal const string BCryptVersion = &quot;$(BCryptVersion)&quot;%3B&#xD;&#xA;    }&#xD;&#xA;}" />
   </Target>
 
-  <PropertyGroup>
-    <IsTestProject>true</IsTestProject>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <IsPublishable>false</IsPublishable>
-    <IsPackable>false</IsPackable>
-    <SignAssembly>false</SignAssembly>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-  </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <NoWarn>NU5105;NU1507;CS1591;CS0618</NoWarn>
     <WarningsAsErrors>;NU1605;NU1603</WarningsAsErrors>
@@ -46,7 +36,11 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="$(BCryptVersion)" />
-    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8"/>
+    <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.15.8"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net462' or '$(TargetFramework)' == 'net481'">

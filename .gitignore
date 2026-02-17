@@ -271,3 +271,4 @@ __pycache__/
 /examples/Api/WebApi/app.db*
 BenchmarkDotNet.Artifacts
 /benchmark-releases/ReleaseBenchmark/Generated/*.cs
+**/Generated/VersionInfo.cs

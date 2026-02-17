@@ -15,18 +15,6 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <IsTestProject>true</IsTestProject>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <IsPublishable>false</IsPublishable>
-    <IsPackable>false</IsPackable>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\bcrypt.snk</AssemblyOriginatorKeyFile>
-    <DelaySign>true</DelaySign>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-  </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <NoWarn>NU5105;NU1507;CS1591;CS0618</NoWarn>
   </PropertyGroup>
@@ -35,12 +23,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
-    <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.15.8" />
     <PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.3.36812.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\BCrypt.Net\BCrypt.Net.csproj" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8"/>
+    <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.15.8"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BCrypt.Net\BCrypt.Net.csproj" />
   </ItemGroup>
 </Project>
