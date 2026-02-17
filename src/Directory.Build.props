@@ -9,7 +9,6 @@
     <DebugType>embedded</DebugType>
     <Deterministic>false</Deterministic>
     <PackageId>$(AssemblyName)</PackageId>
-    <PackageIcon>logo.png</PackageIcon>
     <NuspecBasePath>$(MSBuildProjectDirectory)</NuspecBasePath>
     <MSBuildWarningsAsMessages>NETSDK1069</MSBuildWarningsAsMessages>
     <NoWarn>NU5105;NU1507;S127;S4143;S1854;S1264;S4136;CA1510;CA1308;CA1031</NoWarn>
@@ -17,16 +16,7 @@
     <LangVersion>11.0</LangVersion>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="$(SolutionDir)\logo.png">
-      <Pack>True</Pack>
-      <PackagePath>/</PackagePath>
-    </None>
-    <None Include="$(SolutionDir)\readme.md">
-      <Pack>True</Pack>
-      <PackagePath>/</PackagePath>
-    </None>
-  </ItemGroup>
+
 
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>

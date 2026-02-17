@@ -61,7 +61,7 @@ namespace BCryptNet.UnitTests
         };
 
         private readonly char[] _revisions = { 'a', 'x', 'y', 'b' };
-        
+
         /**
          * Test method for 'BCrypt.HashPassword(string, string)'
          */
