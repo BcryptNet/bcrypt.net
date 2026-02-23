@@ -3,4 +3,3 @@ paths:
 paths-ignore:
  - '**/examples/**'
  - '**/benchmarks/**'
- - '**/tests/**'
