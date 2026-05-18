@@ -2,7 +2,7 @@
 // The MIT License (MIT)
 // Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 // Copyright (c) 2013 Ryan D. Emerle (.Net port)
-// Copyright (c) 2016/2025 Chris McKee (.Net-core port / patches / new features)
+// Copyright (c) 2016 Chris McKee (.Net-core port / patches / new features)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 // (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -17,7 +17,6 @@
 // IN THE SOFTWARE.
 // */
 
-using System;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
@@ -101,6 +100,6 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
     private static bool CheckForAspIdentityHash(string hash)
     {
         if (hash[0] == '$') return false;
-        return hash.FromBase64().ToHex().StartsWith("00") || hash.FromBase64().ToHex().StartsWith("01");
+        return hash.FromBase64().ToHex().StartsWith("00", StringComparison.InvariantCulture) || hash.FromBase64().ToHex().StartsWith("01", StringComparison.InvariantCulture);
     }
 }

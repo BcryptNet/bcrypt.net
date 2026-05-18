@@ -2,7 +2,7 @@
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
-Copyright (c) 2016/2025 Chris McKee (.Net-core port / patches / new features)
+Copyright (c) 2016/2026 Chris McKee (.Net-core port / patches / new features)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -20,6 +20,7 @@ IN THE SOFTWARE.
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using Xunit;
@@ -75,9 +76,8 @@ namespace BCryptNet.UnitTests
 
         private readonly char[] _revisions = { 'a', 'x', 'y', 'b' };
 
-
-        private readonly string TwoPointZeroVersionPass64 = "585292059d6b430b931e77f046bb20cca5f99e9adc8a4359aadd93afa03e60c3";
-        private readonly string[] TwoPointZeroVersionGeneratedHashes64 = new[]
+        private readonly string _twoPointZeroVersionPass64 = "585292059d6b430b931e77f046bb20cca5f99e9adc8a4359aadd93afa03e60c3";
+        private readonly string[] _twoPointZeroVersionGeneratedHashes64 = new[]
         {
             "$2a$10$J5oWpzAvyvvK1ysM/wcKXuckwyEVUTq9Df7tI04EMgT.ATijICPX.",
             "$2a$11$pTBrApS6R/DagcVWzqsm9eYgYwVC.SKQtd1Gn0tb2ELB22oN9YTKC",
@@ -89,9 +89,9 @@ namespace BCryptNet.UnitTests
         [Fact]
         public void TestV2Hashes()
         {
-            for (var i = 0; i < TwoPointZeroVersionGeneratedHashes64.Length; i++)
+            for (var i = 0; i < _twoPointZeroVersionGeneratedHashes64.Length; i++)
             {
-                var bRet = BCrypt.Verify(TwoPointZeroVersionPass64, TwoPointZeroVersionGeneratedHashes64[i]);
+                var bRet = BCrypt.Verify(_twoPointZeroVersionPass64, _twoPointZeroVersionGeneratedHashes64[i]);
                 Assert.True(bRet);
             }
         }
@@ -134,6 +134,80 @@ namespace BCryptNet.UnitTests
             Assert.True(BCrypt.Verify(pass, hash));
         }
 
+
+
+        private static SecureString AsSecureString(string text)
+        {
+            var result = new SecureString();
+            foreach (var c in text) result.AppendChar(c);
+            result.MakeReadOnly();
+            return result;
+        }
+
+#if !NET48_OR_GREATER
+        [Fact()]
+        public void TestSecureHashPassword()
+        {
+            Trace.Write("BCryptSafeString.HashPassword()[Secure]: ");
+            var sw = Stopwatch.StartNew();
+
+            for (int i = 0; i < _testVectors.Length / 3; i++)
+            {
+                var pass = _testVectors[i, 0];
+                var secureString = AsSecureString(pass);
+                if(string.IsNullOrEmpty(pass)) continue;
+                var hash = BCryptSafeString.HashPassword(secureString);
+                var doesValidate = BCrypt.Verify(pass, hash);
+                Assert.True(doesValidate);
+                Trace.Write(".");
+            }
+
+
+            Trace.WriteLine(sw.ElapsedMilliseconds);
+            Trace.WriteLine("");
+        }
+
+
+        [Fact()]
+        public void TestSecureStringHashPassword()
+        {
+            Trace.Write("BCryptSafeString.HashPassword(): ");
+            var sw = Stopwatch.StartNew();
+            for (var r = 0; r < _revisions.Length; r++)
+            {
+                for (int i = 0; i < _testVectors.Length / 3; i++)
+                {
+                    string plain = _testVectors[i, 0];
+                    if(string.IsNullOrEmpty(plain)) continue;
+                    string salt;
+                    if (r > 0)
+                    {
+                        //Check hash that goes in one end comes out the next the same
+                        salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
+
+                        string hashed = BCryptSafeString.HashPassword(AsSecureString(plain), salt);
+
+                        Assert.StartsWith("$2" + _revisions[r], hashed);
+                        Trace.WriteLine(hashed);
+                    }
+                    else
+                    {
+                        salt = _testVectors[i, 1];
+                        var expected = _testVectors[i, 2];
+
+                        string hashed = BCryptSafeString.HashPassword(AsSecureString(plain), salt);
+                        Assert.Equal(hashed, expected);
+                    }
+
+
+                    Trace.Write(".");
+                }
+            }
+
+            Trace.WriteLine(sw.ElapsedMilliseconds);
+            Trace.WriteLine("");
+        }
+#endif
         [Fact]
         // If you're using WoldLabForum just use BCrypt and an appropriate level of cost;
         // DoublebCrypt implementation in the codebase simply hashes with the same salt which is pointless.
@@ -181,11 +255,10 @@ namespace BCryptNet.UnitTests
         public void BCryptMaintainsLengthRestrictionsFromPaper()
         {
             Trace.Write("BCrypt.HashPassword(): ");
-            var inBounds = "testtdsdddddddddddddddddddddddddddddddddddddddddddddddsddddddddddddddddd"; //72char
+            var inBounds = "testtdsdddddddddddddddddddddddddddddddddddddddddddddddsdddddddddddddddd"; //71char (as bcrypt version a will append null)
             var exceedsBounds = "testtdsdddddddddddddddddddddddddddddddddddddddddddddddsdddddddddddddddddd"; //73char
             var hashPassword = BCrypt.HashPassword(inBounds);
-            var exceedsBoundsShouldValidate = BCrypt.Verify(exceedsBounds, hashPassword);
-            Assert.True(exceedsBoundsShouldValidate);
+            Assert.Throws<ArgumentException>(() => BCrypt.HashPassword(exceedsBounds));
         }
 
 
@@ -231,6 +304,90 @@ namespace BCryptNet.UnitTests
             Trace.WriteLine("");
         }
 
+#if NETCOREAPP
+        /**
+         * Test method for 'BCrypt.HashPassword(string, string)'
+         */
+        [Fact()]
+        public void TestHashPasswordSpanToString()
+        {
+            Trace.Write("BCrypt.HashPassword(): ");
+            var sw = Stopwatch.StartNew();
+            for (var r = 0; r < _revisions.Length; r++)
+            {
+                for (int i = 0; i < _testVectors.Length / 3; i++)
+                {
+                    string plain = _testVectors[i, 0];
+                    string salt;
+                    if (r > 0)
+                    {
+                        //Check hash that goes in one end comes out the next the same
+                        salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
+
+                        string hashed = BCrypt.HashPassword(plain.AsSpan(), salt.AsSpan());
+
+                        Assert.StartsWith("$2" + _revisions[r], hashed);
+                        Trace.WriteLine(hashed);
+                    }
+                    else
+                    {
+                        salt = _testVectors[i, 1];
+                        var expected = _testVectors[i, 2];
+
+                        string hashed = BCrypt.HashPassword(plain.AsSpan(), salt.AsSpan());
+                        Assert.Equal(expected, hashed);
+                    }
+
+                    Trace.Write(".");
+                }
+            }
+
+            Trace.WriteLine(sw.ElapsedMilliseconds);
+            Trace.WriteLine("");
+        }
+
+        [Fact()]
+        public void TestHashPasswordSpanBuffer()
+        {
+            Trace.Write("BCrypt.HashPassword(): ");
+            var sw = Stopwatch.StartNew();
+
+            Span<char> outputBuffer = stackalloc char[60];
+
+            for (var r = 0; r < _revisions.Length; r++)
+            {
+                for (int i = 0; i < _testVectors.Length / 3; i++)
+                {
+                    string plain = _testVectors[i, 0];
+                    string salt;
+                    if (r > 0)
+                    {
+                        //Check hash that goes in one end comes out the next the same
+                        salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
+                        BCrypt.HashPassword(plain.AsSpan(), salt.AsSpan(), outputBuffer, out var outputBufferWritten);
+                        var hashed = new string(outputBuffer.Slice(0, outputBufferWritten));
+                        Assert.StartsWith("$2" + _revisions[r], hashed);
+                        Trace.WriteLine(hashed);
+                    }
+                    else
+                    {
+                        salt = _testVectors[i, 1];
+                        var expected = _testVectors[i, 2];
+
+                        BCrypt.HashPassword(plain.AsSpan(), salt.AsSpan(), outputBuffer, out var outputBufferWritten);
+                        var hashed = new string(outputBuffer.Slice(0, outputBufferWritten));
+                        Assert.Equal(expected, hashed);
+                    }
+
+
+                    Trace.Write(".");
+                }
+            }
+
+            Trace.WriteLine(sw.ElapsedMilliseconds);
+            Trace.WriteLine("");
+        }
+#endif
 
         /**
          * Test method for 'BCrypt.HashPassword(string, string)'
@@ -356,7 +513,6 @@ namespace BCryptNet.UnitTests
 
         }
 
-
         // [Theory()]
         // [InlineData("\u2605\u2605\u2605\u2605\u2605\u2605\u2605\u2605")]
         // [InlineData("ππππππππ")]
@@ -444,7 +600,7 @@ namespace BCryptNet.UnitTests
                 for (int j = 0; j < _testVectors.Length / 3; j++)
                 {
                     string plain = _testVectors[j, 0];
-                    string salt = BCrypt.GenerateSalt(i);
+                    var salt = BCrypt.GenerateSalt(i);
                     string hashed1 = BCrypt.HashPassword(plain, salt);
                     string hashed2 = BCrypt.HashPassword(plain, hashed1);
                     Assert.Equal(hashed1, hashed2);
@@ -461,7 +617,7 @@ namespace BCryptNet.UnitTests
             for (int j = 0; j < _testVectors.Length / 3; j++)
             {
                 string plain = _testVectors[j, 0];
-                string salt = BCrypt.GenerateSalt(31);
+                var salt = BCrypt.GenerateSalt(31);
                 string hashed1 = BCrypt.HashPassword(plain, salt);
                 string hashed2 = BCrypt.HashPassword(plain, hashed1);
                 Assert.Equal(hashed1, hashed2);
@@ -480,7 +636,7 @@ namespace BCryptNet.UnitTests
             for (int i = 0; i < _testVectors.Length / 3; i++)
             {
                 string plain = _testVectors[i, 0];
-                string salt = BCrypt.GenerateSalt();
+                var salt = BCrypt.GenerateSalt();
                 string hashed1 = BCrypt.HashPassword(plain, salt);
                 string hashed2 = BCrypt.HashPassword(plain, hashed1);
                 Assert.Equal(hashed1, hashed2);
@@ -550,10 +706,10 @@ namespace BCryptNet.UnitTests
 
 
         [Theory()]
-        [InlineData("RwiKnN>9xg3*C)1AZl.)y8f_:GCz,vt3T]PIV)[7kktZZQ)z1HI(gyrqgn6;gyb]eIP>r1f:<xw?R")]
-        [InlineData("<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>")]
+        [InlineData("RwiKnN>9xg3*C)1AZl.)y8f_:GCz,vt3T]PIV)[7kktZ")]
+        [InlineData("<IMG SRC=&#0000106&#0000097&#0000118>")]
         [InlineData("ππππππππ")]
-        [InlineData("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя")]
+        [InlineData("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЧШЩЪЫЬ")]
         [InlineData("ÅÍÎÏ˝ÓÔÒÚÆ☃")]
         [InlineData("사회과학원 어학연구소")]
         [InlineData("ﾟ･✿ヾ╲(｡◕‿◕｡)╱✿･ﾟ")]
@@ -566,6 +722,13 @@ namespace BCryptNet.UnitTests
             Assert.True(BCrypt.Verify(pw1, h1));
 
             Trace.Write(".");
+        }
+
+        [Theory]
+        [InlineData("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬ")]
+        public void TestStandardHashExceedsMaxLength(string pw1)
+        {
+            Assert.Throws<ArgumentException>(()=>BCrypt.HashPassword(pw1, BCrypt.GenerateSalt()));
         }
 
         [Theory()]
@@ -607,6 +770,9 @@ namespace BCryptNet.UnitTests
             Assert.Equal(libHash, hash);
         }
 
+        #if NETCOREAPP
+
+        #else
         [Fact]
         public void LeadingByteDoesntTruncateHash()
         {
@@ -632,7 +798,11 @@ namespace BCryptNet.UnitTests
 
             Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldn't match as we hash the whole strings bytes, including the null byte");
         }
+        #endif
 
+#if NETCOREAPP
+
+#else
         [Fact]
         public void LeadingByteDoesntTruncateHashSHA()
         {
@@ -661,7 +831,7 @@ namespace BCryptNet.UnitTests
 
             Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldnt match as we hash the whole strings bytes, including the null byte");
         }
-
+#endif
         private bool ContainsNoNullBytes(byte[] bytes)
         {
             if (bytes == null) return false;

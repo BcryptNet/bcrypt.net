@@ -9,12 +9,8 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "System.Runtime.Caching"
         update-types: ["version-update:semver-major"]
-    reviewers:
-      - "chrismckee"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
-    reviewers:
-      - "chrismckee"

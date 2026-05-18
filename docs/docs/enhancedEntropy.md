@@ -21,7 +21,9 @@ Version 3 of this extension *IS NOT BACKWARDS COMPATIBLE* with previous versions
 Version 5 of the library supports both V2 and V3 of the enhanced hashing.
 
 Enhanced Entropy V3 introduces an additional parameter for you to pass in a HMAC Key, this is used to HMAC the password before passing it to bcrypt.
-Much like with V2 the intention is to increase the entropy of the password before passing it to bcrypt and to reduce the risk of truncation reducing the entropy of your password/pass-phrase.
+Much like with V2 the intention is to increase the entropy of the password before passing it to bcrypt and to reduce the risk of truncation reducing the entropy of your password/pass-phrase but with an additional pepper. The HMAC key is not stored in the hash, so you must ensure that you have it available for verification, if you lose the key you will not be able to verify any hashes generated with it.
+
+```csharp
 
 ## Enhanced Entropy V2
 
@@ -49,4 +51,4 @@ var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword,
 
 ## Enhanced Entropy V1
 
-This was marked obsolete in V1 and is removed in V5
+This was marked obsolete in V4 and is removed in V5

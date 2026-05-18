@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Release-Benchmarks</RootNamespace>
+    <AssemblyName>Release-Benchmarks</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net10.0;net481;net462</TargetFrameworks>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <Configurations>Release;Debug</Configurations>
+    <Platforms>AnyCPU</Platforms>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <!--Disable Debug Symbols https://github.com/dotnet/BenchmarkDotNet/pull/2029/-->
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <CompileUsingReferenceAssemblies>false</CompileUsingReferenceAssemblies>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <LangVersion>latest</LangVersion>
+
+    <BCryptDefaultCurrent>5.0.0-prerelease.gb7ae3b8233</BCryptDefaultCurrent>
+    <BCryptVersion Condition="'$(BCryptVersion)' == ''">$(BCryptDefaultCurrent)</BCryptVersion>
+    <DefineConstants Condition="$([System.String]::new('$(BCryptVersion)').StartsWith('5'))">$(DefineConstants);POSTV5</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'net481'">$(DefineConstants);NET48_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+
+  <Target Name="GenerateVersionFile" BeforeTargets="BeforeBuild">
+    <WriteLinesToFile File="Generated/VersionInfo.cs" Overwrite="true" ContinueOnError="true" Lines="namespace ReleaseBenchmark {&#xD;&#xA;    internal static class VersionInfo {&#xD;&#xA;        internal const string BCryptVersion = &quot;$(BCryptVersion)&quot;%3B&#xD;&#xA;    }&#xD;&#xA;}" />
+  </Target>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>NU5105;NU1507;CS1591;CS0618</NoWarn>
+    <WarningsAsErrors>;NU1605;NU1603</WarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <Optimize>true</Optimize>
+    <NoWarn>NU5105;NU1507;CS1591;CS0618</NoWarn>
+    <WarningsAsErrors>;NU1605;NU1603</WarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="$(BCryptVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8"/>
+    <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.15.8"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462' or '$(TargetFramework)' == 'net481'">
+    <PackageReference Include="System.Collections.Immutable" Version="10.0.3" />
+    <PackageReference Include="System.Reflection.Metadata" Version="10.0.3" />
+    <PackageReference Include="NETStandard.Library" Version="2.0.3" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+    <Reference Include="System" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Generated\" />
+  </ItemGroup>
+</Project>

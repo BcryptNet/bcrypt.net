@@ -266,3 +266,9 @@ __pycache__/
 /src/Benchmark/BenchmarkDotNet.Artifacts/results/*
 /docs/_site/
 /assets/*.nupkg
+
+/benchmark/BenchmarkDotNet.Artifacts
+/examples/Api/WebApi/app.db*
+BenchmarkDotNet.Artifacts
+/benchmark-releases/ReleaseBenchmark/Generated/*.cs
+**/Generated/VersionInfo.cs

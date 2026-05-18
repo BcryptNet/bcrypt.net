@@ -1,0 +1,20 @@
+{
+  "stryker-config": {
+    "solution": "BCrypt.Net.sln",
+    "project": "src/BCrypt.Net/BCrypt.Net.csproj",
+    "test-projects": ["tests/UnitTests/BCrypt.Net.UnitTests.csproj"],
+    "target-framework": "net10.0",
+    "reporters": ["progress", "html", "json"],
+    "concurrency": 4,
+    "additional-timeout": 30000,
+    "mutate": [
+      "!**/obj/**",
+      "!**/Properties/**",
+      "!**/examples/**",
+      "!**/benchmarks/**",
+      "!**/dists/**",
+      "!**/docs/**",
+      "!**/assets**/"
+    ]
+  }
+}

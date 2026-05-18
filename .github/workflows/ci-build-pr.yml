@@ -1,0 +1,106 @@
+name: CI PR Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    paths-ignore:
+      - 'docs/**'
+      - '.github/**'
+  pull_request:
+    branches:
+      - 'main'
+    paths-ignore:
+      - 'docs/**'
+      - '.github/**'
+
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+  checks: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-24.04
+    steps:
+    - name: 'Harden Runner'
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      with:
+        egress-policy: audit
+
+    - name: 'Checkout'
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+ 
+    - name: 'Setup .NET SDK'
+      uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
+      with:
+        dotnet-version: 10.x
+
+    - name: 'Restore external dependencies'
+      run: dotnet restore
+
+    - name: 'Build'
+      id: build
+      run: dotnet build --configuration Debug --no-restore
+
+    - name: 'Test'
+      id: test
+      run: dotnet run --configuration Release --coverage --coverage-output-format cobertura --report-github --project tests/UnitTests/BCrypt.Net.UnitTests.csproj
+
+    - name: 'Generate Coverage Reports'
+      uses: danielpalme/ReportGenerator-GitHub-Action@c4c5175a441c6603ec614f5084386dabe0e2295b # v5.4.12
+      with:
+        reports: "tests/**/*.cobertura.xml"
+        targetdir: "${{ github.workspace }}"
+        reporttypes: "Cobertura" 
+        verbosity: "Info" 
+        title: "Code Coverage" 
+        tag: "${{ github.run_number }}_${{ github.run_id }}"
+        toolpath: "reportgeneratortool"
+        license: ${{ secrets.REPORT_GENERATOR_LICENSE }}
+
+    - name: Publish Code Coverage Report
+      uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 # v1.3.0
+      with:
+        filename: "Cobertura.xml"
+        badge: true
+        fail_below_min: false # just informative for now
+        format: markdown
+        hide_branch_rate: false
+        hide_complexity: false
+        indicators: true
+        output: both
+        thresholds: "10 30"
+
+    - name: Upload Code Coverage Results
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: coverage-results
+        path: |
+          ${{ github.workspace }}/Cobertura.xml
+          ${{ github.workspace }}/code-coverage-results.md
+        retention-days: 5
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@afb2984f4d89672b2f9d9c13ae23d53779671984 # v2.19.0
+      if: always()
+      with:
+        files: "tests/**/TestResults.xml"
+
+    - name: Upload Test Artifacts
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: test-results
+        path: "tests/**/TestResults.xml"
+        retention-days: 5

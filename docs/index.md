@@ -32,7 +32,7 @@ File-scoped namespaces are shown; imagine curly brackets if you need to.
 `Top level namespace`
 
 ```csharp
-namespace DotNetSix;
+namespace SomeNamespace;
 
 using BCryptNet;
 

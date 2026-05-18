@@ -2,7 +2,7 @@
 // The MIT License (MIT)
 // Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 // Copyright (c) 2013 Ryan D. Emerle (.Net port)
-// Copyright (c) 2016/2025 Chris McKee (.Net-core port / patches / new features)
+// Copyright (c) 2016 Chris McKee (.Net-core port / patches / new features)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 // (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -17,7 +17,7 @@
 // IN THE SOFTWARE.
 // */
 
-using System;
+using System.Globalization;
 
 namespace BCryptNet.IdentityExtensions;
 
@@ -39,7 +39,11 @@ internal static class StringUtils
     {
         try
         {
-            return BitConverter.ToString(data).Replace("-", "").ToLower();
+#if NET9_0_OR_GREATER
+            return Convert.ToHexStringLower(data);
+#else
+            return BitConverter.ToString(data).Replace("-", "", StringComparison.InvariantCulture).ToLower(CultureInfo.InvariantCulture);
+#endif
         }
         catch
         {

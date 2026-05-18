@@ -1,17 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0;netstandard2.1;net8.0;net9.0</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netstandard2.0;netstandard2.1;net462;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0;netstandard2.1;net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netstandard2.0;netstandard2.1;net462;net472;net48;net8.0;net10.0</TargetFrameworks>
 
     <AssemblyTitle>BCrypt.Net-Next</AssemblyTitle>
-    <AssemblyName>BCrypt.Net-Next</AssemblyName>
+    <AssemblyName>BCrypt-Net-Next</AssemblyName>
     <RootNamespace>BCryptNet</RootNamespace>
     <DebugSymbols>false</DebugSymbols>
     <ImplicitUsings>true</ImplicitUsings>
-    <Configurations>Debug;Release;CodeQL</Configurations>
+    <Configurations>Debug;Release</Configurations>
+    <Platforms>AnyCPU</Platforms>
+
+    <SecureString>true</SecureString>
+    <DefineConstants Condition="'$(SecureString)' == 'true'">$(DefineConstants);SECURESTRING</DefineConstants>
+    <AllowUnsafeBlocks Condition="'$(SecureString)' == 'true'">true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <DocumentationFile>bin\Release\BCrypt.Net-Next.xml</DocumentationFile>
   </PropertyGroup>
@@ -20,27 +26,41 @@
     <Reference Include="System" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net462'">
-    <PackageReference Include="System.Memory" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'
+                         or '$(TargetFramework)' == 'netstandard2.1'
+                         or '$(TargetFramework)' == 'net462'
+                         or '$(TargetFramework)' == 'net472'
+                         or '$(TargetFramework)' == 'net48'">
+    <PackageReference Include="System.Memory"  />
   </ItemGroup>
+
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'
+                         or '$(TargetFramework)' == 'netstandard2.1'
+                         or '$(TargetFramework)' == 'net462'
+                         or '$(TargetFramework)' == 'net472'
+                         or '$(TargetFramework)' == 'net48'">
+    <DefineConstants>$(DefineConstants);PRE_CORE</DefineConstants>
+  </PropertyGroup>
+  
 
   <ItemGroup>
     <None Remove="PublicAPI.Shipped.txt" />
+    <None Remove="create-preview-release.cmd" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <PackageIcon>logo.png</PackageIcon>
-  </PropertyGroup>
-
   <ItemGroup>
-    <None Include="..\..\logo.png">
-      <Pack>True</Pack>
-      <PackagePath>/</PackagePath>
-    </None>
-    <None Include="..\..\readme.md">
-      <Pack>True</Pack>
-      <PackagePath>/</PackagePath>
-    </None>
+    <Compile Update="BCryptBase.Core.cs">
+      <DependentUpon>BCryptBase.cs</DependentUpon>
+    </Compile>
+    <Compile Update="BCryptBase.Std.cs">
+      <DependentUpon>BCryptBase.cs</DependentUpon>
+    </Compile>
+    <Compile Update="BCryptExtendedV2.Std.cs">
+      <DependentUpon>BCryptExtendedV2.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SafeStringExtension.Fwk.cs">
+      <DependentUpon>SafeStringExtension.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

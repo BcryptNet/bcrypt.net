@@ -1,9 +1,11 @@
-﻿using System.Security.Cryptography;
+﻿#if NETCOREAPP
+using System.Globalization;
+using System.Security.Cryptography;
 
 namespace BCryptNet;
 
 /// <summary>
-/// BCrypt Enhanced (post v3.5)
+/// BCrypt Enhanced (post Bcrypt v3.5)
 /// Created to be compatible with other programming-language implementations of pre-hashed keys
 /// i.e. passlib in python / php bcrypt and sha
 /// </summary>
@@ -29,7 +31,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
     public static string HashPassword(string inputKey, int workFactor = DefaultRounds,
         HashType hashType = DefaultEnhancedHashType) =>
         CreatePasswordHash(inputKey, GenerateSalt(workFactor), hashType,
-            (s, type, version) => EnhancedHash(s, type, version));
+            (s, type, version, dest) => { var r = EnhancedHash(s, type, version); r.CopyTo(dest); return r.Length; });
 
     /// <summary>
     ///  Pre-hash a password with SHA384 then using the OpenBSD BCrypt scheme with a manually supplied salt/>.
@@ -43,7 +45,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
     /// <returns>The hashed password.</returns>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static string HashPassword(string inputKey, string salt, HashType hashType = DefaultEnhancedHashType) =>
-        CreatePasswordHash(inputKey, salt, hashType, (s, type, version) => EnhancedHash(s, type, version));
+        CreatePasswordHash(inputKey, salt, hashType, (s, type, version, dest) => { var r = EnhancedHash(s, type, version); r.CopyTo(dest); return r.Length; });
 
     /// <summary>
     /// Hashes key, base64 encodes before returning byte array
@@ -52,22 +54,19 @@ public sealed class BCryptExtendedV2 : BCryptCore
     /// <param name="bcryptMinorRevision">(Default: 'a')</param>
     /// <param name="hashType"><seealso cref="HashType"/>HashType used (default SHA384)</param>
     /// <returns></returns>
-    private static byte[] EnhancedHash(string inputString, HashType hashType, char bcryptMinorRevision = 'a')
+    private static Span<byte> EnhancedHash(ReadOnlySpan<char> inputString, HashType hashType, char bcryptMinorRevision = 'a')
     {
         switch (hashType)
         {
             case HashType.SHA256:
-                using (var sha = SHA256.Create())
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString))) +
-                                             (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                return SafeUTF8.GetBytes(Convert.ToBase64String(SHA256.HashData(SafeUTF8.GetBytes(inputString.ToString()))) +
+                                         (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
             case HashType.SHA384:
-                using (var sha = SHA384.Create())
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString))) +
-                                             (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                return SafeUTF8.GetBytes(Convert.ToBase64String(SHA384.HashData(SafeUTF8.GetBytes(inputString.ToString()))) +
+                                         (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
             case HashType.SHA512:
-                using (var sha = SHA512.Create())
-                    return SafeUTF8.GetBytes(Convert.ToBase64String(sha.ComputeHash(SafeUTF8.GetBytes(inputString))) +
-                                             (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                return SafeUTF8.GetBytes(Convert.ToBase64String(SHA512.HashData(SafeUTF8.GetBytes(inputString.ToString()))) +
+                                         (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
             default:
                 throw new ArgumentOutOfRangeException(nameof(hashType), hashType, null);
         }
@@ -85,7 +84,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
     {
         return SecureEquals(SafeUTF8.GetBytes(hash),
             SafeUTF8.GetBytes(CreatePasswordHash(text, hash, hashType,
-                (s, type, version) => EnhancedHash(s, type, version))));
+                (s, type, version, dest) => { var r = EnhancedHash(s, type, version); r.CopyTo(dest); return r.Length; })));
     }
 
     /// <summary>
@@ -133,7 +132,9 @@ public sealed class BCryptExtendedV2 : BCryptCore
         bool forceWorkFactor = false)
     {
         if (currentKey == null)
+        {
             throw new ArgumentNullException(nameof(currentKey));
+        }
 
         if (string.IsNullOrEmpty(currentHash) || currentHash.Length != 60)
             throw new ArgumentException("Invalid Hash", nameof(currentHash));
@@ -171,7 +172,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
         }
 
         // Extract details from salt
-        int currentWorkFactor = Convert.ToInt16(currentHash.Substring(startingOffset, 2));
+        int currentWorkFactor = Convert.ToInt16(currentHash.Substring(startingOffset, 2), CultureInfo.InvariantCulture);
 
         // Never downgrade work-factor (unless forced)
         if (!forceWorkFactor && currentWorkFactor > workFactor)
@@ -180,6 +181,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
         }
 
         return CreatePasswordHash(newKey, GenerateSalt(workFactor), hashType,
-            (s, type, version) => EnhancedHash(s, type, version));
+            (s, type, version, dest) => { var r = EnhancedHash(s, type, version); r.CopyTo(dest); return r.Length; });
     }
 }
+#endif

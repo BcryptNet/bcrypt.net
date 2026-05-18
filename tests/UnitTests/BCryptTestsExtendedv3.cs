@@ -2,7 +2,7 @@
 The MIT License (MIT)
 Copyright (c) 2006 Damien Miller djm@mindrot.org (jBCrypt)
 Copyright (c) 2013 Ryan D. Emerle (.Net port)
-Copyright (c) 2016/2025 Chris McKee (.Net-core port / patches / new features)
+Copyright (c) 2016/2026 Chris McKee (.Net-core port / patches / new features)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,
@@ -26,7 +26,7 @@ using Xunit;
 
 namespace BCryptNet.UnitTests
 {
-#if NET8_0_OR_GREATER
+#if NETCOREAPP
 
     /// <summary>
     /// BCrypt tests
@@ -61,9 +61,6 @@ namespace BCryptNet.UnitTests
         };
 
         private readonly char[] _revisions = { 'a', 'x', 'y', 'b' };
-
-
-        private readonly string TwoPointZeroVersionPass64 = "585292059d6b430b931e77f046bb20cca5f99e9adc8a4359aadd93afa03e60c3";
 
         /**
          * Test method for 'BCrypt.HashPassword(string, string)'
@@ -161,12 +158,12 @@ namespace BCryptNet.UnitTests
 
             string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
             string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
-            string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPO/jMqrnJc5PFWasgccSlw6RlvYsWV4sS";
+            string expectedHash = "$2a$12$WApznUOJfkEGSmYRfnkrPO/jMqrnJc5PFWasgccSlw6RlvYsWV4sS";
 
             string newPassword = "my new password";
-            string hashed = BCryptExtendedV3.HashPassword(hmacKey,currentKey, salt);
-            Assert.Equal(hashed, currentHash);
-            var replHash = BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey, currentKey, currentHash, newPassword, workFactor: 5, forceWorkFactor: true);
+            string hashed = BCryptExtendedV3.HashPassword(hmacKey, currentKey, salt);
+            Assert.Equal(expectedHash, hashed);
+            var replHash = BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey, currentKey, expectedHash, newPassword, workFactor: 5, forceWorkFactor: true);
             Assert.Contains("$05$", replHash);
             Trace.Write(".");
         }
@@ -208,7 +205,7 @@ namespace BCryptNet.UnitTests
             Trace.Write("BCrypt.HashPassword with naughty strings: ");
             var hmacKey = Guid.NewGuid().ToString();
 
-            string h1 = BCryptExtendedV3.HashPassword(hmacKey,pw1, BCrypt.GenerateSalt());
+            string h1 = BCryptExtendedV3.HashPassword(hmacKey,pw1, BCryptCore.GenerateSalt());
             Assert.True(BCryptExtendedV3.Verify(hmacKey,pw1, h1));
 
             Trace.Write(".");
@@ -221,7 +218,7 @@ namespace BCryptNet.UnitTests
         public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworks(string password)
         {
             var hmacKey = Guid.NewGuid().ToString();
-            var x = BCryptExtendedV3.GenerateSalt();
+            var x = BCryptCore.GenerateSalt();
             string hash = BCryptExtendedV3.HashPassword(hmacKey,password, x);
 
             var t1 = BCryptExtendedV3.Verify(hmacKey,password, hash);
@@ -235,7 +232,7 @@ namespace BCryptNet.UnitTests
         public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworksSetB(string password, string leader)
         {
             var hmacKey = Guid.NewGuid().ToString();
-            var x = BCryptExtendedV3.GenerateSalt();
+            var x = BCryptCore.GenerateSalt();
             string hash = BCryptExtendedV3.HashPassword(hmacKey,password, x);
 
             Assert.False(ContainsNoNullBytes(SafeUtf8.GetBytes(password)));
@@ -245,6 +242,9 @@ namespace BCryptNet.UnitTests
             Assert.False(BCryptExtendedV3.Verify(hmacKey,"", hash), "Null should be treated as part of password as per spec");
         }
 
+#if NETCOREAPP
+
+#else
         [Fact]
         public void LeadingByteDoesntTruncateHashSHA()
         {
@@ -271,7 +271,7 @@ namespace BCryptNet.UnitTests
 
             Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldnt match as we hash the whole strings bytes, including the null byte");
         }
-
+#endif
         private static bool ContainsNoNullBytes(byte[] bytes)
         {
             if (bytes == null) return false;

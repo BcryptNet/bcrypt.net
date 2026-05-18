@@ -9,22 +9,30 @@
     <DebugType>embedded</DebugType>
     <Deterministic>false</Deterministic>
     <PackageId>$(AssemblyName)</PackageId>
-    <PackageIcon>logo.png</PackageIcon>
     <NuspecBasePath>$(MSBuildProjectDirectory)</NuspecBasePath>
     <MSBuildWarningsAsMessages>NETSDK1069</MSBuildWarningsAsMessages>
-    <NoWarn>NU5105;NU1507</NoWarn>
+    <NoWarn>NU5105;NU1507;S127;S4143;S1854;S1264;S4136;CA1510;CA1308;CA1031</NoWarn>
     <Features>strict</Features>
-
     <LangVersion>11.0</LangVersion>
-
-    <AssemblyOriginatorKeyFile>..\..\bcrypt.pub</AssemblyOriginatorKeyFile>
-    <DelaySign>true</DelaySign>
-
-<!--    <SignAssembly Condition=" '$(OS)' == 'Windows_NT' ">true</SignAssembly>-->
-<!--    <PublicSign Condition=" '$(OS)' == 'Windows_NT' ">true</PublicSign>-->
-<!--    <AssemblyDelaySignAttribute>true</AssemblyDelaySignAttribute>-->
-<!--    <AssemblyOriginatorKeyFile Condition=" '$(OS)' == 'Windows_NT' ">../../bcrypt.pfx</AssemblyOriginatorKeyFile>-->
   </PropertyGroup>
+
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\bcrypt.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>true</DelaySign>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\logo.png">
+      <Pack>True</Pack>
+      <PackagePath>/</PackagePath>
+    </None>
+    <None Include="..\..\readme.md">
+      <Pack>True</Pack>
+      <PackagePath>/</PackagePath>
+    </None>
+  </ItemGroup>
+
 
   <PropertyGroup>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
@@ -50,10 +58,6 @@
       </ItemGroup>
     </When>
   </Choose>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
-  </ItemGroup>
 
   <!-- Release configuration
          Enable sbom generation -->
