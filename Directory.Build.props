@@ -12,9 +12,7 @@
     <PackageReleaseNotes>https://github.com/BcryptNet/bcrypt.net/</PackageReleaseNotes>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security,hash;crypto;blowfish;gdpr</PackageTags>
-    <PackageIcon>logo.png</PackageIcon>
   </PropertyGroup>
 
   <PropertyGroup>

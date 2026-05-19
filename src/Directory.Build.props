@@ -14,6 +14,10 @@
     <NoWarn>NU5105;NU1507;S127;S4143;S1854;S1264;S4136;CA1510;CA1308;CA1031</NoWarn>
     <Features>strict</Features>
     <LangVersion>11.0</LangVersion>
+
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
 
   <PropertyGroup>
@@ -23,16 +27,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\logo.png">
-      <Pack>True</Pack>
-      <PackagePath>/</PackagePath>
-    </None>
-    <None Include="..\..\readme.md">
-      <Pack>True</Pack>
-      <PackagePath>/</PackagePath>
-    </None>
+    <None Include="../../logo.png" Pack="true" Visible="false" PackagePath="" />
+    <None Include="../../readme.md" Pack="true" Visible="false" PackagePath="" />
   </ItemGroup>
-
 
   <PropertyGroup>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
