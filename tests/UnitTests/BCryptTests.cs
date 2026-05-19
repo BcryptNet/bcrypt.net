@@ -134,8 +134,6 @@ namespace BCryptNet.UnitTests
             Assert.True(BCrypt.Verify(pass, hash));
         }
 
-
-
         private static SecureString AsSecureString(string text)
         {
             var result = new SecureString();
@@ -146,7 +144,7 @@ namespace BCryptNet.UnitTests
 
 #if !NET48_OR_GREATER
         [Fact()]
-        public void TestSecureHashPassword()
+        public void TestSecureHashPasswordFwk()
         {
             Trace.Write("BCryptSafeString.HashPassword()[Secure]: ");
             var sw = Stopwatch.StartNew();
@@ -157,6 +155,8 @@ namespace BCryptNet.UnitTests
                 var secureString = AsSecureString(pass);
                 if(string.IsNullOrEmpty(pass)) continue;
                 var hash = BCryptSafeString.HashPassword(secureString);
+                var doesValidateFromSecureString = BCryptSafeString.VerifyPassword(secureString, hash);
+                Assert.True(doesValidateFromSecureString);
                 var doesValidate = BCrypt.Verify(pass, hash);
                 Assert.True(doesValidate);
                 Trace.Write(".");
@@ -166,7 +166,6 @@ namespace BCryptNet.UnitTests
             Trace.WriteLine(sw.ElapsedMilliseconds);
             Trace.WriteLine("");
         }
-
 
         [Fact()]
         public void TestSecureStringHashPassword()

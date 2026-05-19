@@ -2,7 +2,10 @@
     <PropertyGroup>
         <AssemblyName>BCrypt.Net.UnitTests</AssemblyName>
         <RootNamespace>BCryptNet.UnitTests</RootNamespace>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework Condition="'$(OS)' != 'Windows_NT'">net10.0</TargetFramework>
+        <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net10.0;net48</TargetFrameworks>
+        <DebugSymbols>true</DebugSymbols>
+        <ImplicitUsings>true</ImplicitUsings>
         <Configurations>Debug;Release</Configurations>
         <LangVersion>default</LangVersion>
 

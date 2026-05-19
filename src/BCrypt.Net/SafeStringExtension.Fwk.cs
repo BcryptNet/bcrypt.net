@@ -18,7 +18,6 @@
 // */
 
 #if PRE_CORE && SECURESTRING
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -72,17 +71,32 @@ public sealed class BCryptSafeString : BCryptCore
         return GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, workFactor));
     }
 
-    private static string HashPassword(string inputKey, int workFactor = DefaultRounds) =>
-        HashPassword(inputKey, GenerateSalt(workFactor));
-
-    private static string HashPassword(string inputKey, string salt)
+    /// <summary>
+    /// Verifies a password against a previously computed BCrypt hash.
+    /// </summary>
+    /// <param name="inputKey">The candidate password, provided as a <see cref="SecureString"/>.</param>
+    /// <param name="hash">The stored BCrypt hash to verify against.</param>
+    /// <returns><c>true</c> if the password matches the hash; otherwise <c>false</c>.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="hash"/> is null or empty.</exception>
+    /// <exception cref="SaltParseException">Thrown when the stored hash cannot be parsed.</exception>
+    public static bool Verify(SecureString inputKey, string hash)
     {
-        return CreatePasswordHash(inputKey.AsSpan(), salt.AsSpan());
+        if (string.IsNullOrEmpty(hash))
+            throw new ArgumentException("Invalid hash", nameof(hash));
+
+        string computed = GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, hash));
+        return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(computed));
     }
 
-    private delegate string SandboxedSecureString(string inputKey);
+    private static string HashPassword(ReadOnlySpan<char> inputKey, int workFactor = DefaultRounds) =>
+        HashPassword(inputKey, GenerateSalt(workFactor));
 
-    private static string GetBCryptHashFromSecureString(SecureString secureString, SandboxedSecureString func)
+    private static string HashPassword(ReadOnlySpan<char> inputKey, string salt) =>
+        CreatePasswordHash(inputKey, salt.AsSpan());
+
+    private delegate string BCryptDelegate(ReadOnlySpan<char> inputKey);
+
+    private static unsafe string GetBCryptHashFromSecureString(SecureString secureString, BCryptDelegate func)
     {
         if (secureString == null)
             throw new ArgumentNullException(nameof(secureString));
@@ -93,7 +107,7 @@ public sealed class BCryptSafeString : BCryptCore
         if (length == 0)
             throw new ArgumentException("SecureString cannot be empty", nameof(secureString));
 
-        if(!secureString.IsReadOnly())
+        if (!secureString.IsReadOnly())
             secureString.MakeReadOnly();
 
         IntPtr sourceStringPointer = IntPtr.Zero;
@@ -106,14 +120,16 @@ public sealed class BCryptSafeString : BCryptCore
             if (sourceStringPointer == IntPtr.Zero)
                 throw new InvalidOperationException("Failed to convert SecureString to BSTR");
 
-            // Convert BSTR pointer to a managed string
-            // Note: We need to use Marshal.PtrToStringUni for wide character strings
-            string inputKey = Marshal.PtrToStringUni(sourceStringPointer);
+            // Wrap the BSTR directly in a ReadOnlySpan<char> — avoiding a managed string touching the GC heap.
+            //
+            // LIFETIME INVARIANT: inputSpan must not outlive sourceStringPointer. The BSTR is zeroed
+            // and freed in the `finally` block below. The compiler enforces this automatically because
+            // ReadOnlySpan<char> is a ref struct: it cannot be stored in a field, boxed, or captured
+            // by an async continuation. Do NOT change BCryptDelegate to an async delegate or convert
+            // this method to async; breaks the invariant and will error at runtime.
+            ReadOnlySpan<char> inputSpan = new ReadOnlySpan<char>(sourceStringPointer.ToPointer(), length);
 
-            if (inputKey == null)
-                throw new InvalidOperationException("Failed to convert BSTR to string");
-
-            return func(inputKey);
+            return func(inputSpan);
         }
         finally
         {

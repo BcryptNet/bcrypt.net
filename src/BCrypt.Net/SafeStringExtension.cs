@@ -52,6 +52,30 @@ public sealed class BCryptSafeString : BCryptCore
         return GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, workFactor));
     }
 
+    /// <summary>
+    /// Verifies a password against a previously computed BCrypt hash.
+    /// </summary>
+    /// <param name="inputKey">The candidate password, provided as a <see cref="SecureString"/>.</param>
+    /// <param name="hash">The stored BCrypt hash to verify against.</param>
+    /// <returns><c>true</c> if the password matches the hash; otherwise <c>false</c>.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="hash"/> is null or empty.</exception>
+    /// <exception cref="SaltParseException">Thrown when the stored hash cannot be parsed.</exception>
+    public static bool Verify(SecureString inputKey, string hash)
+    {
+        if (string.IsNullOrEmpty(hash))
+            throw new ArgumentException("Invalid hash", nameof(hash));
+
+        string computed = GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, hash.AsSpan()));
+
+        // bcrypt hashes are at most 60 ASCII characters; encode both sides to bytes for
+        // constant-time comparison via the existing SecureEquals implementation.
+        Span<byte> hashBytes = stackalloc byte[60];
+        Span<byte> computedBytes = stackalloc byte[60];
+        int hashLen = SafeUTF8.GetBytes(hash, hashBytes);
+        int computedLen = SafeUTF8.GetBytes(computed, computedBytes);
+        return SecureEquals(hashBytes[..hashLen], computedBytes[..computedLen]);
+    }
+
     private static string HashPassword(ReadOnlySpan<char> inputKey, int workFactor = DefaultRounds) =>
         HashPassword(inputKey, GenerateSalt(workFactor));
 
@@ -62,7 +86,8 @@ public sealed class BCryptSafeString : BCryptCore
         return new string(outputBuffer[..outputBufferWritten]);
     }
 
-    private static void HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer, out int outputBufferWritten) => CreatePasswordHash(inputKey, salt, outputBuffer, out outputBufferWritten);
+    private static void HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer, out int outputBufferWritten) =>
+        CreatePasswordHash(inputKey, salt, outputBuffer, out outputBufferWritten);
 
     private delegate string BCryptDelegate(ReadOnlySpan<char> inputKey);
 
@@ -75,7 +100,7 @@ public sealed class BCryptSafeString : BCryptCore
         if (length == 0)
             throw new ArgumentException("SecureString cannot be empty", nameof(secureString));
 
-        if(!secureString.IsReadOnly())
+        if (!secureString.IsReadOnly())
             secureString.MakeReadOnly();
 
         IntPtr sourceStringPointer = IntPtr.Zero;
@@ -88,8 +113,14 @@ public sealed class BCryptSafeString : BCryptCore
             if (sourceStringPointer == IntPtr.Zero)
                 throw new InvalidOperationException("Failed to convert SecureString to BSTR");
 
-            // Convert the BSTR pointer directly to ReadOnlySpan<char>
-            // Note: This assumes the BSTR is null-terminated & we're working with the actual content
+            // Wrap the BSTR directly in a ReadOnlySpan<char> — no managed string is created, so the
+            // password material never touches the GC heap.
+            //
+            // LIFETIME INVARIANT: inputSpan must not outlive sourceStringPointer. The BSTR is zeroed
+            // and freed in the finally block below. The compiler enforces this automatically because
+            // ReadOnlySpan<char> is a ref struct: it cannot be stored in a field, boxed, or captured
+            // by an async continuation. Do NOT change BCryptDelegate to an async delegate or convert
+            // this method to async — doing so would break the invariant without a compile error.
             ReadOnlySpan<char> inputSpan = new ReadOnlySpan<char>(sourceStringPointer.ToPointer(), length);
 
             return func(inputSpan);
