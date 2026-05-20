@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - name: 'Harden Runner'
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
       with:
         egress-policy: audit
 
@@ -43,7 +43,7 @@ jobs:
         fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
  
     - name: 'Setup .NET SDK'
-      uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
       with:
         dotnet-version: 10.x
 
@@ -59,7 +59,7 @@ jobs:
       run: dotnet run --configuration Release --coverage --coverage-output-format cobertura --report-github --project tests/UnitTests/BCrypt.Net.UnitTests.csproj
 
     - name: 'Generate Coverage Reports'
-      uses: danielpalme/ReportGenerator-GitHub-Action@c4c5175a441c6603ec614f5084386dabe0e2295b # v5.4.12
+      uses: danielpalme/ReportGenerator-GitHub-Action@049f7ec958c672fd31d5cc1cb01622dc8d2e23ab # 5.5.10
       with:
         reports: "tests/**/*.cobertura.xml"
         targetdir: "${{ github.workspace }}"
@@ -84,7 +84,7 @@ jobs:
         thresholds: "10 30"
 
     - name: Upload Code Coverage Results
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: coverage-results
         path: |
@@ -93,13 +93,13 @@ jobs:
         retention-days: 5
 
     - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@afb2984f4d89672b2f9d9c13ae23d53779671984 # v2.19.0
+      uses: EnricoMi/publish-unit-test-result-action@c950f6fb443cb5af20a377fd0dfaa78838901040 # v2.23.0
       if: always()
       with:
         files: "tests/**/TestResults.xml"
 
     - name: Upload Test Artifacts
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: test-results
         path: "tests/**/TestResults.xml"
