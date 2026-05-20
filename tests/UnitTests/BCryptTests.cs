@@ -155,7 +155,7 @@ namespace BCryptNet.UnitTests
                 var secureString = AsSecureString(pass);
                 if(string.IsNullOrEmpty(pass)) continue;
                 var hash = BCryptSafeString.HashPassword(secureString);
-                var doesValidateFromSecureString = BCryptSafeString.VerifyPassword(secureString, hash);
+                var doesValidateFromSecureString = BCryptSafeString.Verify(secureString, hash);
                 Assert.True(doesValidateFromSecureString);
                 var doesValidate = BCrypt.Verify(pass, hash);
                 Assert.True(doesValidate);

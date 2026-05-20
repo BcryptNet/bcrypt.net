@@ -23,7 +23,8 @@
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\bcrypt.snk</AssemblyOriginatorKeyFile>
-    <DelaySign>true</DelaySign>
+    <PublicKey>1e11be04b6288443</PublicKey>
+    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
   </PropertyGroup>
 
   <ItemGroup>
