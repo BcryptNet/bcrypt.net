@@ -290,11 +290,13 @@ A future release of Solar's bcrypt code should also support 'b'.
 
 release notes are here <https://github.com/BcryptNet/bcrypt.net/releases>
 
-_v4.1.0_ - Add net10 target, remove older core targets (they'll fall back to netstandard2.1 or 2.0 as appropriate)
+_v4.2.2_  - Fixed strong signing on fwk (migrated to snk and validated)
+_v4.2.1_  - Broken strong signing on fwk
+_v4.1.0_ – Add net10 target, remove older core targets (they'll fall back to netstandard2.1 or 2.0 as appropriate)
 
-_v4.0.3_ - Addition of .net 6 targeting; tidy up targets.
+_v4.0.3_ – Addition of .net 6 targeting; tidy up targets.
 
-_v4.0.2_ - Addition of .net 5 targeting; wrap `shaxxx` creation in using to release.
+_v4.0.2_ – Addition of .net 5 targeting; wrap `shaxxx` creation in using to release.
 
 _v4.0.0 (breaking changes)_ - A bug in `Enhanced Hashing` was discovered that causes the hashes created to be inoperable between different languages.
 V4 provides the fix for this as well as adding test vectors from PHP and Python to ensure the issue remains fixed in the future. V4 also removes the legacy 384 option that came before Base64 was added.
@@ -324,10 +326,10 @@ _v2.1.1 -_
 
 _v2.1.0 -_
 
-- Adds enhanced mode; enhanced hashing allows you to opt-in to ensuring optimal entropy on your users passwords by first making use of the fast SHA384 algorithm before BCrypt hashes the password.
+- Adds enhanced mode; enhanced hashing allows you to opt in to ensuring optimal entropy on your users passwords by first making use of the fast SHA384 algorithm before BCrypt hashes the password.
 - Added Hash interrogation to allow a hash to be passed in and its component parts are returned.
-- Added timeouts to regex and set compiler flags for msbuild so < .net 4.5 (where timeouts were added to regex) we use old regex method.
-- Alter safe equals from ceq/and to xor/and/ceq moving the check outside of the loop to mitigate against branch prediction causing a timing leak
+- Added timeouts to regex and set compiler flags for msbuild, so < .net 4.5 (where timeouts were added to regex) we use the old regex method.
+- Alter safe equals from ceq/and to xor/and/ceq moving the check outside the loop to mitigate against branch prediction causing a timing leak
 - Add new method `PasswordNeedsReshash(string hash, int newMinimumWorkLoad)` as a helper method for developers to use when logging a user in to increase legacy workloads
 - Add `ValidateAndReplacePassword` method to allow inline password validation and replacement. Throws `BcryptAuthenticationException` in the event of authentication failure.
 - Cleaned up XML-doc for intellisense
@@ -338,9 +340,9 @@ _v2.0.1 -_
 
 - Corrects usage of Secure random number generator
 - Change UTF8 handling to safer default (throwOnInvalidBytes: true)
-- .NET Encoding.UTF8 encoding instance does not raise exceptions used to encode bytes which cannot represent a valid encoding & will return the same 'unknown' character instead. This can cause entropy loss when converting from bytes to strings.
+- .NET Encoding. UTF8 encoding instance does not raise exceptions used to encode bytes which cannot represent a valid encoding & will return the same 'unknown' character instead. This can cause entropy loss when converting from bytes to strings.
 - Change secure equals to match .net identity implementation
-- Inline vars in encipher method
+- Inline vars in the encipher method
 
 _v2.0.0 -_
 
