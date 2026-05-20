@@ -22,7 +22,7 @@
     <PackageIcon>logo.png</PackageIcon>
     <PackageIconUrl />
 
-    <Version>4.2.1</Version>
+    <Version>4.2.2</Version>
     <PackageTags>bcrypt;BCrypt.Net;cryptography;hashing;password;security,hash;crypto;blowfish;gdpr</PackageTags>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
@@ -30,7 +30,8 @@
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\bcrypt.snk</AssemblyOriginatorKeyFile>
-    <DelaySign>true</DelaySign>
+    <PublicKey>1e11be04b6288443</PublicKey>
+    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
   </PropertyGroup>
 
   <PropertyGroup>
