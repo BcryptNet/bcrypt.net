@@ -6,10 +6,10 @@ namespace BCryptNet
 {
     #if PRE_CORE
     /// <summary>
-    ///     Exception used to signal errors that occur during salt-parsing
+    ///     Thrown when a password exceeds bcrypt's 72-byte limit under <see cref="LongPasswordHandling.Throw"/>.
     /// </summary>
     [Serializable]
-    public sealed class PasswordTooLongException : Exception
+    public sealed class PasswordTooLongException : ArgumentException
     {
         /// <summary>
         ///     Default Constructor
@@ -42,9 +42,9 @@ namespace BCryptNet
     }
 #else
     /// <summary>
-    ///     Exception used to signal errors that occur during salt-parsing
+    ///     Thrown when a password exceeds bcrypt's 72-byte limit under <see cref="LongPasswordHandling.Throw"/>.
     /// </summary>
-    public sealed class PasswordTooLongException : Exception
+    public sealed class PasswordTooLongException : ArgumentException
     {
         /// <summary>
         ///     Default Constructor
