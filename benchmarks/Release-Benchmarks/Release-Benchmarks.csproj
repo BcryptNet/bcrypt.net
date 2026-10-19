@@ -15,9 +15,10 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <LangVersion>latest</LangVersion>
 
-    <BCryptDefaultCurrent>5.0.0-prerelease.gb7ae3b8233</BCryptDefaultCurrent>
+    <!-- "current" builds src/BCrypt.Net from this repo; anything else is a published NuGet version -->
+    <BCryptDefaultCurrent>current</BCryptDefaultCurrent>
     <BCryptVersion Condition="'$(BCryptVersion)' == ''">$(BCryptDefaultCurrent)</BCryptVersion>
-    <DefineConstants Condition="$([System.String]::new('$(BCryptVersion)').StartsWith('5'))">$(DefineConstants);POSTV5</DefineConstants>
+    <DefineConstants Condition="'$(BCryptVersion)' == 'current' or $([System.String]::new('$(BCryptVersion)').StartsWith('5'))">$(DefineConstants);POSTV5</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'net481'">$(DefineConstants);NET48_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
@@ -35,7 +36,10 @@
     <WarningsAsErrors>;NU1605;NU1603</WarningsAsErrors>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(BCryptVersion)' == 'current'">
+    <ProjectReference Include="..\..\src\BCrypt.Net\BCrypt.Net.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(BCryptVersion)' != 'current'">
     <PackageReference Include="BCrypt.Net-Next" Version="$(BCryptVersion)" />
   </ItemGroup>
 

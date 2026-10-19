@@ -16,7 +16,7 @@ all:
 	@exit 0
 
 .PHONY: run-release-benchmark
-run-release-benchmark: # compares nuget releases of this package
+run-release-benchmark: # compares nuget releases of this package with the current source
 	@dotnet run --configuration Release --framework $(FRAMEWORK) --project Release-Benchmarks/Release-Benchmarks.csproj -- --filter "*" $(ARGS)
 
 .PHONY: run-method-benchmarks
