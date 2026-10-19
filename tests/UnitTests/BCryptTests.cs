@@ -206,6 +206,18 @@ namespace BCryptNet.UnitTests
             Trace.WriteLine(sw.ElapsedMilliseconds);
             Trace.WriteLine("");
         }
+
+        [Fact]
+        public void SecureStringSupportsExplicitLongPasswordTruncation()
+        {
+            const string salt = "$2a$04$abcdefghijklmnopqrstuu";
+            var password = new string('x', 80);
+            var securePassword = AsSecureString(password);
+            var hash = BCryptSafeString.HashPassword(securePassword, salt, LongPasswordHandling.Truncate);
+
+            Assert.True(BCryptSafeString.Verify(securePassword, hash, LongPasswordHandling.Truncate));
+            Assert.Throws<ArgumentException>(() => BCryptSafeString.HashPassword(securePassword, salt));
+        }
 #endif
         [Fact]
         // If you're using WoldLabForum just use BCrypt and an appropriate level of cost;
@@ -258,6 +270,97 @@ namespace BCryptNet.UnitTests
             var exceedsBounds = "testtdsdddddddddddddddddddddddddddddddddddddddddddddddsdddddddddddddddddd"; //73char
             var hashPassword = BCrypt.HashPassword(inBounds);
             Assert.Throws<ArgumentException>(() => BCrypt.HashPassword(exceedsBounds));
+        }
+
+        [Fact]
+        public void LongPasswordTruncationIsOptInAndUsedForVerificationAndUpgrade()
+        {
+            const string salt = "$2a$04$abcdefghijklmnopqrstuu";
+            var sharedPrefix = new string('x', 70) + "π";
+            var firstPassword = sharedPrefix + "a";
+            var secondPassword = sharedPrefix + "b";
+
+            var hash = BCrypt.HashPassword(firstPassword, salt, LongPasswordHandling.Truncate);
+
+            Assert.Throws<ArgumentException>(() => BCrypt.HashPassword(firstPassword, salt));
+            Assert.Equal(hash, BCrypt.HashPassword(secondPassword, salt, LongPasswordHandling.Truncate));
+            Assert.True(BCrypt.Verify(secondPassword, hash, LongPasswordHandling.Truncate));
+            Assert.Throws<ArgumentException>(() => BCrypt.Verify(secondPassword, hash));
+
+            var upgradedHash = BCrypt.ValidateAndUpgradeHash(
+                firstPassword, hash, secondPassword, LongPasswordHandling.Truncate, workFactor: 4, forceWorkFactor: true);
+            Assert.True(BCrypt.Verify(firstPassword, upgradedHash, LongPasswordHandling.Truncate));
+        }
+
+#if NETCOREAPP
+        [Fact]
+        public void LongPasswordTruncationWorksForSpanAndOutputBufferApis()
+        {
+            const string salt = "$2a$04$abcdefghijklmnopqrstuu";
+            var password = new string('x', 80);
+            var expected = BCrypt.HashPassword(password, salt, LongPasswordHandling.Truncate);
+
+            Assert.Equal(expected, BCrypt.HashPassword(password.AsSpan(), salt.AsSpan(), LongPasswordHandling.Truncate));
+
+            Span<char> outputBuffer = stackalloc char[60];
+            BCrypt.HashPassword(password.AsSpan(), salt.AsSpan(), outputBuffer, out var written, LongPasswordHandling.Truncate);
+            Assert.Equal(expected, new string(outputBuffer[..written]));
+        }
+#endif
+
+        [Fact]
+        public void LongPasswordHandlingRejectsUndefinedValues()
+        {
+            const string salt = "$2a$04$abcdefghijklmnopqrstuu";
+            Assert.Equal(LongPasswordHandling.Throw, default(LongPasswordHandling));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                BCrypt.HashPassword("password", salt, (LongPasswordHandling)int.MaxValue));
+        }
+
+        [Fact]
+        public void LongPasswordTruncationHandlesVeryLongInput()
+        {
+            // Large enough that sizing a stack buffer from the full input would overflow the stack.
+            const string salt = "$2a$04$abcdefghijklmnopqrstuu";
+            var hugePassword = new string('x', 1_000_000);
+
+            var hash = BCrypt.HashPassword(hugePassword, salt, LongPasswordHandling.Truncate);
+
+            Assert.Equal(BCrypt.HashPassword(new string('x', 80), salt, LongPasswordHandling.Truncate), hash);
+            Assert.True(BCrypt.Verify(hugePassword, hash, LongPasswordHandling.Truncate));
+            Assert.Throws<ArgumentException>(() => BCrypt.HashPassword(hugePassword, salt));
+        }
+
+        [Fact]
+        public void LongPasswordTruncationWithoutNulTerminator()
+        {
+            // $2$ hashes don't append a NUL, so all 72 bytes are password bytes.
+            const string salt = "$2$04$abcdefghijklmnopqrstuu";
+            var maxLength = new string('x', 72);
+            var overLength = new string('x', 73);
+
+            var hash = BCrypt.HashPassword(maxLength, salt);
+
+            Assert.Throws<ArgumentException>(() => BCrypt.HashPassword(overLength, salt));
+            Assert.Equal(hash, BCrypt.HashPassword(overLength, salt, LongPasswordHandling.Truncate));
+        }
+
+        [Fact]
+        public void LongPasswordTruncationSplitsSurrogatePairAtByteBoundary()
+        {
+            // 71 ASCII chars followed by a 4-byte code point whose surrogate pair straddles the 72-char
+            // trim point; only the code point's first byte fits within the 72-byte limit.
+            const string salt = "$2a$04$abcdefghijklmnopqrstuu";
+            var prefix = new string('x', 71);
+            var grinning = prefix + "\U0001F600" + "tail";
+            var smiley = prefix + "\U0001F603" + "other tail";
+
+            var hash = BCrypt.HashPassword(grinning, salt, LongPasswordHandling.Truncate);
+
+            // Both code points start with 0xF0, so only that byte survives truncation.
+            Assert.Equal(hash, BCrypt.HashPassword(smiley, salt, LongPasswordHandling.Truncate));
+            Assert.NotEqual(hash, BCrypt.HashPassword(prefix + "x", salt, LongPasswordHandling.Truncate));
+            Assert.True(BCrypt.Verify(smiley, hash, LongPasswordHandling.Truncate));
         }
 
 

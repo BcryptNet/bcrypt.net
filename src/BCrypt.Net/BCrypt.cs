@@ -85,6 +85,23 @@ public sealed class BCrypt : BCryptCore
     /// <returns>New hash of new password</returns>
     public static string ValidateAndUpgradeHash(string currentKey, string currentHash, string newKey, int workFactor = DefaultRounds, bool forceWorkFactor = false)
     {
+        return ValidateAndUpgradeHash(currentKey, currentHash, newKey, LongPasswordHandling.Throw, workFactor, forceWorkFactor);
+    }
+
+    /// <summary>
+    /// Validates the current credentials and creates a new BCrypt hash using the selected long-password policy.
+    /// </summary>
+    /// <param name="currentKey">Current password / string.</param>
+    /// <param name="currentHash">Current hash to validate the password against.</param>
+    /// <param name="newKey">New password.</param>
+    /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
+    /// <param name="workFactor">The log2 of the number of rounds of hashing to apply.</param>
+    /// <param name="forceWorkFactor">Whether to allow a work factor lower than the current hash.</param>
+    /// <returns>New hash of the new password.</returns>
+    public static string ValidateAndUpgradeHash(
+        string currentKey, string currentHash, string newKey, LongPasswordHandling longPasswordHandling,
+        int workFactor = DefaultRounds, bool forceWorkFactor = false)
+    {
         if (currentKey == null)
             throw new ArgumentNullException(nameof(currentKey));
 
@@ -129,7 +146,7 @@ public sealed class BCrypt : BCryptCore
         }
 
         // Throw if validation fails (password isn't valid for hash)
-        if (!Verify(currentKey, currentHash))
+        if (!Verify(currentKey, currentHash, longPasswordHandling))
             throw new BcryptAuthenticationException("Current credentials could not be authenticated");
 
         // Never downgrade work-factor (unless forced)
@@ -138,7 +155,7 @@ public sealed class BCrypt : BCryptCore
             workFactor = currentWorkFactor;
         }
 
-        return HashPassword(newKey, GenerateSalt(workFactor));
+        return HashPassword(newKey, longPasswordHandling, workFactor);
     }
 
     /// <summary>
@@ -152,10 +169,22 @@ public sealed class BCrypt : BCryptCore
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static bool Verify(string text, string hash)
     {
+        return Verify(text, hash, LongPasswordHandling.Throw);
+    }
+
+    /// <summary>
+    /// Verifies that the hash of the given text matches the provided hash using the selected long-password policy.
+    /// </summary>
+    /// <param name="text">The text to verify.</param>
+    /// <param name="hash">The previously hashed password.</param>
+    /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
+    /// <returns>true if the passwords match, false otherwise.</returns>
+    public static bool Verify(string text, string hash, LongPasswordHandling longPasswordHandling)
+    {
 #if NETCOREAPP
-        return Verify(text.AsSpan(), hash.AsSpan());
+        return Verify(text.AsSpan(), hash.AsSpan(), longPasswordHandling);
 #else
-        return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(HashPassword(text, hash)));
+        return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(CreatePasswordHash(text.AsSpan(), hash.AsSpan(), longPasswordHandling: longPasswordHandling)));
 #endif
     }
 
@@ -171,6 +200,16 @@ public sealed class BCrypt : BCryptCore
         HashPassword(inputKey, GenerateSalt(workFactor));
 
     /// <summary>
+    /// Hashes a password with a generated salt and an explicit long-password policy.
+    /// </summary>
+    /// <param name="inputKey">The password to hash.</param>
+    /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
+    /// <param name="workFactor">The log2 of the number of rounds of hashing to apply.</param>
+    /// <returns>The hashed password.</returns>
+    public static string HashPassword(string inputKey, LongPasswordHandling longPasswordHandling, int workFactor = DefaultRounds) =>
+        HashPassword(inputKey, GenerateSalt(workFactor), longPasswordHandling);
+
+    /// <summary>
     ///  Hash a password using the OpenBSD BCrypt scheme with a manually supplied salt/>.
     /// </summary>
     /// <remarks>
@@ -182,10 +221,22 @@ public sealed class BCrypt : BCryptCore
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static string HashPassword(string inputKey, string salt)
     {
+        return HashPassword(inputKey, salt, LongPasswordHandling.Throw);
+    }
+
+    /// <summary>
+    /// Hashes a password with a manually supplied salt and an explicit long-password policy.
+    /// </summary>
+    /// <param name="inputKey">The password to hash.</param>
+    /// <param name="salt">The salt to hash with.</param>
+    /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
+    /// <returns>The hashed password.</returns>
+    public static string HashPassword(string inputKey, string salt, LongPasswordHandling longPasswordHandling)
+    {
 #if NETCOREAPP
-            return HashPassword(inputKey.AsSpan(), salt.AsSpan());
+        return HashPassword(inputKey.AsSpan(), salt.AsSpan(), longPasswordHandling);
 #else
-        return CreatePasswordHash(inputKey.AsSpan(), salt.AsSpan());
+        return CreatePasswordHash(inputKey.AsSpan(), salt.AsSpan(), longPasswordHandling: longPasswordHandling);
 #endif
     }
 
@@ -202,7 +253,19 @@ public sealed class BCrypt : BCryptCore
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static string HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char>  salt)
     {
-        return CreatePasswordHash(inputKey, salt);
+        return HashPassword(inputKey, salt, LongPasswordHandling.Throw);
+    }
+
+    /// <summary>
+    /// Hashes a password span with a manually supplied salt and an explicit long-password policy.
+    /// </summary>
+    /// <param name="inputKey">The password to hash.</param>
+    /// <param name="salt">The salt to hash with.</param>
+    /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
+    /// <returns>The hashed password.</returns>
+    public static string HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, LongPasswordHandling longPasswordHandling)
+    {
+        return CreatePasswordHash(inputKey, salt, longPasswordHandling: longPasswordHandling);
     }
 #endif
 
@@ -220,8 +283,20 @@ public sealed class BCrypt : BCryptCore
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         public static string HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt)
         {
+            return HashPassword(inputKey, salt, LongPasswordHandling.Throw);
+        }
+
+        /// <summary>
+        /// Hashes a password span with a manually supplied salt and an explicit long-password policy.
+        /// </summary>
+        /// <param name="inputKey">The password to hash.</param>
+        /// <param name="salt">The salt to hash with.</param>
+        /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
+        /// <returns>The hashed password.</returns>
+        public static string HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, LongPasswordHandling longPasswordHandling)
+        {
             Span<char> outputBuffer = stackalloc char[60];
-            HashPassword(inputKey, salt, outputBuffer, out var outputBufferWritten);
+            HashPassword(inputKey, salt, outputBuffer, out var outputBufferWritten, longPasswordHandling);
             return new string(outputBuffer[..outputBufferWritten]);
         }
 
@@ -238,7 +313,22 @@ public sealed class BCrypt : BCryptCore
         /// <param name="outputBufferWritten"></param>
         /// <returns>The hashed password.</returns>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
-        public static void HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer, out int outputBufferWritten) => CreatePasswordHash(inputKey, salt, outputBuffer, out outputBufferWritten);
+        public static void HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer, out int outputBufferWritten) =>
+            HashPassword(inputKey, salt, outputBuffer, out outputBufferWritten, LongPasswordHandling.Throw);
+
+        /// <summary>
+        /// Hashes a password span into a caller-provided buffer with an explicit long-password policy.
+        /// </summary>
+        /// <param name="inputKey">The password to hash.</param>
+        /// <param name="salt">The salt to hash with.</param>
+        /// <param name="outputBuffer">Buffer for the resulting hash.</param>
+        /// <param name="outputBufferWritten">Number of characters written.</param>
+        /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
+        public static void HashPassword(
+            ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer,
+            out int outputBufferWritten, LongPasswordHandling longPasswordHandling) =>
+            CreatePasswordHash(inputKey, salt, outputBuffer, out outputBufferWritten,
+                longPasswordHandling: longPasswordHandling);
 
         /// <summary>
         ///  Verifies that the hash of the given <paramref name="text"/> matches the provided
@@ -251,6 +341,18 @@ public sealed class BCrypt : BCryptCore
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         public static bool Verify(ReadOnlySpan<char> text, ReadOnlySpan<char> hash)
         {
+            return Verify(text, hash, LongPasswordHandling.Throw);
+        }
+
+        /// <summary>
+        /// Verifies a password span using the selected long-password policy.
+        /// </summary>
+        /// <param name="text">The text to verify.</param>
+        /// <param name="hash">The previously hashed password.</param>
+        /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
+        /// <returns>true if the passwords match, false otherwise.</returns>
+        public static bool Verify(ReadOnlySpan<char> text, ReadOnlySpan<char> hash, LongPasswordHandling longPasswordHandling)
+        {
             if (SafeUTF8.GetByteCount(hash) > 60)
             {
                 return false;
@@ -260,7 +362,8 @@ public sealed class BCrypt : BCryptCore
             int hashLen = SafeUTF8.GetBytes(hash, hashBytes);
 
             Span<char> computedHash = stackalloc char[60];
-            CreatePasswordHash(text, hash, computedHash, out int computedHashLen);
+            CreatePasswordHash(text, hash, computedHash, out int computedHashLen,
+                longPasswordHandling: longPasswordHandling);
 
             Span<byte> computedBytes = stackalloc byte[60];
             int computedLen = SafeUTF8.GetBytes(computedHash[..computedHashLen], computedBytes);

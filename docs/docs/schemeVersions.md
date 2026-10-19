@@ -22,7 +22,7 @@ $2a$ – The current key used to identify this scheme.
        crafted password strings.
 $2b$ – Used by some recent implementations which include a mitigation to a wraparound problem.
        Previous versions of the algorithm have a problem with long passwords. By design, long passwords
-       are truncated at 72 characters, but there is an 8-bit wraparound problem with certain password
+       are truncated at 72 bytes, but there is an 8-bit wraparound problem with certain password
        lengths resulting in weak hashes.
 $2x$ – Post-2011 bug discovery, old hashes can be renamed to be $2x$ to indicate that they were generated with
        the broken algorithm. These hashes are still weak, but at least it's clear which algorithm was used to
@@ -36,6 +36,18 @@ First and foremost this library originated as a port of jBCrypt, and subsequentl
 was set to match, which in this case is `$2a$`.
 This has been changed as handling only the single revision causes issues cross-platform with implementations that moved
 altered their revision to handle migrations and other issues.
+
+Raw BCrypt APIs throw when the UTF-8 encoded password (including the revision-specific terminator) exceeds
+72 bytes. Callers that need the traditional truncating behavior can explicitly pass
+`LongPasswordHandling.Truncate` when hashing and verifying:
+
+```csharp
+var hash = BCrypt.HashPassword(password, LongPasswordHandling.Truncate);
+var isValid = BCrypt.Verify(password, hash, LongPasswordHandling.Truncate);
+```
+
+Truncation is applied to the encoded bytes, not the number of .NET characters. Pre-hashed
+`BCryptExtendedV2` and `BCryptExtendedV3` operations are not subject to the raw BCrypt input limit.
 
 ```text
 

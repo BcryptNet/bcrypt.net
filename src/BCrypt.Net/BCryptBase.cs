@@ -28,6 +28,35 @@ namespace BCryptNet;
 /// </summary>
 public partial class BCryptCore
 {
+    internal static void ValidateLongPasswordHandling(LongPasswordHandling longPasswordHandling)
+    {
+        bool isDefined;
+#if NET7_0_OR_GREATER
+        isDefined = Enum.IsDefined(longPasswordHandling);
+#else
+        isDefined = Enum.IsDefined(typeof(LongPasswordHandling), longPasswordHandling);
+#endif
+        if (!isDefined)
+        {
+            throw new ArgumentOutOfRangeException(nameof(longPasswordHandling), longPasswordHandling, null);
+        }
+    }
+
+    /// <summary>
+    /// Trims an over-long input key before encoding so the work done (and any stack buffer sized from it)
+    /// is bounded. Every char encodes to at least one UTF-8 byte, so the first 72 chars always fill the
+    /// 72-byte limit; a trailing high surrogate keeps its pair so the prefix still encodes identically.
+    /// </summary>
+    internal static ReadOnlySpan<char> TrimForTruncation(ReadOnlySpan<char> inputKey)
+    {
+        if (inputKey.Length <= 72)
+        {
+            return inputKey;
+        }
+
+        return inputKey.Slice(0, char.IsHighSurrogate(inputKey[71]) ? 73 : 72);
+    }
+
     // BCrypt parameters
     /// <summary>
     /// Default Work Factor

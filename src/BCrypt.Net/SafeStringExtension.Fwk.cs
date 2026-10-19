@@ -45,7 +45,19 @@ public sealed class BCryptSafeString : BCryptCore
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static string HashPassword(SecureString safeString, string salt)
     {
-        return GetBCryptHashFromSecureString(safeString, key => HashPassword(key, salt));
+        return HashPassword(safeString, salt, LongPasswordHandling.Throw);
+    }
+
+    /// <summary>
+    /// Hashes a SecureString password with an explicit long-password policy.
+    /// </summary>
+    /// <param name="safeString">The password to hash.</param>
+    /// <param name="salt">The salt to hash with.</param>
+    /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
+    /// <returns>The hashed password.</returns>
+    public static string HashPassword(SecureString safeString, string salt, LongPasswordHandling longPasswordHandling)
+    {
+        return GetBCryptHashFromSecureString(safeString, key => HashPassword(key, salt.AsSpan(), longPasswordHandling));
     }
 
     /// <summary>
@@ -68,7 +80,19 @@ public sealed class BCryptSafeString : BCryptCore
     /// </exception>
     public static string HashPassword(SecureString inputKey, int workFactor = DefaultRounds)
     {
-        return GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, workFactor));
+        return HashPassword(inputKey, LongPasswordHandling.Throw, workFactor);
+    }
+
+    /// <summary>
+    /// Hashes a SecureString password with a generated salt and an explicit long-password policy.
+    /// </summary>
+    /// <param name="inputKey">The password to hash.</param>
+    /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
+    /// <param name="workFactor">The computational cost parameter.</param>
+    /// <returns>The hashed password.</returns>
+    public static string HashPassword(SecureString inputKey, LongPasswordHandling longPasswordHandling, int workFactor = DefaultRounds)
+    {
+        return GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, workFactor, longPasswordHandling));
     }
 
     /// <summary>
@@ -81,18 +105,30 @@ public sealed class BCryptSafeString : BCryptCore
     /// <exception cref="SaltParseException">Thrown when the stored hash cannot be parsed.</exception>
     public static bool Verify(SecureString inputKey, string hash)
     {
+        return Verify(inputKey, hash, LongPasswordHandling.Throw);
+    }
+
+    /// <summary>
+    /// Verifies a SecureString password using the selected long-password policy.
+    /// </summary>
+    /// <param name="inputKey">The candidate password.</param>
+    /// <param name="hash">The stored BCrypt hash.</param>
+    /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
+    /// <returns><c>true</c> if the password matches; otherwise <c>false</c>.</returns>
+    public static bool Verify(SecureString inputKey, string hash, LongPasswordHandling longPasswordHandling)
+    {
         if (string.IsNullOrEmpty(hash))
             throw new ArgumentException("Invalid hash", nameof(hash));
 
-        string computed = GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, hash));
+        string computed = GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, hash.AsSpan(), longPasswordHandling));
         return SecureEquals(SafeUTF8.GetBytes(hash), SafeUTF8.GetBytes(computed));
     }
 
-    private static string HashPassword(ReadOnlySpan<char> inputKey, int workFactor = DefaultRounds) =>
-        HashPassword(inputKey, GenerateSalt(workFactor));
+    private static string HashPassword(ReadOnlySpan<char> inputKey, int workFactor, LongPasswordHandling longPasswordHandling) =>
+        HashPassword(inputKey, GenerateSalt(workFactor).AsSpan(), longPasswordHandling);
 
-    private static string HashPassword(ReadOnlySpan<char> inputKey, string salt) =>
-        CreatePasswordHash(inputKey, salt.AsSpan());
+    private static string HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, LongPasswordHandling longPasswordHandling) =>
+        CreatePasswordHash(inputKey, salt, longPasswordHandling: longPasswordHandling);
 
     private delegate string BCryptDelegate(ReadOnlySpan<char> inputKey);
 

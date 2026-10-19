@@ -53,7 +53,7 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
         ArgumentNullException.ThrowIfNull(password);
         ArgumentNullException.ThrowIfNull(user);
 
-        return BCrypt.HashPassword(password, _options.WorkFactor);
+        return BCrypt.HashPassword(password, _options.LongPasswordHandling, _options.WorkFactor);
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
         if (_options.RehashPasswords)
         {
             var hashInfo = BCrypt.InterrogateHash(hashedPassword);
-            if (BCrypt.Verify(providedPassword, hashedPassword))
+            if (BCrypt.Verify(providedPassword, hashedPassword, _options.LongPasswordHandling))
             {
                 return hashInfo.WorkFactor < _options.WorkFactor
                     ? PasswordVerificationResult.SuccessRehashNeeded
@@ -92,7 +92,7 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
             return PasswordVerificationResult.Failed;
         }
 
-        return BCrypt.Verify(providedPassword, hashedPassword)
+        return BCrypt.Verify(providedPassword, hashedPassword, _options.LongPasswordHandling)
             ? PasswordVerificationResult.Success
             : PasswordVerificationResult.Failed;
     }

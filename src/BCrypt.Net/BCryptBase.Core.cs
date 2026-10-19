@@ -18,11 +18,8 @@
 // */
 
 #if NETCOREAPP
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace BCryptNet;
 
@@ -40,14 +37,19 @@ public partial class BCryptCore
     /// <param name="salt"></param>
     /// <param name="hashType"></param>
     /// <param name="enhancedHashKeyGen"></param>
+    /// <param name="longPasswordHandling"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="SaltParseException"></exception>
-    internal static string CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, HashType hashType = HashType.None, EnhancedHashDelegate enhancedHashKeyGen = null)
+    internal static string CreatePasswordHash(
+        ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, HashType hashType = HashType.None,
+        EnhancedHashDelegate enhancedHashKeyGen = null,
+        LongPasswordHandling longPasswordHandling = LongPasswordHandling.Throw)
     {
         Span<char> outputBuffer = stackalloc char[60];
-        CreatePasswordHash(inputKey, salt, outputBuffer, out var outputBufferWritten, hashType, enhancedHashKeyGen);
+        CreatePasswordHash(inputKey, salt, outputBuffer, out var outputBufferWritten, hashType, enhancedHashKeyGen,
+            longPasswordHandling);
         return new string(outputBuffer[..outputBufferWritten]);
     }
 
@@ -60,6 +62,7 @@ public partial class BCryptCore
     /// <param name="outputBufferWritten"></param>
     /// <param name="hashType"></param>
     /// <param name="enhancedHashKeyGen"></param>
+    /// <param name="longPasswordHandling"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
@@ -67,8 +70,12 @@ public partial class BCryptCore
     internal static void CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt,
         Span<char> outputBuffer, out int outputBufferWritten,
         HashType hashType = HashType.None,
-        EnhancedHashDelegate enhancedHashKeyGen = null)
+        EnhancedHashDelegate enhancedHashKeyGen = null,
+        LongPasswordHandling longPasswordHandling = LongPasswordHandling.Throw
+        )
     {
+        ValidateLongPasswordHandling(longPasswordHandling);
+
         if (salt.IsEmpty)
         {
             throw new ArgumentException("Invalid salt: salt cannot be empty", nameof(salt));
@@ -136,10 +143,14 @@ public partial class BCryptCore
         {
             case HashType.None:
                 bool appendNul = bcryptMinorRevision >= 'a';
-                int inputByteCount = SafeUTF8.GetByteCount(inputKey) + (appendNul ? 1 : 0);
-                if (inputByteCount > 72)
+                if (longPasswordHandling == LongPasswordHandling.Truncate)
                 {
-                    throw new ArgumentException("Invalid input key: input key cannot exceed 72 bytes for bCrypt", nameof(inputKey));
+                    inputKey = TrimForTruncation(inputKey);
+                }
+                int inputByteCount = SafeUTF8.GetByteCount(inputKey) + (appendNul ? 1 : 0);
+                if (longPasswordHandling == LongPasswordHandling.Throw && inputByteCount > 72)
+                {
+                    throw new PasswordTooLongException("Invalid input key: input key cannot exceed 72 bytes for bCrypt");
                 }
                 Span<byte> utf8Buffer = stackalloc byte[SafeUTF8.GetMaxByteCount(inputKey.Length + (appendNul ? 1 : 0))];
                 try
@@ -151,6 +162,10 @@ public partial class BCryptCore
 
                     int bytesWritten = SafeUTF8.GetBytes(inputKey, utf8Buffer);
                     if (appendNul) utf8Buffer[bytesWritten++] = 0;
+                    if (longPasswordHandling == LongPasswordHandling.Truncate && bytesWritten > 72)
+                    {
+                        bytesWritten = 72;
+                    }
                     Span<byte> inputBytes = utf8Buffer[..bytesWritten];
                     if (!HashBytes(inputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int hashBytesWritten))
                         throw new BcryptAuthenticationException("Couldn't hash input");

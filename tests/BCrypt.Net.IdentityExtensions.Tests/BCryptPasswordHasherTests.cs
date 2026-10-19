@@ -51,6 +51,54 @@ public sealed class BCryptPasswordHasherTests
     }
 
     [Fact]
+    public void LongPasswordHandling_CanOptIntoTruncation()
+    {
+        var options = Options.Create(new BCryptHasherOptions
+        {
+            LongPasswordHandling = BCryptNet.LongPasswordHandling.Truncate,
+            RehashPasswords = true,
+            WorkFactor = 4
+        });
+        var hasher = new BCryptPasswordHasher<TestUser>(new PasswordHasher<TestUser>(), options);
+        var user = new TestUser();
+        var password = new string('x', 80);
+
+        var hash = hasher.HashPassword(user, password);
+        var result = hasher.VerifyHashedPassword(user, hash, password);
+
+        Assert.Equal(PasswordVerificationResult.Success, result);
+    }
+
+    [Fact]
+    public void LongPasswordHandling_TruncationAppliesWithoutRehash()
+    {
+        var options = Options.Create(new BCryptHasherOptions
+        {
+            LongPasswordHandling = BCryptNet.LongPasswordHandling.Truncate,
+            RehashPasswords = false,
+            WorkFactor = 4
+        });
+        var hasher = new BCryptPasswordHasher<TestUser>(new PasswordHasher<TestUser>(), options);
+        var user = new TestUser();
+        var password = new string('x', 80);
+
+        var hash = hasher.HashPassword(user, password);
+
+        Assert.Equal(PasswordVerificationResult.Success, hasher.VerifyHashedPassword(user, hash, password));
+        Assert.Equal(PasswordVerificationResult.Success, hasher.VerifyHashedPassword(user, hash, new string('x', 100)));
+        Assert.Equal(PasswordVerificationResult.Failed, hasher.VerifyHashedPassword(user, hash, new string('y', 80)));
+    }
+
+    [Fact]
+    public void LongPasswordHandling_ThrowsByDefault()
+    {
+        var hasher = new BCryptPasswordHasher<TestUser>(new PasswordHasher<TestUser>());
+
+        Assert.Equal(BCryptNet.LongPasswordHandling.Throw, new BCryptHasherOptions().LongPasswordHandling);
+        Assert.Throws<ArgumentException>(() => hasher.HashPassword(new TestUser(), new string('x', 80)));
+    }
+
+    [Fact]
     public void VerifyHashedPassword_Uses_AspNetIdentity_Hash_Path()
     {
         var identityHasher = new PasswordHasher<TestUser>();

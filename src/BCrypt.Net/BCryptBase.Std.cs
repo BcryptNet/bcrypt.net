@@ -17,7 +17,6 @@
 // IN THE SOFTWARE.
 // */
 #if PRE_CORE
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
@@ -38,12 +37,18 @@ public partial class BCryptCore
     /// <param name="salt">the salt to hash with (best generated using <see cref="BCryptCore.GenerateSalt(int,char)"/>)</param>
     /// <param name="hashType">SHA-Based Hash to use</param>
     /// <param name="enhancedHashKeyGen">Delegate</param>
-    /// <returns></returns>
+    /// <param name="longPasswordHandling">Specifies how to handle passwords that exceed the maximum length</param>
+    /// <returns>The hashed password as a string</returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="SaltParseException"></exception>
-    internal static string CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, HashType hashType = HashType.None, EnhancedHashDelegate enhancedHashKeyGen = null)
+    internal static string CreatePasswordHash(
+        ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt,
+        HashType hashType = HashType.None, EnhancedHashDelegate enhancedHashKeyGen = null,
+        LongPasswordHandling longPasswordHandling = LongPasswordHandling.Throw)
     {
+        ValidateLongPasswordHandling(longPasswordHandling);
+
         if (salt.IsEmpty)
         {
             throw new ArgumentException("Invalid salt: salt cannot be empty", nameof(salt));
@@ -106,12 +111,20 @@ public partial class BCryptCore
         {
             case HashType.None:
                 bool appendNul = bcryptMinorRevision >= 'a';
-                int inputByteCount = SafeUTF8.GetByteCount(inputKey.ToArray()) + (appendNul ? 1 : 0);
-                if (inputByteCount > 72)
+                if (longPasswordHandling == LongPasswordHandling.Truncate)
                 {
-                    throw new ArgumentException("Invalid input key: input key cannot exceed 72 bytes for bCrypt", nameof(inputKey));
+                    inputKey = TrimForTruncation(inputKey);
+                }
+                int inputByteCount = SafeUTF8.GetByteCount(inputKey.ToArray()) + (appendNul ? 1 : 0);
+                if (longPasswordHandling == LongPasswordHandling.Throw && inputByteCount > 72)
+                {
+                    throw new PasswordTooLongException("Invalid input key: input key cannot exceed 72 bytes for bCrypt");
                 }
                 inputBytes = SafeUTF8.GetBytes(inputKey.ToString() + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
+                if (longPasswordHandling == LongPasswordHandling.Truncate && inputBytes.Length > 72)
+                {
+                    Array.Resize(ref inputBytes, 72);
+                }
                 break;
             default:
                 if (enhancedHashKeyGen == null)

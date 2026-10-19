@@ -24,6 +24,8 @@ namespace BCryptNet.IdentityExtensions;
 /// </summary>
 public record BCryptHasherOptions
 {
+    private LongPasswordHandling _longPasswordHandling = LongPasswordHandling.Throw;
+
     /// <summary>
     /// The work factor to use when hashing passwords.
     /// </summary>
@@ -32,4 +34,20 @@ public record BCryptHasherOptions
     /// Whether to rehash passwords when the work factor changes.
     /// </summary>
     public bool RehashPasswords { get; set; }
+
+    /// <summary>
+    /// How passwords exceeding bcrypt's 72-byte limit are handled.
+    /// The default is to throw; truncation must be explicitly enabled.
+    /// </summary>
+    public LongPasswordHandling LongPasswordHandling
+    {
+        get => _longPasswordHandling;
+        set
+        {
+            if (!Enum.IsDefined(value))
+                throw new ArgumentOutOfRangeException(nameof(value), value, null);
+
+            _longPasswordHandling = value;
+        }
+    }
 }
