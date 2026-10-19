@@ -28,28 +28,24 @@ namespace BCryptNet;
 /// </summary>
 public partial class BCryptCore
 {
-    internal delegate int EnhancedHashDelegate(ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision, Span<byte> destination);
+    // Inputs whose UTF-8 encoding fits in this many bytes are encoded on the stack; larger ones use a pooled
+    // array. Either way the buffer is zeroed before it is released.
+    internal const int StackallocByteThreshold = 256;
 
     /// <summary>
     /// Create Password Hash Base
     /// </summary>
     /// <param name="inputKey"></param>
     /// <param name="salt"></param>
-    /// <param name="hashType"></param>
-    /// <param name="enhancedHashKeyGen"></param>
-    /// <param name="longPasswordHandling"></param>
+    /// <param name="context">Long-password policy and pre-hash settings</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="SaltParseException"></exception>
-    internal static string CreatePasswordHash(
-        ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, HashType hashType = HashType.None,
-        EnhancedHashDelegate enhancedHashKeyGen = null,
-        LongPasswordHandling longPasswordHandling = LongPasswordHandling.Throw)
+    internal static string CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, in HashContext context)
     {
         Span<char> outputBuffer = stackalloc char[60];
-        CreatePasswordHash(inputKey, salt, outputBuffer, out var outputBufferWritten, hashType, enhancedHashKeyGen,
-            longPasswordHandling);
+        CreatePasswordHash(inputKey, salt, outputBuffer, out var outputBufferWritten, in context);
         return new string(outputBuffer[..outputBufferWritten]);
     }
 
@@ -60,20 +56,17 @@ public partial class BCryptCore
     /// <param name="salt"></param>
     /// <param name="outputBuffer"></param>
     /// <param name="outputBufferWritten"></param>
-    /// <param name="hashType"></param>
-    /// <param name="enhancedHashKeyGen"></param>
-    /// <param name="longPasswordHandling"></param>
+    /// <param name="context">Long-password policy and pre-hash settings</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="SaltParseException"></exception>
     internal static void CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt,
-        Span<char> outputBuffer, out int outputBufferWritten,
-        HashType hashType = HashType.None,
-        EnhancedHashDelegate enhancedHashKeyGen = null,
-        LongPasswordHandling longPasswordHandling = LongPasswordHandling.Throw
-        )
+        Span<char> outputBuffer, out int outputBufferWritten, in HashContext context)
     {
+        LongPasswordHandling longPasswordHandling = context.LongPasswordHandling;
+        HashType hashType = context.HashType;
+
         ValidateLongPasswordHandling(longPasswordHandling);
 
         if (salt.IsEmpty)
@@ -81,9 +74,9 @@ public partial class BCryptCore
             throw new ArgumentException("Invalid salt: salt cannot be empty", nameof(salt));
         }
 
-        if (enhancedHashKeyGen == null && hashType != HashType.None)
+        if (context.Kind == PreHashKind.None && hashType != HashType.None)
         {
-            throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(hashType));
+            throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(context));
         }
 
         if (outputBuffer.Length != 60)
@@ -179,11 +172,6 @@ public partial class BCryptCore
                 return;
 
             default:
-                if (enhancedHashKeyGen == null)
-                {
-                    throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(hashType));
-                }
-
                 Span<byte> eInputBuffer = stackalloc byte[128];
 
                 try
@@ -193,7 +181,12 @@ public partial class BCryptCore
                         throw new SaltParseException("Invalid salt");
                     }
 
-                    int eInputLen = enhancedHashKeyGen(inputKey, hashType, bcryptMinorRevision, eInputBuffer);
+                    int eInputLen = context.Kind switch
+                    {
+                        PreHashKind.Sha2 => BCryptExtendedV2.EnhancedHash(inputKey, hashType, bcryptMinorRevision, eInputBuffer),
+                        PreHashKind.HmacSha3 => BCryptExtendedV3.EnhancedHash(context.HmacKey, inputKey, hashType, eInputBuffer, bcryptMinorRevision),
+                        _ => throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(context))
+                    };
                     Span<byte> eInputBytes = eInputBuffer[..eInputLen];
                     if (!HashBytes(eInputBytes, salt.Slice(startingOffset + 3, 22), bcryptMinorRevision, workFactor, outputBuffer, out int written))
                         throw new BcryptAuthenticationException("Couldn't hash input");
@@ -205,6 +198,59 @@ public partial class BCryptCore
                 }
 
                 return;
+        }
+    }
+
+    /// <summary>
+    /// Hashes <paramref name="text"/> with the salt from <paramref name="hash"/> and compares the result in constant time.
+    /// </summary>
+    internal static bool VerifyHash(ReadOnlySpan<char> text, ReadOnlySpan<char> hash, in HashContext context)
+    {
+        if (SafeUTF8.GetByteCount(hash) > 60)
+        {
+            return false;
+        }
+
+        Span<byte> hashBytes = stackalloc byte[60];
+        int hashLen = SafeUTF8.GetBytes(hash, hashBytes);
+
+        Span<char> computedHash = stackalloc char[60];
+        CreatePasswordHash(text, hash, computedHash, out int computedHashLen, in context);
+
+        Span<byte> computedBytes = stackalloc byte[60];
+        int computedLen = SafeUTF8.GetBytes(computedHash[..computedHashLen], computedBytes);
+
+        return SecureEquals(hashBytes[..hashLen], computedBytes[..computedLen]);
+    }
+
+    /// <summary>
+    /// Writes the pre-hash key material bcrypt consumes: base64(<paramref name="digest"/>) as ASCII bytes,
+    /// NUL-terminated for revisions 'a' and later.
+    /// </summary>
+    internal static int EncodePreHash(ReadOnlySpan<byte> digest, char bcryptMinorRevision, Span<byte> destination)
+    {
+        Span<char> base64Chars = stackalloc char[88]; // base64 of a 64-byte (SHA-512) digest
+        try
+        {
+            if (!Convert.TryToBase64Chars(digest, base64Chars, out int base64Len))
+                throw new BcryptAuthenticationException("Base64 encoding failed in EnhancedHash");
+
+            // base64 is ASCII, so each char is exactly one UTF-8 byte
+            for (int i = 0; i < base64Len; i++)
+            {
+                destination[i] = (byte)base64Chars[i];
+            }
+
+            if (bcryptMinorRevision >= 'a')
+            {
+                destination[base64Len++] = 0;
+            }
+
+            return base64Len;
+        }
+        finally
+        {
+            ZeroMemory(base64Chars);
         }
     }
 

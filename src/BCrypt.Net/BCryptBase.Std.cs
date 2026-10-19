@@ -17,6 +17,7 @@
 // IN THE SOFTWARE.
 // */
 #if PRE_CORE
+using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
@@ -28,25 +29,21 @@ namespace BCryptNet;
 /// </summary>
 public partial class BCryptCore
 {
-    internal delegate Span<byte> EnhancedHashDelegate(ReadOnlySpan<char> inputKey, HashType hashType, char bcryptMinorRevision);
-
     /// <summary>
     /// Create Password Hash Base
     /// </summary>
     /// <param name="inputKey">The password or string to hash.</param>
     /// <param name="salt">the salt to hash with (best generated using <see cref="BCryptCore.GenerateSalt(int,char)"/>)</param>
-    /// <param name="hashType">SHA-Based Hash to use</param>
-    /// <param name="enhancedHashKeyGen">Delegate</param>
-    /// <param name="longPasswordHandling">Specifies how to handle passwords that exceed the maximum length</param>
+    /// <param name="context">Long-password policy and pre-hash settings</param>
     /// <returns>The hashed password as a string</returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="SaltParseException"></exception>
-    internal static string CreatePasswordHash(
-        ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt,
-        HashType hashType = HashType.None, EnhancedHashDelegate enhancedHashKeyGen = null,
-        LongPasswordHandling longPasswordHandling = LongPasswordHandling.Throw)
+    internal static string CreatePasswordHash(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, in HashContext context)
     {
+        LongPasswordHandling longPasswordHandling = context.LongPasswordHandling;
+        HashType hashType = context.HashType;
+
         ValidateLongPasswordHandling(longPasswordHandling);
 
         if (salt.IsEmpty)
@@ -54,9 +51,9 @@ public partial class BCryptCore
             throw new ArgumentException("Invalid salt: salt cannot be empty", nameof(salt));
         }
 
-        if (enhancedHashKeyGen == null && hashType != HashType.None)
+        if (context.Kind == PreHashKind.None && hashType != HashType.None)
         {
-            throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(hashType));
+            throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(context));
         }
 
         // Determine the starting offset and validate the salt
@@ -106,42 +103,80 @@ public partial class BCryptCore
             throw new SaltParseException("Salt rounds out of range");
         }
 
-        byte[] inputBytes;
-        switch (hashType)
+        byte[] inputBytes = null;
+        try
         {
-            case HashType.None:
-                bool appendNul = bcryptMinorRevision >= 'a';
-                if (longPasswordHandling == LongPasswordHandling.Truncate)
-                {
-                    inputKey = TrimForTruncation(inputKey);
-                }
-                int inputByteCount = SafeUTF8.GetByteCount(inputKey.ToArray()) + (appendNul ? 1 : 0);
-                if (longPasswordHandling == LongPasswordHandling.Throw && inputByteCount > 72)
-                {
-                    throw new PasswordTooLongException("Invalid input key: input key cannot exceed 72 bytes for bCrypt");
-                }
-                inputBytes = SafeUTF8.GetBytes(inputKey.ToString() + (bcryptMinorRevision >= 'a' ? Nul : EmptyString));
-                if (longPasswordHandling == LongPasswordHandling.Truncate && inputBytes.Length > 72)
-                {
-                    Array.Resize(ref inputBytes, 72);
-                }
-                break;
-            default:
-                if (enhancedHashKeyGen == null)
-                {
-                    throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(hashType));
-                }
+            switch (hashType)
+            {
+                case HashType.None:
+                    bool appendNul = bcryptMinorRevision >= 'a';
+                    if (longPasswordHandling == LongPasswordHandling.Truncate)
+                    {
+                        inputKey = TrimForTruncation(inputKey);
+                    }
 
-                inputBytes = enhancedHashKeyGen(inputKey, hashType, bcryptMinorRevision).ToArray();
-                break;
+                    inputBytes = EncodeUtf8(inputKey, appendNul);
+                    if (longPasswordHandling == LongPasswordHandling.Throw && inputBytes.Length > 72)
+                    {
+                        throw new PasswordTooLongException("Invalid input key: input key cannot exceed 72 bytes for bCrypt");
+                    }
+
+                    if (longPasswordHandling == LongPasswordHandling.Truncate && inputBytes.Length > 72)
+                    {
+                        // Copy rather than Array.Resize so the original buffer can be wiped
+                        byte[] truncated = new byte[72];
+                        Array.Copy(inputBytes, truncated, 72);
+                        ZeroMemory(inputBytes);
+                        inputBytes = truncated;
+                    }
+                    break;
+                default:
+                    if (context.Kind != PreHashKind.Sha2)
+                    {
+                        throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(context));
+                    }
+
+                    inputBytes = BCryptExtendedV2.EnhancedHash(inputKey, hashType, bcryptMinorRevision);
+                    break;
+            }
+
+            if (salt.Length < startingOffset + 25)
+            {
+                throw new SaltParseException("Invalid salt");
+            }
+
+            return HashBytes(inputBytes, salt.Slice(startingOffset + 3, 22).ToString(), bcryptMinorRevision, workFactor);
         }
-
-        if (salt.Length < startingOffset + 25)
+        finally
         {
-            throw new SaltParseException("Invalid salt");
+            if (inputBytes != null)
+            {
+                ZeroMemory(inputBytes);
+            }
         }
+    }
 
-        return HashBytes(inputBytes, salt.Slice(startingOffset + 3, 22).ToString(), bcryptMinorRevision, workFactor);
+    /// <summary>
+    /// UTF-8 encodes <paramref name="input"/> without creating an intermediate (un-wipeable) string.
+    /// The caller owns the returned array and must zero it once finished.
+    /// </summary>
+    /// <param name="input">Characters to encode.</param>
+    /// <param name="appendNul">Whether to reserve a trailing NUL byte.</param>
+    internal static byte[] EncodeUtf8(ReadOnlySpan<char> input, bool appendNul)
+    {
+        char[] chars = ArrayPool<char>.Shared.Rent(Math.Max(input.Length, 1));
+        try
+        {
+            input.CopyTo(chars);
+            byte[] bytes = new byte[SafeUTF8.GetByteCount(chars, 0, input.Length) + (appendNul ? 1 : 0)];
+            SafeUTF8.GetBytes(chars, 0, input.Length, bytes, 0);
+            return bytes;
+        }
+        finally
+        {
+            ZeroMemory(chars.AsSpan(0, input.Length));
+            ArrayPool<char>.Shared.Return(chars);
+        }
     }
 
     internal static string HashBytes(byte[] inputBytes, string extractedSalt, char bcryptMinorRevision, int workFactor)
@@ -162,7 +197,7 @@ public partial class BCryptCore
     }
 
     /// <summary>
-    ///  Generate a salt for use with the <see cref="BCrypt.HashPassword(string, string)"/> method.
+    ///  Generate a salt for use with the <see cref="BCrypt.HashPassword(string, string, BCryptOptions)"/> method.
     /// </summary>
     /// <param name="workFactor">The log2 of the number of rounds of hashing to apply - the work
     ///                          factor therefore increases as 2**workFactor.</param>

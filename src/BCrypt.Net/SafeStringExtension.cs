@@ -34,23 +34,12 @@ public sealed class BCryptSafeString : BCryptCore
     /// Hashes a password using the BCrypt algorithm.
     /// </summary>
     /// <param name="inputKey">The password to be hashed, provided as a <see cref="SecureString"/>.</param>
-    /// <param name="salt">A cryptographic salt used for the hashing process.</param>
+    /// <param name="salt">A cryptographic salt used for the hashing process; its work factor is used and <see cref="BCryptOptions.WorkFactor"/> is ignored.</param>
+    /// <param name="options">Hashing options: <see cref="BCryptOptions.LongPasswordHandling"/> controls passwords exceeding the 72-byte bcrypt limit; <see cref="BCryptOptions.WorkFactor"/> is ignored as the salt carries its own. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="HashType.None"/>.</param>
     /// <returns>The hashed password as a string.</returns>
-    public static string HashPassword(SecureString inputKey, string salt)
+    public static string HashPassword(SecureString inputKey, string salt, BCryptOptions options = default)
     {
-        return HashPassword(inputKey, salt, LongPasswordHandling.Throw);
-    }
-
-    /// <summary>
-    /// Hashes a SecureString password with an explicit long-password policy.
-    /// </summary>
-    /// <param name="inputKey">The password to be hashed.</param>
-    /// <param name="salt">A cryptographic salt used for the hashing process.</param>
-    /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
-    /// <returns>The hashed password as a string.</returns>
-    public static string HashPassword(SecureString inputKey, string salt, LongPasswordHandling longPasswordHandling)
-    {
-        return GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, salt.AsSpan(), longPasswordHandling));
+        return GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, salt.AsSpan(), options));
     }
 
     /// <summary>
@@ -61,19 +50,18 @@ public sealed class BCryptSafeString : BCryptCore
     /// <returns>The hashed password as a string.</returns>
     public static string HashPassword(SecureString inputKey, int workFactor = DefaultRounds)
     {
-        return HashPassword(inputKey, LongPasswordHandling.Throw, workFactor);
+        return HashPassword(inputKey, new BCryptOptions(workFactor));
     }
 
     /// <summary>
-    /// Hashes a SecureString password with a generated salt and an explicit long-password policy.
+    /// Hashes a SecureString password with a generated salt.
     /// </summary>
     /// <param name="inputKey">The password to be hashed.</param>
-    /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
-    /// <param name="workFactor">The computational cost parameter.</param>
+    /// <param name="options">Hashing options: <see cref="BCryptOptions.WorkFactor"/> sets the cost of the generated salt and <see cref="BCryptOptions.LongPasswordHandling"/> controls passwords exceeding the 72-byte bcrypt limit. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="HashType.None"/>.</param>
     /// <returns>The hashed password as a string.</returns>
-    public static string HashPassword(SecureString inputKey, LongPasswordHandling longPasswordHandling, int workFactor = DefaultRounds)
+    public static string HashPassword(SecureString inputKey, BCryptOptions options)
     {
-        return GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, workFactor, longPasswordHandling));
+        return GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, GenerateSalt(options.WorkFactor), options));
     }
 
     /// <summary>
@@ -81,27 +69,16 @@ public sealed class BCryptSafeString : BCryptCore
     /// </summary>
     /// <param name="inputKey">The candidate password, provided as a <see cref="SecureString"/>.</param>
     /// <param name="hash">The stored BCrypt hash to verify against.</param>
+    /// <param name="options">Hashing options used to recompute the hash: <see cref="BCryptOptions.LongPasswordHandling"/> must match the policy used when the hash was created; <see cref="BCryptOptions.WorkFactor"/> is ignored as it is read from the hash. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="HashType.None"/>.</param>
     /// <returns><c>true</c> if the password matches the hash; otherwise <c>false</c>.</returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="hash"/> is null or empty.</exception>
     /// <exception cref="SaltParseException">Thrown when the stored hash cannot be parsed.</exception>
-    public static bool Verify(SecureString inputKey, string hash)
-    {
-        return Verify(inputKey, hash, LongPasswordHandling.Throw);
-    }
-
-    /// <summary>
-    /// Verifies a SecureString password using the selected long-password policy.
-    /// </summary>
-    /// <param name="inputKey">The candidate password.</param>
-    /// <param name="hash">The stored BCrypt hash.</param>
-    /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.</param>
-    /// <returns><c>true</c> if the password matches; otherwise <c>false</c>.</returns>
-    public static bool Verify(SecureString inputKey, string hash, LongPasswordHandling longPasswordHandling)
+    public static bool Verify(SecureString inputKey, string hash, BCryptOptions options = default)
     {
         if (string.IsNullOrEmpty(hash))
             throw new ArgumentException("Invalid hash", nameof(hash));
 
-        string computed = GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, hash.AsSpan(), longPasswordHandling));
+        string computed = GetBCryptHashFromSecureString(inputKey, key => HashPassword(key, hash.AsSpan(), options));
 
         // bcrypt hashes are at most 60 ASCII characters; encode both sides to bytes for
         // constant-time comparison via the existing SecureEquals implementation.
@@ -112,21 +89,8 @@ public sealed class BCryptSafeString : BCryptCore
         return SecureEquals(hashBytes[..hashLen], computedBytes[..computedLen]);
     }
 
-    private static string HashPassword(ReadOnlySpan<char> inputKey, int workFactor, LongPasswordHandling longPasswordHandling) =>
-        HashPassword(inputKey, GenerateSalt(workFactor), longPasswordHandling);
-
-    private static string HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, LongPasswordHandling longPasswordHandling)
-    {
-        Span<char> outputBuffer = stackalloc char[60];
-        HashPassword(inputKey, salt, outputBuffer, out var outputBufferWritten, longPasswordHandling);
-        return new string(outputBuffer[..outputBufferWritten]);
-    }
-
-    private static void HashPassword(
-        ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer,
-        out int outputBufferWritten, LongPasswordHandling longPasswordHandling) =>
-        CreatePasswordHash(inputKey, salt, outputBuffer, out outputBufferWritten,
-            longPasswordHandling: longPasswordHandling);
+    private static string HashPassword(ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, BCryptOptions options) =>
+        CreatePasswordHash(inputKey, salt, HashContext.ForBCrypt(options));
 
     private delegate string BCryptDelegate(ReadOnlySpan<char> inputKey);
 

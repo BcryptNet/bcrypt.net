@@ -42,8 +42,9 @@ Raw BCrypt APIs throw when the UTF-8 encoded password (including the revision-sp
 `LongPasswordHandling.Truncate` when hashing and verifying:
 
 ```csharp
-var hash = BCrypt.HashPassword(password, LongPasswordHandling.Truncate);
-var isValid = BCrypt.Verify(password, hash, LongPasswordHandling.Truncate);
+var truncate = new BCryptOptions(longPasswordHandling: LongPasswordHandling.Truncate);
+var hash = BCrypt.HashPassword(password, truncate);
+var isValid = BCrypt.Verify(password, hash, truncate);
 ```
 
 Truncation is applied to the encoded bytes, not the number of .NET characters. Pre-hashed

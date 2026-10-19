@@ -39,8 +39,9 @@ If you want to specify a different version of SHA, or just wish to explicitly se
 you can do so by using the following change to the above.
 
 ```csharp
-var enhancedHashPassword = BCryptExtendedV2.HashPassword(myPassword, hashType: HashType.SHA384);
-var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword, hashType:HashType.SHA384);
+var options = new BCryptOptions(preHash: HashType.SHA384);
+var enhancedHashPassword = BCryptExtendedV2.HashPassword(myPassword, options);
+var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword, options);
 ```
 
 *Why SHA384?* It’s a good balance of performance, security, collision protection and is the only version that wasn't vulnerable to length extension attacks <https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks> .

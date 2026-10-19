@@ -17,13 +17,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OU
 IN THE SOFTWARE.
 */
 
-using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Security;
-using System.Security.Cryptography;
 using System.Text;
-using Xunit;
 
 namespace BCryptNet.UnitTests
 {
@@ -32,6 +28,8 @@ namespace BCryptNet.UnitTests
     /// </summary>
     public class BCryptTests
     {
+        private static readonly BCryptOptions TruncateOptions = new(longPasswordHandling: LongPasswordHandling.Truncate);
+
         private static readonly Encoding SafeUtf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         private readonly string[,] _testVectors = new[,] {
@@ -213,10 +211,10 @@ namespace BCryptNet.UnitTests
             const string salt = "$2a$04$abcdefghijklmnopqrstuu";
             var password = new string('x', 80);
             var securePassword = AsSecureString(password);
-            var hash = BCryptSafeString.HashPassword(securePassword, salt, LongPasswordHandling.Truncate);
+            var hash = BCryptSafeString.HashPassword(securePassword, salt, TruncateOptions);
 
-            Assert.True(BCryptSafeString.Verify(securePassword, hash, LongPasswordHandling.Truncate));
-            Assert.Throws<ArgumentException>(() => BCryptSafeString.HashPassword(securePassword, salt));
+            Assert.True(BCryptSafeString.Verify(securePassword, hash, TruncateOptions));
+            Assert.Throws<PasswordTooLongException>(() => BCryptSafeString.HashPassword(securePassword, salt));
         }
 #endif
         [Fact]
@@ -269,7 +267,7 @@ namespace BCryptNet.UnitTests
             var inBounds = "testtdsdddddddddddddddddddddddddddddddddddddddddddddddsdddddddddddddddd"; //71char (as bcrypt version a will append null)
             var exceedsBounds = "testtdsdddddddddddddddddddddddddddddddddddddddddddddddsdddddddddddddddddd"; //73char
             var hashPassword = BCrypt.HashPassword(inBounds);
-            Assert.Throws<ArgumentException>(() => BCrypt.HashPassword(exceedsBounds));
+            Assert.Throws<PasswordTooLongException>(() => BCrypt.HashPassword(exceedsBounds));
         }
 
         [Fact]
@@ -280,16 +278,16 @@ namespace BCryptNet.UnitTests
             var firstPassword = sharedPrefix + "a";
             var secondPassword = sharedPrefix + "b";
 
-            var hash = BCrypt.HashPassword(firstPassword, salt, LongPasswordHandling.Truncate);
+            var hash = BCrypt.HashPassword(firstPassword, salt, TruncateOptions);
 
-            Assert.Throws<ArgumentException>(() => BCrypt.HashPassword(firstPassword, salt));
-            Assert.Equal(hash, BCrypt.HashPassword(secondPassword, salt, LongPasswordHandling.Truncate));
-            Assert.True(BCrypt.Verify(secondPassword, hash, LongPasswordHandling.Truncate));
-            Assert.Throws<ArgumentException>(() => BCrypt.Verify(secondPassword, hash));
+            Assert.Throws<PasswordTooLongException>(() => BCrypt.HashPassword(firstPassword, salt));
+            Assert.Equal(hash, BCrypt.HashPassword(secondPassword, salt, TruncateOptions));
+            Assert.True(BCrypt.Verify(secondPassword, hash, TruncateOptions));
+            Assert.Throws<PasswordTooLongException>(() => BCrypt.Verify(secondPassword, hash));
 
             var upgradedHash = BCrypt.ValidateAndUpgradeHash(
-                firstPassword, hash, secondPassword, LongPasswordHandling.Truncate, workFactor: 4, forceWorkFactor: true);
-            Assert.True(BCrypt.Verify(firstPassword, upgradedHash, LongPasswordHandling.Truncate));
+                firstPassword, hash, secondPassword, TruncateOptions.WithWorkFactor(4), forceWorkFactor: true);
+            Assert.True(BCrypt.Verify(firstPassword, upgradedHash, TruncateOptions));
         }
 
 #if NETCOREAPP
@@ -298,12 +296,12 @@ namespace BCryptNet.UnitTests
         {
             const string salt = "$2a$04$abcdefghijklmnopqrstuu";
             var password = new string('x', 80);
-            var expected = BCrypt.HashPassword(password, salt, LongPasswordHandling.Truncate);
+            var expected = BCrypt.HashPassword(password, salt, TruncateOptions);
 
-            Assert.Equal(expected, BCrypt.HashPassword(password.AsSpan(), salt.AsSpan(), LongPasswordHandling.Truncate));
+            Assert.Equal(expected, BCrypt.HashPassword(password.AsSpan(), salt.AsSpan(), TruncateOptions));
 
             Span<char> outputBuffer = stackalloc char[60];
-            BCrypt.HashPassword(password.AsSpan(), salt.AsSpan(), outputBuffer, out var written, LongPasswordHandling.Truncate);
+            BCrypt.HashPassword(password.AsSpan(), salt.AsSpan(), outputBuffer, out var written, TruncateOptions);
             Assert.Equal(expected, new string(outputBuffer[..written]));
         }
 #endif
@@ -311,10 +309,9 @@ namespace BCryptNet.UnitTests
         [Fact]
         public void LongPasswordHandlingRejectsUndefinedValues()
         {
-            const string salt = "$2a$04$abcdefghijklmnopqrstuu";
             Assert.Equal(LongPasswordHandling.Throw, default(LongPasswordHandling));
             Assert.Throws<ArgumentOutOfRangeException>(() =>
-                BCrypt.HashPassword("password", salt, (LongPasswordHandling)int.MaxValue));
+                new BCryptOptions(longPasswordHandling: (LongPasswordHandling)int.MaxValue));
         }
 
         [Fact]
@@ -324,11 +321,11 @@ namespace BCryptNet.UnitTests
             const string salt = "$2a$04$abcdefghijklmnopqrstuu";
             var hugePassword = new string('x', 1_000_000);
 
-            var hash = BCrypt.HashPassword(hugePassword, salt, LongPasswordHandling.Truncate);
+            var hash = BCrypt.HashPassword(hugePassword, salt, TruncateOptions);
 
-            Assert.Equal(BCrypt.HashPassword(new string('x', 80), salt, LongPasswordHandling.Truncate), hash);
-            Assert.True(BCrypt.Verify(hugePassword, hash, LongPasswordHandling.Truncate));
-            Assert.Throws<ArgumentException>(() => BCrypt.HashPassword(hugePassword, salt));
+            Assert.Equal(BCrypt.HashPassword(new string('x', 80), salt, TruncateOptions), hash);
+            Assert.True(BCrypt.Verify(hugePassword, hash, TruncateOptions));
+            Assert.Throws<PasswordTooLongException>(() => BCrypt.HashPassword(hugePassword, salt));
         }
 
         [Fact]
@@ -341,8 +338,8 @@ namespace BCryptNet.UnitTests
 
             var hash = BCrypt.HashPassword(maxLength, salt);
 
-            Assert.Throws<ArgumentException>(() => BCrypt.HashPassword(overLength, salt));
-            Assert.Equal(hash, BCrypt.HashPassword(overLength, salt, LongPasswordHandling.Truncate));
+            Assert.Throws<PasswordTooLongException>(() => BCrypt.HashPassword(overLength, salt));
+            Assert.Equal(hash, BCrypt.HashPassword(overLength, salt, TruncateOptions));
         }
 
         [Fact]
@@ -355,12 +352,12 @@ namespace BCryptNet.UnitTests
             var grinning = prefix + "\U0001F600" + "tail";
             var smiley = prefix + "\U0001F603" + "other tail";
 
-            var hash = BCrypt.HashPassword(grinning, salt, LongPasswordHandling.Truncate);
+            var hash = BCrypt.HashPassword(grinning, salt, TruncateOptions);
 
             // Both code points start with 0xF0, so only that byte survives truncation.
-            Assert.Equal(hash, BCrypt.HashPassword(smiley, salt, LongPasswordHandling.Truncate));
-            Assert.NotEqual(hash, BCrypt.HashPassword(prefix + "x", salt, LongPasswordHandling.Truncate));
-            Assert.True(BCrypt.Verify(smiley, hash, LongPasswordHandling.Truncate));
+            Assert.Equal(hash, BCrypt.HashPassword(smiley, salt, TruncateOptions));
+            Assert.NotEqual(hash, BCrypt.HashPassword(prefix + "x", salt, TruncateOptions));
+            Assert.True(BCrypt.Verify(smiley, hash, TruncateOptions));
         }
 
 
@@ -541,11 +538,11 @@ namespace BCryptNet.UnitTests
                 //Check hash that goes in one end comes out the next the same
                 string salt = _otherLibTestVectors[i, 1];
 
-                string hashed = BCryptExtendedV2.HashPassword(plain, salt, HashType.SHA256);
+                string hashed = BCryptExtendedV2.HashPassword(plain, salt, new BCryptOptions(preHash: HashType.SHA256));
 
                 Assert.Equal(_otherLibTestVectors[i, 2], hashed);
 
-                var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed, HashType.SHA256);
+                var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed, new BCryptOptions(preHash: HashType.SHA256));
                 Assert.True(validateHashCheck);
 
                 Trace.WriteLine(hashed);
@@ -572,13 +569,13 @@ namespace BCryptNet.UnitTests
                     //Check hash that goes in one end comes out the next the same
                     string salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
 
-                    string hashed = BCryptExtendedV2.HashPassword(plain, salt, HashType.SHA256);
+                    string hashed = BCryptExtendedV2.HashPassword(plain, salt, new BCryptOptions(preHash: HashType.SHA256));
 
                     var revCheck = hashed.StartsWith("$2" + _revisions[r]);
 
                     Assert.True(revCheck);
 
-                    var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed, HashType.SHA256);
+                    var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed, new BCryptOptions(preHash: HashType.SHA256));
                     Assert.True(validateHashCheck);
 
                     Trace.WriteLine(hashed);
@@ -645,7 +642,7 @@ namespace BCryptNet.UnitTests
                 string hashed = BCrypt.HashPassword(currentKey, salt);
                 var d = hashed == currentHash;
 
-                var newHash = BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, workFactor: 11);
+                var newHash = BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, new BCryptOptions(11));
 
                 var newPassValid = BCrypt.Verify(newPassword, newHash);
 
@@ -668,7 +665,7 @@ namespace BCryptNet.UnitTests
             string hashed = BCrypt.HashPassword(currentKey, salt);
             var d = hashed == currentHash;
 
-            Assert.Contains("$12$", BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, workFactor: 5));
+            Assert.Contains("$12$", BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, new BCryptOptions(5)));
 
             Trace.Write(".");
         }
@@ -683,18 +680,17 @@ namespace BCryptNet.UnitTests
             string newPassword = "my new password";
             string hashed = BCrypt.HashPassword(currentKey, salt);
             Assert.Equal(hashed, currentHash);
-            var replHash = BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, workFactor: 5, forceWorkFactor: true);
+            var replHash = BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, newPassword, new BCryptOptions(5), forceWorkFactor: true);
             Assert.Contains("$05$", replHash);
             Trace.Write(".");
         }
 
         [Fact]
-        public void ValidateAndUpgradeHash_WithInvalidWorkFactor_ThrowsSaltParseException()
+        public void ValidateAndUpgradeHash_WithInvalidWorkFactor_IsRejectedByOptions()
         {
-            const string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC";
-
-            Assert.Throws<SaltParseException>(() =>
-                BCrypt.ValidateAndUpgradeHash("wrong-current-password", currentHash, "new-password", workFactor: 1));
+            // Out-of-range work factors are rejected when the options are built, before any authentication
+            Assert.Throws<ArgumentOutOfRangeException>(() => new BCryptOptions(1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new BCryptOptions(32));
         }
 
         [Fact]
@@ -872,7 +868,7 @@ namespace BCryptNet.UnitTests
         [InlineData("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬ")]
         public void TestStandardHashExceedsMaxLength(string pw1)
         {
-            Assert.Throws<ArgumentException>(()=>BCrypt.HashPassword(pw1, BCrypt.GenerateSalt()));
+            Assert.Throws<PasswordTooLongException>(()=>BCrypt.HashPassword(pw1, BCrypt.GenerateSalt()));
         }
 
         [Theory()]
@@ -959,8 +955,8 @@ namespace BCryptNet.UnitTests
 
             byte[] saltBytes = BCrypt.DecodeBase64(extractedSalt, 128 / 8);
 
-            byte[] enhancedBytes = SHA384.Create().ComputeHash(passA);
-            byte[] enhancedBytesB = SHA384.Create().ComputeHash(passB);
+            byte[] enhancedBytes = System.Security.Cryptography.SHA384.Create().ComputeHash(passA);
+            byte[] enhancedBytesB = System.Security.Cryptography.SHA384.Create().ComputeHash(passB);
 
             var hasNullBytes = ContainsNoNullBytes(enhancedBytes);
             Assert.False(hasNullBytes, "Hash contains null bytes");
@@ -1014,7 +1010,7 @@ namespace BCryptNet.UnitTests
 
             var enhancedHashPassword = BCryptExtendedV2.HashPassword(myPassword);
 
-            var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword, hashType: HashType.SHA384);
+            var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword, new BCryptOptions(preHash: HashType.SHA384));
 
             Assert.True(validatePassword);
         }

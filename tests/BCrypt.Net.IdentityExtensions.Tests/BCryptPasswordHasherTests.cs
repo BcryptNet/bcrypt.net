@@ -51,6 +51,16 @@ public sealed class BCryptPasswordHasherTests
     }
 
     [Fact]
+    public void HashPassword_Rejects_Zero_WorkFactor()
+    {
+        // 0 must not silently fall back to the default cost (which would also stop rehashes ever being requested)
+        var options = Options.Create(new BCryptHasherOptions { WorkFactor = 0 });
+        var hasher = new BCryptPasswordHasher<TestUser>(new PasswordHasher<TestUser>(), options);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => hasher.HashPassword(new TestUser(), "password"));
+    }
+
+    [Fact]
     public void LongPasswordHandling_CanOptIntoTruncation()
     {
         var options = Options.Create(new BCryptHasherOptions
@@ -95,7 +105,7 @@ public sealed class BCryptPasswordHasherTests
         var hasher = new BCryptPasswordHasher<TestUser>(new PasswordHasher<TestUser>());
 
         Assert.Equal(BCryptNet.LongPasswordHandling.Throw, new BCryptHasherOptions().LongPasswordHandling);
-        Assert.Throws<ArgumentException>(() => hasher.HashPassword(new TestUser(), new string('x', 80)));
+        Assert.Throws<BCryptNet.PasswordTooLongException>(() => hasher.HashPassword(new TestUser(), new string('x', 80)));
     }
 
     [Fact]

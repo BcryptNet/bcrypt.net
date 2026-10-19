@@ -112,13 +112,13 @@ namespace BCryptNet.UnitTests
                     //Check hash that goes in one end comes out the next the same
                     string salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
 
-                    string hashed = BCryptExtendedV3.HashPassword(HMACKey, plain, salt, HashType.SHA256);
+                    string hashed = BCryptExtendedV3.HashPassword(HMACKey, plain, salt, new BCryptOptions(preHash: HashType.SHA256));
 
                     var revCheck = hashed.StartsWith("$2" + _revisions[r]);
 
                     Assert.True(revCheck);
 
-                    var validateHashCheck = BCryptExtendedV3.Verify(HMACKey, plain, hashed, HashType.SHA256);
+                    var validateHashCheck = BCryptExtendedV3.Verify(HMACKey, plain, hashed, new BCryptOptions(preHash: HashType.SHA256));
                     Assert.True(validateHashCheck);
 
                     Trace.WriteLine(hashed);
@@ -146,7 +146,7 @@ namespace BCryptNet.UnitTests
             string hashed3 = BCryptExtendedV3.HashPassword(hmacKey,currentKey, salt);
             var d = hashed == currentHash;
 
-            Assert.Contains("$12$", BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey,currentKey, currentHash, newPassword, workFactor: 5));
+            Assert.Contains("$12$", BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey,currentKey, currentHash, newPassword, new BCryptOptions(5)));
 
             Trace.Write(".");
         }
@@ -163,7 +163,7 @@ namespace BCryptNet.UnitTests
             string newPassword = "my new password";
             string hashed = BCryptExtendedV3.HashPassword(hmacKey, currentKey, salt);
             Assert.Equal(expectedHash, hashed);
-            var replHash = BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey, currentKey, expectedHash, newPassword, workFactor: 5, forceWorkFactor: true);
+            var replHash = BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey, currentKey, expectedHash, newPassword, new BCryptOptions(5), forceWorkFactor: true);
             Assert.Contains("$05$", replHash);
             Trace.Write(".");
         }

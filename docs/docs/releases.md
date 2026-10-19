@@ -10,6 +10,9 @@ uid: releases
 
 - Drops support for .net 2, 3.5, 5.0
 - Renamed namespace to `BcryptNet` to fix the issue with the class and namespace clashing.
+- `LongPasswordHandling` and `HashType` overloads are replaced by a single `BCryptOptions` parameter (see below).
+- `BCryptExtendedV2` no longer creates un-wipeable heap copies of the password; V2/V3 pre-hash buffers are zeroed after use.
+- `BCryptExtendedV3` throws `ArgumentNullException` for a null HMAC key instead of silently using an empty key.
 
 ### Migrating to V5
 
@@ -36,6 +39,33 @@ After
 var enhancedHashPassword = BCryptExtendedV2.HashPassword(myPassword);
 var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword);
 ```
+
+#### BCryptOptions
+
+Per-call settings (work factor, long-password handling and pre-hash algorithm) are now passed as a
+`BCryptOptions` value instead of through separate overloads. It is an immutable struct, so passing it
+does not allocate, and `default(BCryptOptions)` means the library defaults. `HashPassword(password)` and
+`HashPassword(password, workFactor)` are unchanged. Hashes are byte-for-byte identical to v4.
+
+| Before | After |
+| --- | --- |
+| `BCrypt.HashPassword(pw, LongPasswordHandling.Truncate, 12)` | `BCrypt.HashPassword(pw, new BCryptOptions(12, LongPasswordHandling.Truncate))` |
+| `BCrypt.HashPassword(pw, salt, LongPasswordHandling.Truncate)` | `BCrypt.HashPassword(pw, salt, new BCryptOptions(longPasswordHandling: LongPasswordHandling.Truncate))` |
+| `BCrypt.Verify(pw, hash, LongPasswordHandling.Truncate)` | `BCrypt.Verify(pw, hash, new BCryptOptions(longPasswordHandling: LongPasswordHandling.Truncate))` |
+| `BCrypt.ValidateAndUpgradeHash(cur, hash, newPw, workFactor: 12)` | `BCrypt.ValidateAndUpgradeHash(cur, hash, newPw, new BCryptOptions(12))` |
+| `BCryptExtendedV2.HashPassword(pw, 12, HashType.SHA512)` | `BCryptExtendedV2.HashPassword(pw, new BCryptOptions(12, preHash: HashType.SHA512))` |
+| `BCryptExtendedV2.Verify(pw, hash, HashType.SHA512)` | `BCryptExtendedV2.Verify(pw, hash, new BCryptOptions(preHash: HashType.SHA512))` |
+| `BCryptExtendedV3.HashPassword(key, pw, salt, HashType.SHA256)` | `BCryptExtendedV3.HashPassword(key, pw, salt, new BCryptOptions(preHash: HashType.SHA256))` |
+
+Options can be built once and reused, or adjusted with `WithWorkFactor`, `WithLongPasswordHandling` and `WithPreHash`.
+An out-of-range work factor (including 0) now throws `ArgumentOutOfRangeException` when the options are constructed
+(previously `ValidateAndUpgradeHash` threw `SaltParseException`); omit it or pass `null` for the default. `PreHash` is rejected by the plain `BCrypt` class.
+
+`BCryptExtendedV2` and `BCryptExtendedV3` now reject `PreHash = HashType.None` with an `ArgumentException`; previously it
+silently produced a plain bcrypt hash (and for V3, ignored the HMAC key). Use `BCrypt` for plain bcrypt hashes.
+To migrate an existing plain bcrypt hash to an extended one, pass `HashType.None` as the `currentKeyHashType` of
+`ValidateAndUpgradeHash`; the options' `LongPasswordHandling` is used to verify that hash, so pass
+`LongPasswordHandling.Truncate` if it was created with truncation.
 
 ----
 

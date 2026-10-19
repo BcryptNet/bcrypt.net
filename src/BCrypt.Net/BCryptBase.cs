@@ -24,6 +24,50 @@ using System.Text;
 namespace BCryptNet;
 
 /// <summary>
+/// Which key generator feeds bcrypt when <see cref="HashContext.HashType"/> is not <see cref="HashType.None"/>.
+/// </summary>
+internal enum PreHashKind
+{
+    None,
+    Sha2,     // BCryptExtendedV2: base64(SHA2(password))
+    HmacSha3  // BCryptExtendedV3: base64(HMAC-SHA3(hmacKey, password))
+}
+
+/// <summary>
+/// Internal per-call hashing context. A ref struct so it (and the HMAC key span it carries) can only live on
+/// the stack: it can't be boxed, captured by a lambda or stored in a field, so no key material reaches the heap.
+/// </summary>
+internal readonly ref struct HashContext
+{
+    internal HashContext(LongPasswordHandling longPasswordHandling, HashType hashType = HashType.None,
+        PreHashKind kind = PreHashKind.None, ReadOnlySpan<char> hmacKey = default)
+    {
+        LongPasswordHandling = longPasswordHandling;
+        HashType = hashType;
+        Kind = kind;
+        HmacKey = hmacKey;
+    }
+
+    internal LongPasswordHandling LongPasswordHandling { get; }
+    internal HashType HashType { get; }
+    internal PreHashKind Kind { get; }
+    internal ReadOnlySpan<char> HmacKey { get; }
+
+    /// <summary>
+    /// Context for plain bcrypt; pre-hash settings only apply to the extended schemes.
+    /// </summary>
+    internal static HashContext ForBCrypt(BCryptOptions options)
+    {
+        if (options.PreHash is not null and not HashType.None)
+        {
+            throw new ArgumentException("Pre-hashing is not supported by BCrypt; use BCryptExtendedV2 or BCryptExtendedV3", nameof(options));
+        }
+
+        return new HashContext(options.LongPasswordHandling);
+    }
+}
+
+/// <summary>
 /// Base class of the bcrypt api
 /// </summary>
 public partial class BCryptCore
