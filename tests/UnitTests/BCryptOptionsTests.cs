@@ -207,7 +207,7 @@ namespace BCryptNet.UnitTests
             Assert.Throws<ArgumentException>(() => BCryptExtendedV2.Verify("password", hash, none));
 
             // Options are validated before the credentials are checked
-            Assert.Throws<ArgumentException>(() => BCryptExtendedV2.ValidateAndUpgradeHash("wrong", hash, "new", none));
+            Assert.Throws<ArgumentException>(() => BCryptExtendedV2.ValidateAndUpgradeHash("wrong", hash, HashType.SHA384, "new", none));
         }
 
         [Fact]
@@ -271,7 +271,7 @@ namespace BCryptNet.UnitTests
             Assert.Throws<ArgumentException>(() => BCryptExtendedV3.HashPassword(HmacKey, "password", V3Salt, none));
             Assert.Throws<ArgumentException>(() => BCryptExtendedV3.HashPassword(HmacKey, "password".AsSpan(), V3Salt.AsSpan(), none));
             Assert.Throws<ArgumentException>(() => BCryptExtendedV3.Verify(HmacKey, "password", hash, none));
-            Assert.Throws<ArgumentException>(() => BCryptExtendedV3.ValidateAndUpgradeHash(HmacKey, "wrong", hash, "new", none));
+            Assert.Throws<ArgumentException>(() => BCryptExtendedV3.ValidateAndUpgradeHash(HmacKey, "wrong", hash, HashType.SHA384, "new", none));
         }
 
         [Fact]

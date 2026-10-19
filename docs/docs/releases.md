@@ -56,6 +56,9 @@ does not allocate, and `default(BCryptOptions)` means the library defaults. `Has
 | `BCryptExtendedV2.HashPassword(pw, 12, HashType.SHA512)` | `BCryptExtendedV2.HashPassword(pw, new BCryptOptions(12, preHash: HashType.SHA512))` |
 | `BCryptExtendedV2.Verify(pw, hash, HashType.SHA512)` | `BCryptExtendedV2.Verify(pw, hash, new BCryptOptions(preHash: HashType.SHA512))` |
 | `BCryptExtendedV3.HashPassword(key, pw, salt, HashType.SHA256)` | `BCryptExtendedV3.HashPassword(key, pw, salt, new BCryptOptions(preHash: HashType.SHA256))` |
+| `BCryptExtendedV2.ValidateAndUpgradeHash(cur, hash, newPw, HashType.SHA512)` | `BCryptExtendedV2.ValidateAndUpgradeHash(cur, hash, HashType.SHA384, newPw, new BCryptOptions(preHash: HashType.SHA512))` |
+| `BCryptExtendedV3.ValidateAndUpgradeHash(key, cur, hash, newPw)` | `BCryptExtendedV3.ValidateAndUpgradeHash(key, cur, hash, HashType.SHA384, newPw)` |
+
 
 Options can be built once and reused, or adjusted with `WithWorkFactor`, `WithLongPasswordHandling` and `WithPreHash`.
 An out-of-range work factor (including 0) now throws `ArgumentOutOfRangeException` when the options are constructed

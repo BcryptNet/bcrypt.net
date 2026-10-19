@@ -146,7 +146,7 @@ namespace BCryptNet.UnitTests
             string hashed3 = BCryptExtendedV3.HashPassword(hmacKey,currentKey, salt);
             var d = hashed == currentHash;
 
-            Assert.Contains("$12$", BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey,currentKey, currentHash, newPassword, new BCryptOptions(5)));
+            Assert.Contains("$12$", BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey,currentKey, currentHash, HashType.SHA384, newPassword, new BCryptOptions(5)));
 
             Trace.Write(".");
         }
@@ -163,7 +163,7 @@ namespace BCryptNet.UnitTests
             string newPassword = "my new password";
             string hashed = BCryptExtendedV3.HashPassword(hmacKey, currentKey, salt);
             Assert.Equal(expectedHash, hashed);
-            var replHash = BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey, currentKey, expectedHash, newPassword, new BCryptOptions(5), forceWorkFactor: true);
+            var replHash = BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey, currentKey, expectedHash, HashType.SHA384, newPassword, new BCryptOptions(5), forceWorkFactor: true);
             Assert.Contains("$05$", replHash);
             Trace.Write(".");
         }

@@ -176,28 +176,6 @@ public sealed class BCryptExtendedV3 : BCryptCore
     /// <summary>
     /// Validate and Upgrade Hash
     /// </summary>
-    /// <remarks>The current hash is verified using the default pre-hash (SHA384).</remarks>
-    /// <param name="hmacKey">Key used in HMAC hashing</param>
-    /// <param name="currentKey"></param>
-    /// <param name="currentHash"></param>
-    /// <param name="newKey"></param>
-    /// <param name="options">Hashing options for the new hash: <see cref="BCryptOptions.WorkFactor"/> sets the cost of the new hash (raised to match the current hash unless <paramref name="forceWorkFactor"/> is set), and <see cref="BCryptOptions.PreHash"/> selects the pre-hash algorithm (<c>null</c> uses SHA384). <see cref="HashType.None"/> is rejected; use <see cref="BCrypt"/> for plain bcrypt. <see cref="BCryptOptions.LongPasswordHandling"/> is ignored, as pre-hashed input is never subject to the 72-byte limit.</param>
-    /// <param name="forceWorkFactor"></param>
-    /// <returns></returns>
-    public static string ValidateAndUpgradeHash(
-        string hmacKey,
-        string currentKey,
-        string currentHash,
-        string newKey,
-        BCryptOptions options = default,
-        bool forceWorkFactor = false)
-    {
-        return ValidateAndUpgradeHash(hmacKey, currentKey, currentHash, DefaultEnhancedHashType, newKey, options, forceWorkFactor);
-    }
-
-    /// <summary>
-    /// Validate and Upgrade Hash
-    /// </summary>
     /// <param name="hmacKey">Key used in HMAC hashing</param>
     /// <param name="currentKey"></param>
     /// <param name="currentHash"></param>
