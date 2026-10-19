@@ -98,7 +98,7 @@ public partial class BCryptCore
         }
 
         // Throw if log rounds are out of range on hash, deals with custom salts
-        if (workFactor < 1 || workFactor > 31)
+        if (workFactor < MinRounds || workFactor > MaxRounds)
         {
             throw new SaltParseException("Salt rounds out of range");
         }
@@ -182,6 +182,10 @@ public partial class BCryptCore
     internal static string HashBytes(byte[] inputBytes, string extractedSalt, char bcryptMinorRevision, int workFactor)
     {
         byte[] saltBytes = DecodeBase64(extractedSalt, BCryptSaltLen);
+        if (saltBytes.Length != BCryptSaltLen)
+        {
+            throw new SaltParseException("Invalid salt");
+        }
 
         BCrypt bCrypt = new BCrypt();
 
@@ -189,7 +193,14 @@ public partial class BCryptCore
 
         // Generate result string
         var result = new StringBuilder(60);
-        result.Append('$').Append('2').Append(bcryptMinorRevision).Append('$').Append(workFactor.ToString("D2", CultureInfo.InvariantCulture)).Append('$');
+        result.Append('$').Append('2');
+        // Legacy "$2$" hashes have no revision letter
+        if (bcryptMinorRevision >= 'a')
+        {
+            result.Append(bcryptMinorRevision);
+        }
+
+        result.Append('$').Append(workFactor.ToString("D2", CultureInfo.InvariantCulture)).Append('$');
         result.Append(EncodeBase64(saltBytes, saltBytes.Length));
         result.Append(EncodeBase64(hashed, (BfCryptCiphertextLength * 4) - 1));
 
@@ -292,7 +303,7 @@ public partial class BCryptCore
     ///                                     illegal values.</exception>
     /// <param name="encodedString">The string to decode.</param>
     /// <param name="maximumBytes"> The maximum bytes to decode.</param>
-    /// <returns>The decoded byte array.</returns>
+    /// <returns>The decoded byte array; shorter if an invalid character was found.</returns>
     internal static byte[] DecodeBase64(string encodedString, int maximumBytes)
     {
         int sourceLength = encodedString.Length;
@@ -334,9 +345,19 @@ public partial class BCryptCore
             }
 
             int c4 = Char64(encodedString[position++]);
+            if (c4 == -1)
+            {
+                break;
+            }
+
             result[outputLength] = (byte)(((c3 & 0x03) << 6) | c4);
 
             ++outputLength;
+        }
+
+        if (outputLength < maximumBytes)
+        {
+            Array.Resize(ref result, outputLength);
         }
 
         return result;
@@ -497,6 +518,8 @@ public partial class BCryptCore
         {
             throw new ArgumentException("Bad number of rounds", nameof(workFactor));
         }
+
+        inputBytes = KeyOrNul(inputBytes);
 
         InitializeKey();
         try

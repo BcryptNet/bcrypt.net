@@ -69,6 +69,9 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
         ArgumentNullException.ThrowIfNull(hashedPassword);
         ArgumentNullException.ThrowIfNull(providedPassword);
 
+        if (hashedPassword.Length == 0)
+            return PasswordVerificationResult.Failed;
+
         // Handle ASP.NET Identity v2 and v3 hashed passwords
         if (CheckForAspIdentityHash(hashedPassword))
         {
@@ -79,22 +82,23 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
             return PasswordVerificationResult.Failed;
         }
 
-        if (_options.RehashPasswords)
+        HashInformation hashInfo;
+        try
         {
-            var hashInfo = BCrypt.InterrogateHash(hashedPassword);
-            if (BCrypt.Verify(providedPassword, hashedPassword, new BCryptOptions(longPasswordHandling: _options.LongPasswordHandling)))
-            {
-                return hashInfo.WorkFactor < _options.WorkFactor
-                    ? PasswordVerificationResult.SuccessRehashNeeded
-                    : PasswordVerificationResult.Success;
-            }
-
+            hashInfo = BCrypt.InterrogateHash(hashedPassword);
+        }
+        catch (HashInformationException)
+        {
+            // Not a bcrypt hash
             return PasswordVerificationResult.Failed;
         }
 
-        return BCrypt.Verify(providedPassword, hashedPassword, new BCryptOptions(longPasswordHandling: _options.LongPasswordHandling))
-            ? PasswordVerificationResult.Success
-            : PasswordVerificationResult.Failed;
+        if (!BCrypt.Verify(providedPassword, hashedPassword, new BCryptOptions(longPasswordHandling: _options.LongPasswordHandling)))
+            return PasswordVerificationResult.Failed;
+
+        return _options.RehashPasswords && hashInfo.WorkFactor < _options.WorkFactor
+            ? PasswordVerificationResult.SuccessRehashNeeded
+            : PasswordVerificationResult.Success;
     }
 
     private static bool CheckForAspIdentityHash(string hash)

@@ -192,7 +192,7 @@ public sealed class BCryptExtendedV2 : BCryptCore
         }
 
         // Extract number of rounds
-        if (currentHash[startingOffset + 2] > '$')
+        if (currentHash[startingOffset + 2] != '$')
         {
             throw new SaltParseException("Missing work factor");
         }

@@ -343,6 +343,58 @@ namespace BCryptNet.UnitTests
         }
 
         [Fact]
+        public void LegacyRevisionHashesRoundTrip()
+        {
+            const string salt = "$2$04$abcdefghijklmnopqrstuu";
+            var hash = BCrypt.HashPassword("password", salt);
+
+            Assert.Equal(59, hash.Length);
+            Assert.StartsWith(salt, hash);
+            Assert.True(HashParser.IsValidHash(hash, out _));
+            Assert.True(BCrypt.Verify("password", hash));
+            Assert.False(BCrypt.Verify("passwore", hash));
+
+            // "$2$" doesn't NUL-terminate the key, so appending one gives the "$2a$" hash
+            var revisionAHash = BCrypt.HashPassword("password", "$2a$04$abcdefghijklmnopqrstuu");
+            Assert.Equal(revisionAHash.Substring(7), BCrypt.HashPassword("password ", salt).Substring(6));
+        }
+
+        [Fact]
+        public void LegacyRevisionHashesEmptyPasswordAsNul()
+        {
+            const string salt = "$2$04$abcdefghijklmnopqrstuu";
+            var hash = BCrypt.HashPassword("", salt);
+
+            Assert.True(BCrypt.Verify("", hash));
+            Assert.Equal(BCrypt.HashPassword(" ", salt), hash);
+            Assert.Equal(BCrypt.HashPassword("", "$2a$04$abcdefghijklmnopqrstuu").Substring(7), hash.Substring(6));
+        }
+
+        [Theory]
+        [InlineData("$2a$04$!!!!!!!!!!!!!!!!!!!!!!")]
+        [InlineData("$2a$04$abc!efghijklmnopqrstuu")] // Invalid fourth character of a base64 group
+        [InlineData("$2a$04$abcdefghijklmnopqrstu!")]
+        public void HashPasswordRejectsInvalidSaltCharacters(string salt)
+        {
+            Assert.Throws<SaltParseException>(() => BCrypt.HashPassword("password", salt));
+        }
+
+        [Theory]
+        [InlineData("$2a$03$abcdefghijklmnopqrstuu")]
+        [InlineData("$2a$32$abcdefghijklmnopqrstuu")]
+        public void HashPasswordRejectsOutOfRangeSaltCost(string salt)
+        {
+            Assert.Throws<SaltParseException>(() => BCrypt.HashPassword("password", salt));
+        }
+
+        [Fact]
+        public void PasswordTooLongExceptionIsAnArgumentException()
+        {
+            var exception = Assert.Throws<PasswordTooLongException>(() => BCrypt.HashPassword(new string('x', 80)));
+            Assert.IsAssignableFrom<ArgumentException>(exception);
+        }
+
+        [Fact]
         public void LongPasswordTruncationSplitsSurrogatePairAtByteBoundary()
         {
             // 71 ASCII chars followed by a 4-byte code point whose surrogate pair straddles the 72-char
@@ -1038,6 +1090,10 @@ namespace BCryptNet.UnitTests
         [InlineData("$2a$08aHqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Invalid hash layout
         [InlineData("$2ac08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Invalid hash layout
         [InlineData("a2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Invalid hash layout
+        [InlineData("$2a$03$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Work factor below the minimum
+        [InlineData("$2a$32$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye")] // Work factor above the maximum
+        [InlineData("$2$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s.x")] // "$2$" hash with 60 characters
+        [InlineData("$2a$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s")] // "$2a$" hash with 59 characters
         public void InterrogateHash_WhenHashInvalid_ThrowsInvalidHashFormat(string hash)
         {
             var exception = Assert.Throws<HashInformationException>(() => BCrypt.InterrogateHash(hash));

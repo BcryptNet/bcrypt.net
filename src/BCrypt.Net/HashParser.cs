@@ -8,6 +8,8 @@ public static class HashParser
     private static readonly HashFormatDescriptor OldFormatDescriptor = new HashFormatDescriptor(versionLength: 1);
     private static readonly HashFormatDescriptor NewFormatDescriptor = new HashFormatDescriptor(versionLength: 2);
 
+    private const int EncodedSaltAndHashLength = 22 + 31;
+
     /// <summary>
     /// Get Hash Info
     /// </summary>
@@ -20,7 +22,7 @@ public static class HashParser
             ThrowInvalidHashFormat();
         }
 
-        var workFactor = 10 * (hash[format.WorkfactorOffset] - '0') + (hash[format.WorkfactorOffset + 1] - '0');
+        var workFactor = ParseWorkFactor(hash, format);
 
         return new HashInformation(
             hash.Substring(0, format.SettingLength),
@@ -41,7 +43,7 @@ public static class HashParser
             ThrowInvalidHashFormat();
         }
 
-        return 10 * (hash[format.WorkfactorOffset] - '0') + (hash[format.WorkfactorOffset + 1] - '0');
+        return ParseWorkFactor(hash, format);
     }
 
     /// <summary>
@@ -96,7 +98,7 @@ public static class HashParser
             format = OldFormatDescriptor;
         }
 
-        if (hash[offset++] != '$')
+        if (hash.Length != format.HashOffset + EncodedSaltAndHashLength || hash[offset++] != '$')
         {
             format = null;
             return false;
@@ -106,6 +108,13 @@ public static class HashParser
 #pragma warning disable S1764
         if (!IsAsciiNumeric(hash[offset++]) || !IsAsciiNumeric(hash[offset++]))
 #pragma warning restore S1764
+        {
+            format = null;
+            return false;
+        }
+
+        int workFactor = ParseWorkFactor(hash, format);
+        if (workFactor < BCryptCore.MinRounds || workFactor > BCryptCore.MaxRounds)
         {
             format = null;
             return false;
@@ -129,6 +138,9 @@ public static class HashParser
 
         return true;
     }
+
+    private static int ParseWorkFactor(string hash, HashFormatDescriptor format) =>
+        10 * (hash[format.WorkfactorOffset] - '0') + (hash[format.WorkfactorOffset + 1] - '0');
 
     private static bool IsValidBCryptVersionChar(char value)
     {

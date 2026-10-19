@@ -13,6 +13,11 @@ uid: releases
 - `LongPasswordHandling` and `HashType` overloads are replaced by a single `BCryptOptions` parameter (see below).
 - `BCryptExtendedV2` no longer creates un-wipeable heap copies of the password; V2/V3 pre-hash buffers are zeroed after use.
 - `BCryptExtendedV3` throws `ArgumentNullException` for a null HMAC key instead of silently using an empty key.
+- Passwords over 72 bytes throw `PasswordTooLongException`, which derives from `ArgumentException` so existing handlers still catch it.
+- Legacy `$2$` hashes are now produced and verified correctly (59 characters, no revision letter); an empty `$2$` password hashes as a single NUL byte, as the original OpenBSD implementation did, instead of throwing.
+- Salts with invalid characters or a cost outside 4–31 throw `SaltParseException` on every target framework; .NET Framework and .NET Standard previously hashed invalid characters as zero bytes.
+- `HashParser` / `InterrogateHash` reject hashes whose length doesn't match their revision or whose cost is outside 4–31.
+- `BCryptPasswordHasher.VerifyHashedPassword` returns `Failed` for empty or unrecognised hashes instead of throwing.
 
 ### Migrating to V5
 

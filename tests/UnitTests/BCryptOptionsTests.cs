@@ -63,7 +63,6 @@ namespace BCryptNet.UnitTests
             Assert.Equal(LongPasswordHandling.Throw, original.LongPasswordHandling);
             Assert.Equal(new BCryptOptions(6, LongPasswordHandling.Truncate, HashType.SHA512), modified);
 
-            // An unset work factor stays unset rather than being passed on as an (invalid) explicit 0
             var unset = default(BCryptOptions).WithLongPasswordHandling(LongPasswordHandling.Truncate).WithPreHash(HashType.SHA512);
             Assert.Equal(new BCryptOptions(null, LongPasswordHandling.Truncate, HashType.SHA512), unset);
         }

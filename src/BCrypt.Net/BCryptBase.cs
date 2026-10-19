@@ -101,6 +101,13 @@ public partial class BCryptCore
         return inputKey.Slice(0, char.IsHighSurrogate(inputKey[71]) ? 73 : 72);
     }
 
+    private static ReadOnlySpan<byte> NulKey => new byte[] { 0 };
+
+    /// <summary>
+    /// An empty key (an empty "$2$" password) is hashed as a single NUL byte, as OpenBSD did.
+    /// </summary>
+    internal static ReadOnlySpan<byte> KeyOrNul(ReadOnlySpan<byte> inputBytes) => inputBytes.IsEmpty ? NulKey : inputBytes;
+
     // BCrypt parameters
     /// <summary>
     /// Default Work Factor

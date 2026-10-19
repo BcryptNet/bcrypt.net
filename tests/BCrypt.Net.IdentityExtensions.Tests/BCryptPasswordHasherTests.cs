@@ -53,7 +53,6 @@ public sealed class BCryptPasswordHasherTests
     [Fact]
     public void HashPassword_Rejects_Zero_WorkFactor()
     {
-        // 0 must not silently fall back to the default cost (which would also stop rehashes ever being requested)
         var options = Options.Create(new BCryptHasherOptions { WorkFactor = 0 });
         var hasher = new BCryptPasswordHasher<TestUser>(new PasswordHasher<TestUser>(), options);
 
@@ -150,5 +149,20 @@ public sealed class BCryptPasswordHasherTests
         var result = hasher.VerifyHashedPassword(user, hash, "wrong");
 
         Assert.Equal(PasswordVerificationResult.Failed, result);
+    }
+
+    [Theory]
+    [InlineData("", false)]
+    [InlineData("", true)]
+    [InlineData("not-a-hash", false)]
+    [InlineData("not-a-hash", true)]
+    [InlineData("$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/Sg", false)] // Truncated bcrypt hash
+    [InlineData("$2a$03$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye", true)] // Cost below the minimum
+    public void VerifyHashedPassword_Returns_Failed_For_Unrecognised_Hash(string hashedPassword, bool rehashPasswords)
+    {
+        var options = Options.Create(new BCryptHasherOptions { RehashPasswords = rehashPasswords });
+        var hasher = new BCryptPasswordHasher<TestUser>(new PasswordHasher<TestUser>(), options);
+
+        Assert.Equal(PasswordVerificationResult.Failed, hasher.VerifyHashedPassword(new TestUser(), hashedPassword, "password"));
     }
 }

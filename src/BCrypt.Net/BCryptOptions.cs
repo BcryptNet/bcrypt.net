@@ -35,8 +35,7 @@ namespace BCryptNet;
 /// </remarks>
 public readonly struct BCryptOptions : IEquatable<BCryptOptions>
 {
-    // 0 means "not set, use the default" so default(BCryptOptions) is valid. An explicit 0 is rejected by the
-    // constructor, so a caller passing 0 by mistake gets an exception rather than silently getting the default.
+    // 0 means "not set" so default(BCryptOptions) is valid; the constructor rejects an explicit 0.
     private readonly int _workFactor;
 
     /// <summary>
@@ -81,7 +80,6 @@ public readonly struct BCryptOptions : IEquatable<BCryptOptions>
     /// </summary>
     public int WorkFactor => _workFactor == 0 ? BCryptCore.DefaultRounds : _workFactor;
 
-    // The work factor as passed to the constructor, so the With* methods keep "unset" unset
     private int? ExplicitWorkFactor => _workFactor == 0 ? null : _workFactor;
 
     /// <summary>

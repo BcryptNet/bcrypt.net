@@ -127,7 +127,7 @@ public partial class BCryptCore
         }
 
         // Throw if log rounds are out of range on hash, deals with custom salts
-        if (workFactor < 1 || workFactor > 31)
+        if (workFactor < MinRounds || workFactor > MaxRounds)
         {
             throw new SaltParseException("Salt rounds out of range");
         }
@@ -281,6 +281,9 @@ public partial class BCryptCore
         try
         {
             int written = DecodeBase64(extractedSalt, saltBuffer);
+            if (written != BCryptSaltLen)
+                throw new SaltParseException("Invalid salt");
+
             var saltBytes = saltBuffer[..written];
 
             var hashBytes = bCrypt.CryptRaw(inputBytes, saltBytes, workFactor, hashBuffer);
@@ -293,7 +296,9 @@ public partial class BCryptCore
             int pos = 0;
             destination[pos++] = '$';
             destination[pos++] = '2';
-            destination[pos++] = bcryptMinorRevision;
+            // Legacy "$2$" hashes have no revision letter
+            if (bcryptMinorRevision >= 'a')
+                destination[pos++] = bcryptMinorRevision;
             destination[pos++] = '$';
 
             // Write work factor as 2-digit number
@@ -455,6 +460,8 @@ public partial class BCryptCore
         {
             throw new ArgumentException("Bad number of rounds", nameof(workFactor));
         }
+
+        inputBytes = KeyOrNul(inputBytes);
 
         InitializeKey();
         try
