@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace BCryptNet
 {
-    #if PRE_CORE
+#if PRE_CORE
     /// <summary>
     ///     Thrown when a password exceeds bcrypt's 72-byte limit under <see cref="LongPasswordHandling.Throw"/>.
     /// </summary>

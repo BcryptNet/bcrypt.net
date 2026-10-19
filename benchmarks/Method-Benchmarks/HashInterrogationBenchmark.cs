@@ -21,7 +21,7 @@ namespace BCryptNet.BenchMarks
     {
         [Benchmark(Baseline = true)]
         [Arguments("$2a$12$k42ZFHFWqBp3vWli.nIn8uYyIkbvYRvodzbfbK18SSsY.CsIQPlxO")]
-        [Arguments( "$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
+        [Arguments("$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
         public void InterrogateHashUsingRegex(string hash)
         {
             BCryptBaseLine.BCrypt.InterrogateHash(hash);
@@ -29,7 +29,7 @@ namespace BCryptNet.BenchMarks
 
         [Benchmark()]
         [Arguments("$2a$12$k42ZFHFWqBp3vWli.nIn8uYyIkbvYRvodzbfbK18SSsY.CsIQPlxO")]
-        [Arguments( "$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
+        [Arguments("$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
         public void InterrogateHashUsingParserV4(string hash)
         {
             BCryptV4.BCrypt.InterrogateHash(hash);
@@ -37,15 +37,15 @@ namespace BCryptNet.BenchMarks
 
         [Benchmark()]
         [Arguments("$2a$12$k42ZFHFWqBp3vWli.nIn8uYyIkbvYRvodzbfbK18SSsY.CsIQPlxO")]
-        [Arguments( "$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
+        [Arguments("$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
         public void InterrogateHashUsingParserV403(string hash)
         {
             BCryptV403.BCrypt.InterrogateHash(hash);
-        }        
-        
+        }
+
         [Benchmark()]
         [Arguments("$2a$12$k42ZFHFWqBp3vWli.nIn8uYyIkbvYRvodzbfbK18SSsY.CsIQPlxO")]
-        [Arguments( "$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
+        [Arguments("$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
         public void InterrogateHashUsingParserCurrent(string hash)
         {
             BCrypt.InterrogateHash(hash);
@@ -53,7 +53,7 @@ namespace BCryptNet.BenchMarks
 
         [Benchmark()]
         [Arguments("$2a$12$k42ZFHFWqBp3vWli.nIn8uYyIkbvYRvodzbfbK18SSsY.CsIQPlxO")]
-        [Arguments( "$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
+        [Arguments("$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq")]
         public void InterrogateHashUsingParser(string hash)
         {
             Decoder.GetHashInformation(hash);

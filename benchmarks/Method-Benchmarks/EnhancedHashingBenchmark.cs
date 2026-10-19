@@ -50,7 +50,7 @@ namespace BCryptNet.BenchMarks
         [ArgumentsSource(nameof(Data))]
         public string TestHashValidateEnhancedCurrent(string key, string salt)
         {
-            return  BCryptExtendedV2.HashPassword(key, salt);
+            return BCryptExtendedV2.HashPassword(key, salt);
         }
 
         private static readonly string Hmackey = Guid.NewGuid().ToString();

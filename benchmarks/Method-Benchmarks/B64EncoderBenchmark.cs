@@ -8,7 +8,8 @@ using BenchmarkDotNet.Order;
 namespace BCryptNet.BenchMarks
 {
     [MemoryDiagnoser]
-    [RPlotExporter][RankColumn]
+    [RPlotExporter]
+    [RankColumn]
     [GcServer(true)]
     [Orderer(SummaryOrderPolicy.Declared)]
     [KeepBenchmarkFiles]

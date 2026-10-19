@@ -151,7 +151,7 @@ namespace BCryptNet.UnitTests
             {
                 var pass = _testVectors[i, 0];
                 var secureString = AsSecureString(pass);
-                if(string.IsNullOrEmpty(pass)) continue;
+                if (string.IsNullOrEmpty(pass)) continue;
                 var hash = BCryptSafeString.HashPassword(secureString);
                 var doesValidateFromSecureString = BCryptSafeString.Verify(secureString, hash);
                 Assert.True(doesValidateFromSecureString);
@@ -175,7 +175,7 @@ namespace BCryptNet.UnitTests
                 for (int i = 0; i < _testVectors.Length / 3; i++)
                 {
                     string plain = _testVectors[i, 0];
-                    if(string.IsNullOrEmpty(plain)) continue;
+                    if (string.IsNullOrEmpty(plain)) continue;
                     string salt;
                     if (r > 0)
                     {
@@ -920,7 +920,7 @@ namespace BCryptNet.UnitTests
         [InlineData("ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬ")]
         public void TestStandardHashExceedsMaxLength(string pw1)
         {
-            Assert.Throws<PasswordTooLongException>(()=>BCrypt.HashPassword(pw1, BCrypt.GenerateSalt()));
+            Assert.Throws<PasswordTooLongException>(() => BCrypt.HashPassword(pw1, BCrypt.GenerateSalt()));
         }
 
         [Theory()]
@@ -962,9 +962,9 @@ namespace BCryptNet.UnitTests
             Assert.Equal(libHash, hash);
         }
 
-        #if NETCOREAPP
+#if NETCOREAPP
 
-        #else
+#else
         [Fact]
         public void LeadingByteDoesntTruncateHash()
         {
@@ -990,7 +990,7 @@ namespace BCryptNet.UnitTests
 
             Assert.False(Convert.ToBase64String(hashA) == Convert.ToBase64String(hashB), "These shouldn't match as we hash the whole strings bytes, including the null byte");
         }
-        #endif
+#endif
 
 #if NETCOREAPP
 

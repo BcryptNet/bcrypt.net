@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 
 namespace BCryptNet
 {
-    #if NETFRAMEWORK || NETSTANDARD
+#if NETFRAMEWORK || NETSTANDARD
     /// <summary>Exception for signalling hash validation errors. </summary>
     [Serializable]
     public class BcryptAuthenticationException : Exception

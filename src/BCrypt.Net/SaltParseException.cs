@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace BCryptNet
 {
-    #if PRE_CORE
+#if PRE_CORE
     /// <summary>
     ///     Exception used to signal errors that occur during salt-parsing
     /// </summary>

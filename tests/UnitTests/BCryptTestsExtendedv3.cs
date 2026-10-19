@@ -141,12 +141,12 @@ namespace BCryptNet.UnitTests
             string currentHash = "$2a$12$WApznUOJfkEGSmYRfnkrPO/jMqrnJc5PFWasgccSlw6RlvYsWV4sS";
 
             string newPassword = "my new password";
-            string hashed = BCryptExtendedV3.HashPassword(hmacKey,currentKey, salt);
-            string hashed2 = BCryptExtendedV3.HashPassword(hmacKey,currentKey, salt);
-            string hashed3 = BCryptExtendedV3.HashPassword(hmacKey,currentKey, salt);
+            string hashed = BCryptExtendedV3.HashPassword(hmacKey, currentKey, salt);
+            string hashed2 = BCryptExtendedV3.HashPassword(hmacKey, currentKey, salt);
+            string hashed3 = BCryptExtendedV3.HashPassword(hmacKey, currentKey, salt);
             var d = hashed == currentHash;
 
-            Assert.Contains("$12$", BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey,currentKey, currentHash, HashType.SHA384, newPassword, new BCryptOptions(5)));
+            Assert.Contains("$12$", BCryptExtendedV3.ValidateAndUpgradeHash(hmacKey, currentKey, currentHash, HashType.SHA384, newPassword, new BCryptOptions(5)));
 
             Trace.Write(".");
         }
@@ -180,12 +180,12 @@ namespace BCryptNet.UnitTests
             Trace.Write("BCrypt.HashPassword with international chars: ");
             string pw2 = "????????";
 
-            string h1 = BCryptExtendedV3.HashPassword(hmacKey,pw1, BCrypt.GenerateSalt());
-            Assert.False(BCryptExtendedV3.Verify(hmacKey,pw2, h1));
+            string h1 = BCryptExtendedV3.HashPassword(hmacKey, pw1, BCrypt.GenerateSalt());
+            Assert.False(BCryptExtendedV3.Verify(hmacKey, pw2, h1));
             Trace.Write(".");
 
-            string h2 = BCryptExtendedV3.HashPassword(hmacKey,pw2, BCrypt.GenerateSalt());
-            Assert.False(BCryptExtendedV3.Verify(hmacKey,pw1, h2));
+            string h2 = BCryptExtendedV3.HashPassword(hmacKey, pw2, BCrypt.GenerateSalt());
+            Assert.False(BCryptExtendedV3.Verify(hmacKey, pw1, h2));
             Trace.Write(".");
             Trace.WriteLine("");
         }
@@ -205,8 +205,8 @@ namespace BCryptNet.UnitTests
             Trace.Write("BCrypt.HashPassword with naughty strings: ");
             var hmacKey = Guid.NewGuid().ToString();
 
-            string h1 = BCryptExtendedV3.HashPassword(hmacKey,pw1, BCryptCore.GenerateSalt());
-            Assert.True(BCryptExtendedV3.Verify(hmacKey,pw1, h1));
+            string h1 = BCryptExtendedV3.HashPassword(hmacKey, pw1, BCryptCore.GenerateSalt());
+            Assert.True(BCryptExtendedV3.Verify(hmacKey, pw1, h1));
 
             Trace.Write(".");
         }
@@ -219,10 +219,10 @@ namespace BCryptNet.UnitTests
         {
             var hmacKey = Guid.NewGuid().ToString();
             var x = BCryptCore.GenerateSalt();
-            string hash = BCryptExtendedV3.HashPassword(hmacKey,password, x);
+            string hash = BCryptExtendedV3.HashPassword(hmacKey, password, x);
 
-            var t1 = BCryptExtendedV3.Verify(hmacKey,password, hash);
-            var t2 = BCryptExtendedV3.Verify(hmacKey,"password", hash);
+            var t1 = BCryptExtendedV3.Verify(hmacKey, password, hash);
+            var t2 = BCryptExtendedV3.Verify(hmacKey, "password", hash);
             Assert.True(t1, "Null terminator should validate if part of passphrase");
             Assert.False(t2, "Null terminator shouldn't alter passphrase");
         }
@@ -233,13 +233,13 @@ namespace BCryptNet.UnitTests
         {
             var hmacKey = Guid.NewGuid().ToString();
             var x = BCryptCore.GenerateSalt();
-            string hash = BCryptExtendedV3.HashPassword(hmacKey,password, x);
+            string hash = BCryptExtendedV3.HashPassword(hmacKey, password, x);
 
             Assert.False(ContainsNoNullBytes(SafeUtf8.GetBytes(password)));
 
-            var t1 = BCryptExtendedV3.Verify(hmacKey,leader, hash);
+            var t1 = BCryptExtendedV3.Verify(hmacKey, leader, hash);
             Assert.False(t1, "Null should be treated as part of password as per spec");
-            Assert.False(BCryptExtendedV3.Verify(hmacKey,"", hash), "Null should be treated as part of password as per spec");
+            Assert.False(BCryptExtendedV3.Verify(hmacKey, "", hash), "Null should be treated as part of password as per spec");
         }
 
 #if NETCOREAPP

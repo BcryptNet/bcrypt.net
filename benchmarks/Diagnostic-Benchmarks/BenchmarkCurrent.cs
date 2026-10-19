@@ -18,8 +18,8 @@
 // */
 
 using System;
-using Microsoft.VSDiagnostics;
 using BCryptNet;
+using Microsoft.VSDiagnostics;
 
 namespace BenchmarkCurrent
 {

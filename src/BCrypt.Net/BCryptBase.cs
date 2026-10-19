@@ -353,8 +353,8 @@ public partial class BCryptCore
     /// <summary>Initializes the Blowfish key schedule.</summary>
     private void InitializeKey()
     {
-        _p = s_p.Value!;
-        _s = s_s.Value!;
+        _p = s_p.Value;
+        _s = s_s.Value;
         Array.Copy(POrig, _p, POrig.Length);
         Array.Copy(SOrig, _s, SOrig.Length);
     }
