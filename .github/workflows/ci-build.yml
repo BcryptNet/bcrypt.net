@@ -27,17 +27,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden the runner
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
           egress-policy: audit
 
       - name: 'Checkout'
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
 
       - name: 'Setup .NET SDK'
-        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.x
 
@@ -49,7 +49,7 @@ jobs:
         run: dotnet build --configuration Debug --no-restore
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: build-artifacts
           path: |
@@ -68,7 +68,7 @@ jobs:
         if: always()
 
       - name: 'Generate Coverage Reports'
-        uses: danielpalme/ReportGenerator-GitHub-Action@049f7ec958c672fd31d5cc1cb01622dc8d2e23ab # 5.5.10
+        uses: danielpalme/ReportGenerator-GitHub-Action@d3ebf1f760f7d8ab92cc44d9bcfee7ad73722a31 # 5.5.11
         with:
           reports: "tests/**/*.cobertura.xml"
           targetdir: "${{ github.workspace }}"
@@ -93,7 +93,7 @@ jobs:
           thresholds: "10 30"
 
       - name: Upload Code Coverage Results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-results
           path: |
@@ -102,13 +102,13 @@ jobs:
           retention-days: 5
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
+        uses: EnricoMi/publish-unit-test-result-action@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d # v2.25.0
         if: always()
         with:
           files: "tests/**/TestResults.xml"
 
       - name: Upload Test Artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: test-results
           path: "tests/**/TestResults.xml"
