@@ -270,8 +270,7 @@ public sealed class BCrypt : BCryptCore
 #endif
 
     /// <summary>
-    /// Based on password_needs_rehash in PHP this method will return true
-    /// if the work factor (logrounds) set on the hash is lower than the new minimum workload passed in
+    /// Returns true if the work factor (logrounds) set on the hash is lower than the new minimum workload passed in
     /// </summary>
     /// <param name="hash">full bcrypt hash</param>
     /// <param name="newMinimumWorkLoad">target workload</param>

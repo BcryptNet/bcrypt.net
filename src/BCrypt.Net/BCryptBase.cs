@@ -20,7 +20,6 @@ IN THE SOFTWARE.
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 
 namespace BCryptNet;
 
