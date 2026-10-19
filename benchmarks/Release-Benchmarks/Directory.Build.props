@@ -1,0 +1,10 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!-- BCrypt.Net-Next 2.x isn't strong-named and .NET Framework won't load it into a signed assembly.
+       Set here rather than in the csproj so the projects BenchmarkDotNet generates under bin\ inherit it. -->
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+    <PublicSign>false</PublicSign>
+  </PropertyGroup>
+</Project>

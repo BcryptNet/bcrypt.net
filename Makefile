@@ -11,8 +11,8 @@ all:
 	@exit 0
 
 .PHONY: ci-test
-ci-test: ## Run tests in CI with code coverage
-	@dotnet run --configuration Release --coverage --coverage-output-format cobertura --report-github
+ci-test: # Run tests in CI with code coverage
+	@dotnet run --configuration Release --coverage --coverage-output-format cobertura --report-github --project tests/UnitTests/BCrypt.Net.UnitTests.csproj
 
 .PHONY: build-alpha-package
 build-alpha-package: # builds a package with a pre-release version suffix
@@ -23,5 +23,5 @@ build-package: # builds a package with the version from the project file
 	@dotnet pack src/BCrypt.Net/BCrypt.Net.csproj -o artifacts
 
 .PHONY: benchmarks
-benchmarks:
-	$(MAKE) -C src/benchmarks/
+benchmarks: # lists the benchmark recipes; run one with make -C benchmarks <recipe>
+	@$(MAKE) -C benchmarks
