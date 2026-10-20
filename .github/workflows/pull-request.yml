@@ -1,0 +1,69 @@
+name: Pull Request
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # MTP telemetry crashes the net48 test host (Polyfill MissingMethodException); keep it off.
+  TESTINGPLATFORM_TELEMETRY_OPTOUT: true
+
+jobs:
+  build_and_pack:
+    name: Build, test and pack (alpha)
+    # Windows: needed for the net462/net472/net48 targets and full strong-name signing (bcrypt.snk);
+    # on other OSes the projects drop the framework targets and only public-sign.
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.x
+
+      # Version comes from version.json via Nerdbank.GitVersioning; PR refs are non-public,
+      # so packages get a -prerelease.g<commit> style suffix.
+      - name: Build
+        run: |
+          dotnet build src/BCrypt.Net/BCrypt.Net.csproj --configuration Release
+          dotnet build src/BCrypt.Net.IdentityExtensions/BCrypt.Net.IdentityExtensions.csproj --configuration Release
+          dotnet build tests/UnitTests/BCrypt.Net.UnitTests.csproj --configuration Release
+          dotnet build tests/BCrypt.Net.IdentityExtensions.Tests/BCrypt.Net.IdentityExtensions.Tests.csproj --configuration Release
+
+      - name: Run unit tests
+        run: dotnet test --project tests/UnitTests/BCrypt.Net.UnitTests.csproj --configuration Release --no-build --report-github
+
+      - name: Run identity extension tests
+        run: dotnet test --project tests/BCrypt.Net.IdentityExtensions.Tests/BCrypt.Net.IdentityExtensions.Tests.csproj --configuration Release --no-build
+
+      - name: Pack NuGet packages
+        run: |
+          dotnet pack src/BCrypt.Net/BCrypt.Net.csproj --configuration Release --no-build --output ./artifacts -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+          dotnet pack src/BCrypt.Net.IdentityExtensions/BCrypt.Net.IdentityExtensions.csproj --configuration Release --no-build --output ./artifacts -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+
+      - name: Publish artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nuget-packages-pr-${{ github.event.pull_request.number || github.run_number }}
+          path: ./artifacts/*
+          retention-days: 7

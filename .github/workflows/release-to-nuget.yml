@@ -1,0 +1,189 @@
+name: Build Release
+
+# Release process: set "version" in version.json to the release version (e.g. "5.0.0"),
+# merge, then push a matching tag ("5.0.0" or "v5.0.0") on that commit.
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # MTP telemetry crashes the net48 test host (Polyfill MissingMethodException); keep it off.
+  TESTINGPLATFORM_TELEMETRY_OPTOUT: true
+  SIMPLYSIGN_URL: 'https://files.certum.eu/software/SimplySignDesktop/Windows/9.4.4.92/SimplySignDesktop-9.4.4.92-64-bit-en.msi'
+
+jobs:
+  build_and_pack:
+    name: Build, test and pack release
+    # Windows: needed for the net462/net472/net48 targets and full strong-name signing (bcrypt.snk).
+    runs-on: windows-latest
+    env:
+      # Tags aren't in version.json's publicReleaseRefSpec; force a public (unsuffixed) version.
+      PublicRelease: true
+
+    steps:
+      - name: Calculate version from the tag
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.x
+
+      - name: Build
+        run: |
+          dotnet build src/BCrypt.Net/BCrypt.Net.csproj --configuration Release
+          dotnet build src/BCrypt.Net.IdentityExtensions/BCrypt.Net.IdentityExtensions.csproj --configuration Release
+          dotnet build tests/UnitTests/BCrypt.Net.UnitTests.csproj --configuration Release
+          dotnet build tests/BCrypt.Net.IdentityExtensions.Tests/BCrypt.Net.IdentityExtensions.Tests.csproj --configuration Release
+
+      - name: Run unit tests
+        run: dotnet test --project tests/UnitTests/BCrypt.Net.UnitTests.csproj --configuration Release --no-build --report-github
+
+      - name: Run identity extension tests
+        run: dotnet test --project tests/BCrypt.Net.IdentityExtensions.Tests/BCrypt.Net.IdentityExtensions.Tests.csproj --configuration Release --no-build
+
+      - name: Pack NuGet packages
+        run: |
+          dotnet pack src/BCrypt.Net/BCrypt.Net.csproj --configuration Release --no-build --output ./artifacts -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+          dotnet pack src/BCrypt.Net.IdentityExtensions/BCrypt.Net.IdentityExtensions.csproj --configuration Release --no-build --output ./artifacts -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+
+      # Version is computed by nbgv from version.json, not from the tag; refuse to ship a mismatch.
+      - name: Verify package version matches tag
+        shell: pwsh
+        run: |
+          $expected = "*.$env:RELEASE_VERSION.nupkg"
+          $packages = Get-ChildItem -Path ./artifacts -Filter *.nupkg -File
+          $packages | Format-Table Name, Length
+          $mismatched = $packages | Where-Object { $_.Name -notlike $expected }
+          if ($packages.Count -ne 2 -or $mismatched) {
+            throw "Expected 2 packages versioned $env:RELEASE_VERSION. Check that version.json matches the tag."
+          }
+
+      - name: Publish artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nuget-packages-unsigned
+          path: ./artifacts/*
+
+  sign_and_publish:
+    name: Sign and publish to GPR and NuGet.org
+    needs: build_and_pack
+    runs-on: windows-latest
+    permissions:
+      contents: write   # GitHub release
+      packages: write   # GPR
+      id-token: write   # NuGet trusted publishing (OIDC)
+
+    steps:
+      - name: Calculate version from the tag
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Download artifacts from build job
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: nuget-packages-unsigned
+          path: ./artifacts/
+
+      - name: List downloaded artifacts
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path ./artifacts -Recurse | Format-Table FullName, Length
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.x
+
+      - name: Cache SimplySign Installer
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: SimplySignDesktop.msi
+          key: simplysign-msi-${{ env.SIMPLYSIGN_URL }}
+
+      - name: Setup Certum SimplySign environment
+        uses: chrismckee/windows-app-signing-setup-action@89ae3b032d4bc7a5b98d1a42a34e61ecb6faad64 # main @ 2026-06-29
+        with:
+          certum-username: ${{ secrets.CERTUM_USERNAME }}
+          certum-otp-uri: ${{ secrets.CERTUM_OTP_URI }}
+          certum-key-id: ${{ secrets.CERTUM_KEY_ID }}
+          simplysign-url: ${{ env.SIMPLYSIGN_URL }}
+
+      - name: Sign packages
+        shell: pwsh
+        run: |
+          $packages = Get-ChildItem -Path ./artifacts -Filter *.nupkg -File
+          if ($packages.Count -eq 0) {
+            throw "No .nupkg files found in ./artifacts"
+          }
+
+          foreach ($package in $packages) {
+            dotnet nuget sign $package.FullName `
+              --certificate-subject-name "Open Source Developer Christopher McKee" `
+              --timestamper http://timestamp.certum.pl
+            if ($LASTEXITCODE -ne 0) { throw "Signing failed for $($package.Name)" }
+          }
+
+      - name: Verify package signatures
+        shell: pwsh
+        run: |
+          foreach ($package in Get-ChildItem -Path ./artifacts -Filter *.nupkg -File) {
+            dotnet nuget verify $package.FullName --all
+            if ($LASTEXITCODE -ne 0) { throw "Signature verification failed for $($package.Name)" }
+          }
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        with:
+          name: ${{ env.RELEASE_VERSION }}
+          files: ./artifacts/*
+          prerelease: ${{ contains(env.RELEASE_VERSION, '-') }}
+          generate_release_notes: true
+
+      - name: Publish signed packages to GPR
+        shell: pwsh
+        run: |
+          foreach ($package in Get-ChildItem -Path ./artifacts -Filter *.nupkg -File) {
+            dotnet nuget push $package.FullName `
+              --no-symbols `
+              --api-key ${{ secrets.GITHUB_TOKEN }} `
+              --source https://nuget.pkg.github.com/${{ github.repository_owner }} `
+              --skip-duplicate
+          }
+
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        id: login
+        with:
+          user: ChrisMcKee
+
+      # Pushing the .nupkg also pushes the matching .snupkg from the same folder.
+      - name: Publish signed packages to nuget.org
+        shell: pwsh
+        run: |
+          foreach ($package in Get-ChildItem -Path ./artifacts -Filter *.nupkg -File) {
+            dotnet nuget push $package.FullName `
+              --api-key ${{ steps.login.outputs.NUGET_API_KEY }} `
+              --source https://api.nuget.org/v3/index.json `
+              --skip-duplicate
+          }

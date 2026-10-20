@@ -1,0 +1,86 @@
+name: Merge to 'main'
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # MTP telemetry crashes the net48 test host (Polyfill MissingMethodException); keep it off.
+  TESTINGPLATFORM_TELEMETRY_OPTOUT: true
+  # main is a public release ref in version.json, which would give every commit the same
+  # package version. Force a non-public build so each beta is unique (-g<commit> suffix).
+  PublicRelease: false
+
+jobs:
+  build_and_publish_beta:
+    name: Build and publish BETA NuGet packages (GPR)
+    # Windows: needed for the net462/net472/net48 targets and full strong-name signing (bcrypt.snk).
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.x
+
+      - name: Build
+        run: |
+          dotnet build src/BCrypt.Net/BCrypt.Net.csproj --configuration Release
+          dotnet build src/BCrypt.Net.IdentityExtensions/BCrypt.Net.IdentityExtensions.csproj --configuration Release
+          dotnet build tests/UnitTests/BCrypt.Net.UnitTests.csproj --configuration Release
+          dotnet build tests/BCrypt.Net.IdentityExtensions.Tests/BCrypt.Net.IdentityExtensions.Tests.csproj --configuration Release
+
+      - name: Run unit tests
+        run: dotnet test --project tests/UnitTests/BCrypt.Net.UnitTests.csproj --configuration Release --no-build --report-github
+
+      - name: Run identity extension tests
+        run: dotnet test --project tests/BCrypt.Net.IdentityExtensions.Tests/BCrypt.Net.IdentityExtensions.Tests.csproj --configuration Release --no-build
+
+      - name: Pack NuGet packages
+        run: |
+          dotnet pack src/BCrypt.Net/BCrypt.Net.csproj --configuration Release --no-build --output ./artifacts -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+          dotnet pack src/BCrypt.Net.IdentityExtensions/BCrypt.Net.IdentityExtensions.csproj --configuration Release --no-build --output ./artifacts -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+
+      - name: Publish artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nuget-packages-beta-${{ github.run_number }}
+          path: ./artifacts/*
+          retention-days: 14
+
+      - name: Publish to GPR
+        shell: pwsh
+        run: |
+          $packages = Get-ChildItem -Path ./artifacts -Filter *.nupkg -File
+          if ($packages.Count -eq 0) {
+            throw "No .nupkg files found in ./artifacts"
+          }
+
+          foreach ($package in $packages) {
+            dotnet nuget push $package.FullName `
+              --no-symbols `
+              --api-key ${{ secrets.GITHUB_TOKEN }} `
+              --source https://nuget.pkg.github.com/${{ github.repository_owner }} `
+              --skip-duplicate
+          }
