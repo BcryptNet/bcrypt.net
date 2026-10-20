@@ -21,7 +21,6 @@ env:
   DOTNET_GENERATE_ASPNET_CERTIFICATE: false
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  # MTP telemetry crashes the net48 test host (Polyfill MissingMethodException); keep it off.
   TESTINGPLATFORM_TELEMETRY_OPTOUT: true
   # main is a public release ref in version.json, which would give every commit the same
   # package version. Force a non-public build so each beta is unique (-g<commit> suffix).

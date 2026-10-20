@@ -17,7 +17,6 @@ env:
   DOTNET_GENERATE_ASPNET_CERTIFICATE: false
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  # MTP telemetry crashes the net48 test host (Polyfill MissingMethodException); keep it off.
   TESTINGPLATFORM_TELEMETRY_OPTOUT: true
   SIMPLYSIGN_URL: 'https://files.certum.eu/software/SimplySignDesktop/Windows/9.4.4.92/SimplySignDesktop-9.4.4.92-64-bit-en.msi'
 
