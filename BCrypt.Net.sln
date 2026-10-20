@@ -27,7 +27,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{93729F4E-5F15-4769-8385-19176C7AAA2C}"
 	ProjectSection(SolutionItems) = preProject
 		.github\ISSUE_TEMPLATE\bug_report.md = .github\ISSUE_TEMPLATE\bug_report.md
-		.github\workflows\ci-build.yml = .github\workflows\ci-build.yml
 		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
 		.github\dependabot.yml = .github\dependabot.yml
 		.github\workflows\dependency-review.yml = .github\workflows\dependency-review.yml
@@ -35,7 +34,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{93729F
 		.github\ISSUE_TEMPLATE\feature_request.md = .github\ISSUE_TEMPLATE\feature_request.md
 		.github\workflows\generate-publish-docs.yml = .github\workflows\generate-publish-docs.yml
 		.github\stale.yml = .github\stale.yml
-		.github\workflows\upload-coverage-report.yml = .github\workflows\upload-coverage-report.yml
+		.github\workflows\merge-to-main.yml = .github\workflows\merge-to-main.yml
+		.github\workflows\pull-request.yml = .github\workflows\pull-request.yml
+		.github\workflows\release-to-nuget.yml = .github\workflows\release-to-nuget.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndroidTest", "examples\AndroidTest\AndroidTest.csproj", "{AEA6712D-0FAE-4031-8FA7-FDD2A026855A}"
