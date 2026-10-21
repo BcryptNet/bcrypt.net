@@ -9,6 +9,8 @@ items:
         href: enhancedEntropy.md
       - name: Enhanced Entropy - Password Shucking
         href: enhancedEntropyPasswordShucking.md
+      - name: ASP.NET Core Identity
+        href: identity.md
       - name: Salts / Salting
         href: salts.md
       - name: Scheme Versioning

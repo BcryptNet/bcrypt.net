@@ -20,6 +20,7 @@ uid: releases
 - Salts with invalid characters or a cost outside 4–31 throw `SaltParseException` on every target framework; .NET Framework and .NET Standard previously hashed invalid characters as zero bytes.
 - `HashParser` / `InterrogateHash` reject hashes whose length doesn't match their revision or whose cost is outside 4–31.
 - `BCryptPasswordHasher.VerifyHashedPassword` returns `Failed` for empty or unrecognised hashes instead of throwing.
+- `BCryptPasswordHasher` supports enhanced (V2/V3) bcrypt through `BCryptHasherOptions.PreHash`, and migrates existing hashes through `PreviousPreHashes`; see [ASP.NET Core Identity](xref:identity). `UseBcrypt` now validates the options at startup, and option changes apply without a restart.
 
 ### Migrating to V5
 

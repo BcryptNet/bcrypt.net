@@ -19,6 +19,9 @@
 
 using BCryptNet.IdentityExtensions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -31,12 +34,47 @@ public static class BCryptNetPasswordHasher
     /// <summary>
     /// Set the IPasswordHasher to use BCrypt for password hashing.
     /// </summary>
+    /// <remarks>
+    /// Configure with <c>services.Configure&lt;BCryptHasherOptions&gt;(...)</c> or the overload taking an action.
+    /// Options are validated at startup and changes apply without a restart.
+    /// </remarks>
     /// <param name="services"></param>
     /// <typeparam name="TUser"></typeparam>
     /// <returns></returns>
     public static IServiceCollection UseBcrypt<TUser>(this IServiceCollection services) where TUser : class
     {
+        services.AddOptions<BCryptHasherOptions>().ValidateOnStart();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<BCryptHasherOptions>, BCryptHasherOptionsValidator>());
         services.AddScoped<PasswordHasher<TUser>>();
-        return services.AddScoped<IPasswordHasher<TUser>, BCryptPasswordHasher<TUser>>();
+        // Factory, as the container finds the IOptions and IOptionsMonitor constructors ambiguous
+        return services.AddScoped<IPasswordHasher<TUser>>(sp => new BCryptPasswordHasher<TUser>(
+            sp.GetRequiredService<PasswordHasher<TUser>>(),
+            sp.GetRequiredService<IOptionsMonitor<BCryptHasherOptions>>(),
+            sp.GetService<ILogger<BCryptPasswordHasher<TUser>>>()));
+    }
+
+    /// <summary>
+    /// Set the IPasswordHasher to use BCrypt for password hashing, configured by <paramref name="configure"/>.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// services.UseBcrypt&lt;IdentityUser&gt;(o =>
+    /// {
+    ///     o.WorkFactor = 12;
+    ///     o.PreHash = new PreHashOptions { Scheme = PreHashScheme.HmacSha3, HmacKey = configuration["Pepper"] };
+    ///     o.PreviousPreHashes.Add(new PreHashOptions()); // plain bcrypt
+    /// });
+    /// </code>
+    /// </example>
+    /// <param name="services"></param>
+    /// <param name="configure">Configures the <see cref="BCryptHasherOptions"/>.</param>
+    /// <param name="configure">Configures the options.</param>
+    /// <typeparam name="TUser"></typeparam>
+    /// <returns></returns>
+    public static IServiceCollection UseBcrypt<TUser>(this IServiceCollection services, Action<BCryptHasherOptions> configure) where TUser : class
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        services.Configure(configure);
+        return services.UseBcrypt<TUser>();
     }
 }

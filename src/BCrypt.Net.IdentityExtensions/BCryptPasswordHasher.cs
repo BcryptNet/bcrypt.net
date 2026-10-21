@@ -18,21 +18,30 @@
 // */
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace BCryptNet.IdentityExtensions;
 
 /// <summary>
-/// A password hasher that uses BCrypt for password hashing.
+/// A password hasher that uses BCrypt, optionally pre-hashed with SHA2 (<see cref="BCryptExtendedV2"/>)
+/// or HMAC-SHA3 (<see cref="BCryptExtendedV3"/>); see <see cref="BCryptHasherOptions.PreHash"/>.
 /// </summary>
+/// <remarks>
+/// ASP.NET Identity hashes and hashes matching <see cref="BCryptHasherOptions.PreviousPreHashes"/> verify with
+/// <see cref="PasswordVerificationResult.SuccessRehashNeeded"/>. With an <see cref="IOptionsMonitor{TOptions}"/>, option changes
+/// apply without a restart; an invalid reload is logged and the last valid options are kept.
+/// </remarks>
 /// <typeparam name="TUser"></typeparam>
 public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : class
 {
     private readonly PasswordHasher<TUser> _identityHasher;
     private readonly BCryptHasherOptions _options;
+    private readonly IOptionsMonitor<BCryptHasherOptions> _optionsMonitor;
+    private readonly ILogger _logger;
 
     /// <summary>
-    /// Creates a new instance of <see cref="PasswordHasher{TUser}"/>.
+    /// Creates a hasher with fixed options.
     /// </summary>
     /// <param name="identityHasher">AspNet Identity PasswordHasher</param>
     /// <param name="optionsAccessor">The options for this instance.</param>
@@ -41,6 +50,26 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
         _identityHasher = identityHasher;
         _options = optionsAccessor?.Value ?? new BCryptHasherOptions();
     }
+
+    /// <summary>
+    /// Creates a hasher that follows option changes.
+    /// </summary>
+    /// <param name="identityHasher">AspNet Identity PasswordHasher</param>
+    /// <param name="optionsMonitor">The live options.</param>
+    /// <param name="logger">Logs invalid reloads.</param>
+    public BCryptPasswordHasher(PasswordHasher<TUser> identityHasher, IOptionsMonitor<BCryptHasherOptions> optionsMonitor,
+        ILogger<BCryptPasswordHasher<TUser>> logger = null)
+    {
+        ArgumentNullException.ThrowIfNull(optionsMonitor);
+        _identityHasher = identityHasher;
+        _optionsMonitor = optionsMonitor;
+        _logger = logger;
+    }
+
+    // One snapshot per call, so a reload can't mix settings
+    private HasherSnapshot Current() => _optionsMonitor is null
+        ? new HasherSnapshot(_options, ResolvedPreHashes.For(_options))
+        : LiveHasherOptions.Current(_optionsMonitor, _logger);
 
     /// <summary>
     /// Hashes a password using BCrypt.
@@ -53,7 +82,9 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
         ArgumentNullException.ThrowIfNull(password);
         ArgumentNullException.ThrowIfNull(user);
 
-        return BCrypt.HashPassword(password, new BCryptOptions(_options.WorkFactor, _options.LongPasswordHandling));
+        var (settings, schemes) = Current();
+        var options = new BCryptOptions(settings.WorkFactor, settings.LongPasswordHandling);
+        return Hash(password, schemes.Current, options);
     }
 
     /// <summary>
@@ -93,13 +124,47 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
             return PasswordVerificationResult.Failed;
         }
 
-        if (!BCrypt.Verify(providedPassword, hashedPassword, new BCryptOptions(longPasswordHandling: _options.LongPasswordHandling)))
-            return PasswordVerificationResult.Failed;
+        var (settings, schemes) = Current();
+        var options = new BCryptOptions(longPasswordHandling: settings.LongPasswordHandling);
 
-        return _options.RehashPasswords && hashInfo.WorkFactor < _options.WorkFactor
-            ? PasswordVerificationResult.SuccessRehashNeeded
-            : PasswordVerificationResult.Success;
+        if (Verify(providedPassword, hashedPassword, schemes.Current, options))
+        {
+            return settings.RehashPasswords && hashInfo.WorkFactor < settings.WorkFactor
+                ? PasswordVerificationResult.SuccessRehashNeeded
+                : PasswordVerificationResult.Success;
+        }
+
+        foreach (var previous in schemes.Previous)
+        {
+            try
+            {
+                if (Verify(providedPassword, hashedPassword, previous, options))
+                    return PasswordVerificationResult.SuccessRehashNeeded;
+            }
+            catch (PasswordTooLongException)
+            {
+                // An over-long password can't match a plain bcrypt hash
+            }
+        }
+
+        return PasswordVerificationResult.Failed;
     }
+
+    private static string Hash(string password, ResolvedPreHash scheme, BCryptOptions options) => scheme.PreHash.Scheme switch
+    {
+        PreHashScheme.None => BCrypt.HashPassword(password, options),
+        PreHashScheme.Sha2 => BCryptExtendedV2.HashPassword(password, options.WithPreHash(scheme.PreHash)),
+        PreHashScheme.HmacSha3 => BCryptExtendedV3.HashPassword(scheme.HmacKey, password, options.WithPreHash(scheme.PreHash)),
+        _ => throw new InvalidOperationException($"Unknown pre-hash scheme {scheme.PreHash}")
+    };
+
+    private static bool Verify(string password, string hash, ResolvedPreHash scheme, BCryptOptions options) => scheme.PreHash.Scheme switch
+    {
+        PreHashScheme.None => BCrypt.Verify(password, hash, options),
+        PreHashScheme.Sha2 => BCryptExtendedV2.Verify(password, hash, options.WithPreHash(scheme.PreHash)),
+        PreHashScheme.HmacSha3 => BCryptExtendedV3.Verify(scheme.HmacKey, password, hash, options.WithPreHash(scheme.PreHash)),
+        _ => throw new InvalidOperationException($"Unknown pre-hash scheme {scheme.PreHash}")
+    };
 
     private static bool CheckForAspIdentityHash(string hash)
     {
