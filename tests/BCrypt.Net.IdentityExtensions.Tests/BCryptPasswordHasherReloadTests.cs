@@ -112,7 +112,7 @@ public sealed class BCryptPasswordHasherReloadTests : IDisposable
 
         using var key = HmacKey.FromString("pepper");
         var hmacHash = Hasher().HashPassword(User, "password");
-        Assert.True(BCryptExtendedV3.Verify(key, "password", hmacHash));
+        Assert.True(BCryptExtendedV3.Verify(key, "password", BCryptPasswordHasherPreHashTests.Untag(hmacHash, "$bcnet-hmac-sha3-384")));
         Assert.Equal(PasswordVerificationResult.Success, Hasher().VerifyHashedPassword(User, hmacHash, "password"));
         Assert.Equal(PasswordVerificationResult.SuccessRehashNeeded, Hasher().VerifyHashedPassword(User, plainHash, "password"));
     }
@@ -128,7 +128,8 @@ public sealed class BCryptPasswordHasherReloadTests : IDisposable
 
         Assert.Equal(PasswordVerificationResult.SuccessRehashNeeded, Hasher().VerifyHashedPassword(User, oldHash, "password"));
         using var newKey = HmacKey.FromString("new pepper");
-        Assert.True(BCryptExtendedV3.Verify(newKey, "password", Hasher().HashPassword(User, "password")));
+        Assert.True(BCryptExtendedV3.Verify(newKey, "password",
+            BCryptPasswordHasherPreHashTests.Untag(Hasher().HashPassword(User, "password"), "$bcnet-hmac-sha3-384")));
     }
 
     [Fact]
@@ -142,13 +143,15 @@ public sealed class BCryptPasswordHasherReloadTests : IDisposable
         Assert.IsType<OptionsValidationException>(reloadError.InnerException);
 
         Assert.Equal(PasswordVerificationResult.Success, Hasher().VerifyHashedPassword(User, sha2Hash, "password"));
-        Assert.True(BCryptExtendedV2.Verify("password", Hasher().HashPassword(User, "password")));
+        Assert.True(BCryptExtendedV2.Verify("password",
+            BCryptPasswordHasherPreHashTests.Untag(Hasher().HashPassword(User, "password"), "$bcnet-sha2-384")));
         Assert.Single(_logger.Entries, e => e.Level == LogLevel.Error); // once, not per call
 
         Reload(("BCrypt:PreHash:HmacKey", "pepper"));
 
         using var key = HmacKey.FromString("pepper");
-        Assert.True(BCryptExtendedV3.Verify(key, "password", Hasher().HashPassword(User, "password")));
+        Assert.True(BCryptExtendedV3.Verify(key, "password",
+            BCryptPasswordHasherPreHashTests.Untag(Hasher().HashPassword(User, "password"), "$bcnet-hmac-sha3-384")));
         Assert.Contains(_logger.Entries, e => e.Level == LogLevel.Information);
     }
 

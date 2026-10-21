@@ -54,9 +54,22 @@ HMAC-SHA3 needs OS support (Windows 11 build 25324+, or OpenSSL 1.1.1+ on Linux;
 
 ## Migrating existing hashes
 
-Bcrypt hashes don't record which pre-hash produced them, so after changing `PreHash` the hasher has to be told which schemes
-existing hashes may use. List them in `PreviousPreHashes`. They are tried in order when a password doesn't verify under the
-current scheme, and a match returns `SuccessRehashNeeded`, so the user is moved to the current scheme on their next login.
+Bcrypt hashes don't record which pre-hash produced them, so the hasher stores pre-hashed passwords with a scheme tag in front
+of the bcrypt hash:
+
+| Scheme | Stored hash |
+|---|---|
+| None | `$2a$12$...` (untagged, standard bcrypt) |
+| Sha2 | `$bcnet-sha2-384$2a$12$...` (`sha2-256`, `sha2-384`, `sha2-512`) |
+| HmacSha3 | `$bcnet-hmac-sha3-384$2a$12$...` (`hmac-sha3-256`, `hmac-sha3-384`, `hmac-sha3-512`) |
+
+A hash is only ever verified under the scheme it is tagged with. Checking a SHA2 hash as plain bcrypt would accept
+base64(SHA2(password)) as the password, so anyone holding an unsalted SHA2 digest of the password (from another site's
+breach, say) could log in without cracking it.
+
+After changing `PreHash`, list the schemes existing hashes may use in `PreviousPreHashes`. A hash tagged with one of them
+verifies with `SuccessRehashNeeded`, so the user is moved to the current scheme on their next login. A hash whose scheme
+isn't configured fails.
 
 ```json
 {
@@ -72,7 +85,14 @@ current scheme, and a match returns `SuccessRehashNeeded`, so the user is moved 
 
 The same mechanism rotates the V3 HMAC key: set the new key on `PreHash` and add the old one as a previous `HmacSha3` entry.
 
-Each previous scheme costs one extra bcrypt computation on every failed login. Remove entries once your users have migrated.
+Entries sharing a scheme (old HMAC keys) are tried in order, each costing one extra bcrypt computation on a failed login.
+Remove entries once your users have migrated.
+
+### Hashes created outside the hasher
+
+Untagged hashes are treated as plain bcrypt. If you stored `BCryptExtendedV2` or `BCryptExtendedV3` hashes yourself, add
+the tag for the scheme that created them before switching to this hasher, e.g. prefix V2 SHA384 hashes with
+`$bcnet-sha2-384`. Untagged pre-hashed hashes won't verify.
 
 ## Live reload
 

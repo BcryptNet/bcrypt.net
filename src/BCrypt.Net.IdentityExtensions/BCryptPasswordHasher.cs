@@ -28,6 +28,7 @@ namespace BCryptNet.IdentityExtensions;
 /// or HMAC-SHA3 (<see cref="BCryptExtendedV3"/>); see <see cref="BCryptHasherOptions.PreHash"/>.
 /// </summary>
 /// <remarks>
+/// Pre-hashed hashes are tagged with their scheme (e.g. <c>$bcnet-sha2-384$2b$...</c>) and only verify under it.
 /// ASP.NET Identity hashes and hashes matching <see cref="BCryptHasherOptions.PreviousPreHashes"/> verify with
 /// <see cref="PasswordVerificationResult.SuccessRehashNeeded"/>. With an <see cref="IOptionsMonitor{TOptions}"/>, option changes
 /// apply without a restart; an invalid reload is logged and the last valid options are kept.
@@ -84,7 +85,7 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
 
         var (settings, schemes) = Current();
         var options = new BCryptOptions(settings.WorkFactor, settings.LongPasswordHandling);
-        return Hash(password, schemes.Current, options);
+        return SchemeTag.Apply(schemes.Current.PreHash, Hash(password, schemes.Current, options));
     }
 
     /// <summary>
@@ -113,10 +114,13 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
             return PasswordVerificationResult.Failed;
         }
 
+        if (!SchemeTag.TryParse(hashedPassword, out var preHash, out var hash))
+            return PasswordVerificationResult.Failed;
+
         HashInformation hashInfo;
         try
         {
-            hashInfo = BCrypt.InterrogateHash(hashedPassword);
+            hashInfo = BCrypt.InterrogateHash(hash);
         }
         catch (HashInformationException)
         {
@@ -127,7 +131,8 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
         var (settings, schemes) = Current();
         var options = new BCryptOptions(longPasswordHandling: settings.LongPasswordHandling);
 
-        if (Verify(providedPassword, hashedPassword, schemes.Current, options))
+        // Only verify under the scheme the hash is tagged with
+        if (schemes.Current.PreHash == preHash && Verify(providedPassword, hash, schemes.Current, options))
         {
             return settings.RehashPasswords && hashInfo.WorkFactor < settings.WorkFactor
                 ? PasswordVerificationResult.SuccessRehashNeeded
@@ -136,9 +141,12 @@ public class BCryptPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : 
 
         foreach (var previous in schemes.Previous)
         {
+            if (previous.PreHash != preHash)
+                continue;
+
             try
             {
-                if (Verify(providedPassword, hashedPassword, previous, options))
+                if (Verify(providedPassword, hash, previous, options))
                     return PasswordVerificationResult.SuccessRehashNeeded;
             }
             catch (PasswordTooLongException)

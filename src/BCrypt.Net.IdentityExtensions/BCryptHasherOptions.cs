@@ -58,10 +58,9 @@ public record BCryptHasherOptions
     public PreHashOptions PreHash { get; set; } = new();
 
     /// <summary>
-    /// Schemes tried in order when a password doesn't verify under <see cref="PreHash"/>. A match returns
-    /// <see cref="Microsoft.AspNetCore.Identity.PasswordVerificationResult.SuccessRehashNeeded"/>, so the password is re-hashed
-    /// with the current scheme.
+    /// Older schemes existing hashes may use. A hash matching one verifies with
+    /// <see cref="Microsoft.AspNetCore.Identity.PasswordVerificationResult.SuccessRehashNeeded"/>, so it is re-hashed with the
+    /// current scheme.
     /// </summary>
-    /// <remarks>Each entry adds a bcrypt computation to every failed login.</remarks>
     public IList<PreHashOptions> PreviousPreHashes { get; } = new List<PreHashOptions>();
 }

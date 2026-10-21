@@ -19,6 +19,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using BCryptNet;
 using BCryptNet.IdentityExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -50,6 +52,12 @@ public sealed class BCryptPasswordHasherPreHashTests
         return new BCryptPasswordHasher<TestUser>(new PasswordHasher<TestUser>(), Options.Create(options));
     }
 
+    internal static string Untag(string hash, string tag)
+    {
+        Assert.StartsWith(tag + "$2", hash, StringComparison.Ordinal);
+        return hash[tag.Length..];
+    }
+
     [Fact]
     public void Defaults_ToPlainBcrypt()
     {
@@ -63,7 +71,8 @@ public sealed class BCryptPasswordHasherPreHashTests
     [Fact]
     public void HashPassword_Sha2_CreatesExtendedV2Hash()
     {
-        var hash = CreateHasher(new PreHashOptions { Scheme = PreHashScheme.Sha2, Digest = HashType.SHA256 }).HashPassword(User, "password");
+        var hash = Untag(CreateHasher(new PreHashOptions { Scheme = PreHashScheme.Sha2, Digest = HashType.SHA256 }).HashPassword(User, "password"),
+            "$bcnet-sha2-256");
 
         Assert.True(BCryptExtendedV2.Verify("password", hash, new BCryptOptions(preHash: PreHash.Sha2(HashType.SHA256))));
         Assert.False(BCryptNet.BCrypt.Verify("password", hash));
@@ -75,7 +84,7 @@ public sealed class BCryptPasswordHasherPreHashTests
         using var key = HmacKey.FromString(Pepper);
         using var wrongKey = HmacKey.FromString("other");
 
-        var hash = CreateHasher(Hmac()).HashPassword(User, "password");
+        var hash = Untag(CreateHasher(Hmac()).HashPassword(User, "password"), "$bcnet-hmac-sha3-384");
 
         Assert.True(BCryptExtendedV3.Verify(key, "password", hash));
         Assert.False(BCryptExtendedV3.Verify(wrongKey, "password", hash));
@@ -142,9 +151,36 @@ public sealed class BCryptPasswordHasherPreHashTests
     {
         var options = new BCryptHasherOptions { WorkFactor = 5, RehashPasswords = true, PreHash = Sha2 };
         var hasher = new BCryptPasswordHasher<TestUser>(new PasswordHasher<TestUser>(), Options.Create(options));
-        var lowCost = BCryptExtendedV2.HashPassword("password", 4);
+        var lowCost = "$bcnet-sha2-384" + BCryptExtendedV2.HashPassword("password", 4);
 
         Assert.Equal(PasswordVerificationResult.SuccessRehashNeeded, hasher.VerifyHashedPassword(User, lowCost, "password"));
+    }
+
+    [Fact]
+    public void VerifyHashedPassword_Sha2HashUnderPlainFallback_RejectsDigestAsPassword()
+    {
+        // A leaked unsalted SHA384 of the password must not log in
+        var hasher = CreateHasher(Hmac(), Plain, Sha2);
+        var sha2Hash = CreateHasher(Sha2).HashPassword(User, "password");
+        var digest = Convert.ToBase64String(SHA384.HashData(Encoding.UTF8.GetBytes("password")));
+
+        Assert.Equal(PasswordVerificationResult.Failed, hasher.VerifyHashedPassword(User, sha2Hash, digest));
+        Assert.Equal(PasswordVerificationResult.SuccessRehashNeeded, hasher.VerifyHashedPassword(User, sha2Hash, "password"));
+    }
+
+    [Fact]
+    public void VerifyHashedPassword_OnlyUsesTaggedScheme()
+    {
+        var untaggedSha2 = BCryptExtendedV2.HashPassword("password", 4);
+        var sha256Hash = CreateHasher(new PreHashOptions { Scheme = PreHashScheme.Sha2, Digest = HashType.SHA256 }).HashPassword(User, "password");
+
+        // Untagged is plain bcrypt
+        Assert.Equal(PasswordVerificationResult.Failed, CreateHasher(Sha2).VerifyHashedPassword(User, untaggedSha2, "password"));
+        // Unconfigured scheme
+        Assert.Equal(PasswordVerificationResult.Failed, CreateHasher(Sha2, Plain).VerifyHashedPassword(User, sha256Hash, "password"));
+        // Unknown or malformed tags
+        Assert.Equal(PasswordVerificationResult.Failed, CreateHasher(Sha2).VerifyHashedPassword(User, "$bcnet-sha2-999" + untaggedSha2, "password"));
+        Assert.Equal(PasswordVerificationResult.Failed, CreateHasher(Sha2).VerifyHashedPassword(User, "$bcnet-sha2-384", "password"));
     }
 
     [Fact]
@@ -223,7 +259,7 @@ public sealed class BCryptPasswordHasherPreHashTests
         var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<TestUser>>();
         using var key = HmacKey.FromString(Pepper);
 
-        var hash = hasher.HashPassword(User, "password");
+        var hash = Untag(hasher.HashPassword(User, "password"), "$bcnet-hmac-sha3-512");
 
         Assert.StartsWith("$2a$04$", hash, StringComparison.Ordinal);
         Assert.True(BCryptExtendedV3.Verify(key, "password", hash, new BCryptOptions(preHash: PreHash.HmacSha3(HashType.SHA512))));
