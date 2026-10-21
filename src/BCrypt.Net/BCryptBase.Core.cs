@@ -74,11 +74,6 @@ public partial class BCryptCore
             throw new ArgumentException("Invalid salt: salt cannot be empty", nameof(salt));
         }
 
-        if (context.Kind == PreHashKind.None && hashType != HashType.None)
-        {
-            throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(context));
-        }
-
         if (outputBuffer.Length != 60)
         {
             throw new ArgumentException("Output buffer must be 60 characters long", nameof(outputBuffer));
@@ -183,8 +178,8 @@ public partial class BCryptCore
 
                     int eInputLen = context.Kind switch
                     {
-                        PreHashKind.Sha2 => BCryptExtendedV2.EnhancedHash(inputKey, hashType, bcryptMinorRevision, eInputBuffer),
-                        PreHashKind.HmacSha3 => BCryptExtendedV3.EnhancedHash(context.HmacKey, inputKey, hashType, eInputBuffer, bcryptMinorRevision),
+                        PreHashScheme.Sha2 => BCryptExtendedV2.EnhancedHash(inputKey, hashType, bcryptMinorRevision, eInputBuffer),
+                        PreHashScheme.HmacSha3 => BCryptExtendedV3.EnhancedHash(context.HmacKey, inputKey, hashType, eInputBuffer, bcryptMinorRevision),
                         _ => throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(context))
                     };
                     Span<byte> eInputBytes = eInputBuffer[..eInputLen];

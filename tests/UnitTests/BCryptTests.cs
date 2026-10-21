@@ -590,11 +590,11 @@ namespace BCryptNet.UnitTests
                 //Check hash that goes in one end comes out the next the same
                 string salt = _otherLibTestVectors[i, 1];
 
-                string hashed = BCryptExtendedV2.HashPassword(plain, salt, new BCryptOptions(preHash: HashType.SHA256));
+                string hashed = BCryptExtendedV2.HashPassword(plain, salt, new BCryptOptions(preHash: PreHash.Sha2(HashType.SHA256)));
 
                 Assert.Equal(_otherLibTestVectors[i, 2], hashed);
 
-                var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed, new BCryptOptions(preHash: HashType.SHA256));
+                var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed, new BCryptOptions(preHash: PreHash.Sha2(HashType.SHA256)));
                 Assert.True(validateHashCheck);
 
                 Trace.WriteLine(hashed);
@@ -621,13 +621,13 @@ namespace BCryptNet.UnitTests
                     //Check hash that goes in one end comes out the next the same
                     string salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
 
-                    string hashed = BCryptExtendedV2.HashPassword(plain, salt, new BCryptOptions(preHash: HashType.SHA256));
+                    string hashed = BCryptExtendedV2.HashPassword(plain, salt, new BCryptOptions(preHash: PreHash.Sha2(HashType.SHA256)));
 
                     var revCheck = hashed.StartsWith("$2" + _revisions[r]);
 
                     Assert.True(revCheck);
 
-                    var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed, new BCryptOptions(preHash: HashType.SHA256));
+                    var validateHashCheck = BCryptExtendedV2.Verify(plain, hashed, new BCryptOptions(preHash: PreHash.Sha2(HashType.SHA256)));
                     Assert.True(validateHashCheck);
 
                     Trace.WriteLine(hashed);
@@ -1062,7 +1062,7 @@ namespace BCryptNet.UnitTests
 
             var enhancedHashPassword = BCryptExtendedV2.HashPassword(myPassword);
 
-            var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword, new BCryptOptions(preHash: HashType.SHA384));
+            var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword, new BCryptOptions(preHash: PreHash.Sha2(HashType.SHA384)));
 
             Assert.True(validatePassword);
         }

@@ -46,10 +46,10 @@ public class EnhancedHashingValidation
     private readonly string _baselineEnhancedHash = BCryptBaseLine.BCrypt.EnhancedHashPassword("~!@#$%^&*()      ~!@#$%^&*()PNBFRD", BCryptBaseLine.HashType.SHA384, 12);
     private readonly string _bCrypt305PerfMerge1EnhancedHash = BCrypt305PerfMerge1.BCrypt.EnhancedHashPassword("~!@#$%^&*()      ~!@#$%^&*()PNBFRD", BCrypt305PerfMerge1.HashType.SHA384, 12);
     private readonly string _bCryptV4PerfMerge1EnhancedHash = BCryptV4.BCrypt.EnhancedHashPassword("~!@#$%^&*()      ~!@#$%^&*()PNBFRD", BCryptV4.HashType.SHA384, 12);
-    private readonly string _bCryptExtendedV2EnhancedHash = BCryptExtendedV2.HashPassword("~!@#$%^&*()      ~!@#$%^&*()PNBFRD", new BCryptOptions(12, preHash: HashType.SHA384));
-    private static readonly string Hmackey = Guid.NewGuid().ToString();
+    private readonly string _bCryptExtendedV2EnhancedHash = BCryptExtendedV2.HashPassword("~!@#$%^&*()      ~!@#$%^&*()PNBFRD", new BCryptOptions(12, preHash: PreHash.Sha2(HashType.SHA384)));
+    private static readonly HmacKey Hmackey = HmacKey.FromString(Guid.NewGuid().ToString());
 #if NETCOREAPP
-    private readonly string _bCryptExtendedV3EnhancedHash = BCryptExtendedV3.HashPassword(Hmackey, "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", new BCryptOptions(12, preHash: HashType.SHA384));
+    private readonly string _bCryptExtendedV3EnhancedHash = BCryptExtendedV3.HashPassword(Hmackey, "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", new BCryptOptions(12, preHash: PreHash.HmacSha3(HashType.SHA384)));
 #endif
 
     [Benchmark(Baseline = true)]

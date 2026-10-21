@@ -23,6 +23,36 @@ Version 5 of the library supports both V2 and V3 of the enhanced hashing.
 Enhanced Entropy V3 introduces an additional parameter for you to pass in a HMAC Key, this is used to HMAC the password before passing it to bcrypt.
 Much like with V2 the intention is to increase the entropy of the password before passing it to bcrypt and to reduce the risk of truncation reducing the entropy of your password/pass-phrase but with an additional pepper. The HMAC key is not stored in the hash, so you must ensure that you have it available for verification, if you lose the key you will not be able to verify any hashes generated with it.
 
+The key is passed as an `HmacKey` rather than a `string`, so it can't be swapped with the password by mistake. Create it once
+(for example at startup, or as a DI singleton) and reuse it; it is encoded once and zeroed when disposed.
+
+```csharp
+using HmacKey pepper = HmacKey.FromString(configuration["Pepper"]); // or HmacKey.FromBytes(keyVaultBytes)
+var hash = BCryptExtendedV3.HashPassword(pepper, myPassword);
+var valid = BCryptExtendedV3.Verify(pepper, myPassword, hash);
+```
+
+HMAC-SHA3 needs .NET 8+ and OS support (Windows 11 build 25324+, or OpenSSL 1.1.1+ on Linux; not macOS).
+Check `PreHash.HmacSha3().IsSupported` before relying on it.
+
+## Changing scheme or rotating the HMAC key
+
+Bcrypt hashes don't record which pre-hash produced them, so you have to say how the current hash was created.
+`BCrypt.ValidateAndUpgradeHash` takes the current scheme as a `PreHash` and the target scheme in the options, so it can move a
+hash between any two schemes, or re-hash under a new HMAC key, at login time:
+
+```csharp
+// Plain bcrypt or V2 -> V3
+var upgraded = BCrypt.ValidateAndUpgradeHash(password, storedHash, PreHash.Sha2(), password,
+    new BCryptOptions(preHash: PreHash.HmacSha3()), newHmacKey: pepper);
+
+// Rotate the V3 pepper
+var rotated = BCrypt.ValidateAndUpgradeHash(password, storedHash, PreHash.HmacSha3(), password,
+    new BCryptOptions(preHash: PreHash.HmacSha3()), currentHmacKey: oldPepper, newHmacKey: newPepper);
+```
+
+A key must be supplied exactly when its scheme uses one; passing a key to a scheme that would ignore it throws.
+
 ```csharp
 
 ## Enhanced Entropy V2
@@ -39,7 +69,7 @@ If you want to specify a different version of SHA, or just wish to explicitly se
 you can do so by using the following change to the above.
 
 ```csharp
-var options = new BCryptOptions(preHash: HashType.SHA384);
+var options = new BCryptOptions(preHash: PreHash.Sha2(HashType.SHA384));
 var enhancedHashPassword = BCryptExtendedV2.HashPassword(myPassword, options);
 var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword, options);
 ```

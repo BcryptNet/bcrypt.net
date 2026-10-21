@@ -24,46 +24,64 @@ using System.Text;
 namespace BCryptNet;
 
 /// <summary>
-/// Which key generator feeds bcrypt when <see cref="HashContext.HashType"/> is not <see cref="HashType.None"/>.
-/// </summary>
-internal enum PreHashKind
-{
-    None,
-    Sha2,     // BCryptExtendedV2: base64(SHA2(password))
-    HmacSha3  // BCryptExtendedV3: base64(HMAC-SHA3(hmacKey, password))
-}
-
-/// <summary>
 /// Internal per-call hashing context. A ref struct so it (and the HMAC key span it carries) can only live on
-/// the stack: it can't be boxed, captured by a lambda or stored in a field, so no key material reaches the heap.
+/// the stack: it can't be boxed, captured by a lambda or stored in a field.
 /// </summary>
 internal readonly ref struct HashContext
 {
-    internal HashContext(LongPasswordHandling longPasswordHandling, HashType hashType = HashType.None,
-        PreHashKind kind = PreHashKind.None, ReadOnlySpan<char> hmacKey = default)
+    private HashContext(LongPasswordHandling longPasswordHandling, PreHash preHash, ReadOnlySpan<byte> hmacKey)
     {
         LongPasswordHandling = longPasswordHandling;
-        HashType = hashType;
-        Kind = kind;
+        PreHash = preHash;
         HmacKey = hmacKey;
     }
 
     internal LongPasswordHandling LongPasswordHandling { get; }
-    internal HashType HashType { get; }
-    internal PreHashKind Kind { get; }
-    internal ReadOnlySpan<char> HmacKey { get; }
+    internal PreHash PreHash { get; }
+    internal HashType HashType => PreHash.HashType;
+    internal PreHashScheme Kind => PreHash.Scheme;
+    internal ReadOnlySpan<byte> HmacKey { get; }
 
     /// <summary>
     /// Context for plain bcrypt; pre-hash settings only apply to the extended schemes.
     /// </summary>
     internal static HashContext ForBCrypt(BCryptOptions options)
     {
-        if (options.PreHash is not null and not HashType.None)
+        if (options.PreHash is { Scheme: not PreHashScheme.None })
         {
             throw new ArgumentException("Pre-hashing is not supported by BCrypt; use BCryptExtendedV2 or BCryptExtendedV3", nameof(options));
         }
 
-        return new HashContext(options.LongPasswordHandling);
+        return new HashContext(options.LongPasswordHandling, PreHash.None, default);
+    }
+
+    /// <summary>
+    /// Context for any scheme. Checks platform support, and that a key is supplied exactly when the scheme uses one
+    /// (a key passed to a scheme that ignores it is rejected rather than silently dropped).
+    /// </summary>
+    internal static HashContext Create(PreHash preHash, LongPasswordHandling longPasswordHandling, HmacKey hmacKey, string hmacKeyParamName)
+    {
+        if (!preHash.IsSupported)
+        {
+            throw new PlatformNotSupportedException($"Pre-hash {preHash} is not supported on this platform");
+        }
+
+        if (preHash.RequiresKey)
+        {
+            if (hmacKey is null)
+            {
+                throw new ArgumentNullException(hmacKeyParamName, $"Pre-hash {preHash} requires an HMAC key");
+            }
+
+            return new HashContext(longPasswordHandling, preHash, hmacKey.Span);
+        }
+
+        if (hmacKey is not null)
+        {
+            throw new ArgumentException($"Pre-hash {preHash} does not use an HMAC key; it would be ignored", hmacKeyParamName);
+        }
+
+        return new HashContext(longPasswordHandling, preHash, default);
     }
 }
 
@@ -84,6 +102,72 @@ public partial class BCryptCore
         {
             throw new ArgumentOutOfRangeException(nameof(longPasswordHandling), longPasswordHandling, null);
         }
+    }
+
+    /// <summary>
+    /// Shared ValidateAndUpgradeHash: verifies <paramref name="currentKey"/> against <paramref name="currentHash"/> using
+    /// <paramref name="currentContext"/>, then hashes <paramref name="newKey"/> with <paramref name="newContext"/>.
+    /// Both contexts are built (and so validated) by the caller before any credentials are checked.
+    /// <paramref name="workFactor"/> is raised to the current hash's unless <paramref name="forceWorkFactor"/> is set.
+    /// </summary>
+    internal static string UpgradeHash(string currentKey, string currentHash, in HashContext currentContext,
+        string newKey, in HashContext newContext, int workFactor, bool forceWorkFactor)
+    {
+        if (currentKey == null)
+            throw new ArgumentNullException(nameof(currentKey));
+
+        if (newKey == null)
+            throw new ArgumentNullException(nameof(newKey));
+
+        if (string.IsNullOrEmpty(currentHash) || currentHash.Length != 60)
+            throw new ArgumentException("Invalid Hash", nameof(currentHash));
+
+        // Throw if invalid BCrypt Version
+        if (currentHash[0] != '$' || currentHash[1] != '2')
+            throw new SaltParseException("Invalid bcrypt version");
+
+        // Determine the starting offset and validate the salt
+        int startingOffset = 3;
+
+        if (currentHash[2] != '$')
+        {
+            char minor = currentHash[2];
+            if (minor != 'a' && minor != 'b' && minor != 'x' && minor != 'y' || currentHash[3] != '$')
+            {
+                throw new SaltParseException("Invalid bcrypt revision");
+            }
+
+            startingOffset = 4;
+        }
+
+        // Extract number of rounds
+#if NETCOREAPP
+        ReadOnlySpan<char> rounds = currentHash.AsSpan(startingOffset, 2);
+#else
+        string rounds = currentHash.Substring(startingOffset, 2);
+#endif
+        if (currentHash[startingOffset + 2] != '$' ||
+            !int.TryParse(rounds, System.Globalization.NumberStyles.None,
+                System.Globalization.CultureInfo.InvariantCulture, out int currentWorkFactor))
+        {
+            throw new SaltParseException("Missing work factor");
+        }
+
+        // Throw if validation fails (password isn't valid for hash)
+        if (!VerifyHash(currentKey.AsSpan(), currentHash.AsSpan(), in currentContext))
+            throw new BcryptAuthenticationException("Current credentials could not be authenticated");
+
+        // Never downgrade work-factor (unless forced)
+        if (!forceWorkFactor && currentWorkFactor > workFactor)
+        {
+            workFactor = currentWorkFactor;
+        }
+
+#if NETCOREAPP
+        return CreatePasswordHash(newKey, GenerateSalt(workFactor), in newContext);
+#else
+        return CreatePasswordHash(newKey.AsSpan(), GenerateSalt(workFactor).AsSpan(), in newContext);
+#endif
     }
 
     /// <summary>

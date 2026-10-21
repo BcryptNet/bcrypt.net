@@ -35,7 +35,7 @@ namespace BCryptNet.UnitTests
     {
         private static readonly Encoding SafeUtf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
-        private static readonly string HMACKey = Guid.NewGuid().ToString();
+        private static readonly HmacKey HMACKey = HmacKey.FromString(Guid.NewGuid().ToString());
 
         private readonly string[,] _testVectors = new[,] {
             { "",                                   "$2a$06$DCq7YPn5Rq63x1Lad4cll.",    "$2a$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s." },
@@ -112,13 +112,13 @@ namespace BCryptNet.UnitTests
                     //Check hash that goes in one end comes out the next the same
                     string salt = _testVectors[i, 1].Replace("2a", "2" + _revisions[r]);
 
-                    string hashed = BCryptExtendedV3.HashPassword(HMACKey, plain, salt, new BCryptOptions(preHash: HashType.SHA256));
+                    string hashed = BCryptExtendedV3.HashPassword(HMACKey, plain, salt, new BCryptOptions(preHash: PreHash.HmacSha3(HashType.SHA256)));
 
                     var revCheck = hashed.StartsWith("$2" + _revisions[r]);
 
                     Assert.True(revCheck);
 
-                    var validateHashCheck = BCryptExtendedV3.Verify(HMACKey, plain, hashed, new BCryptOptions(preHash: HashType.SHA256));
+                    var validateHashCheck = BCryptExtendedV3.Verify(HMACKey, plain, hashed, new BCryptOptions(preHash: PreHash.HmacSha3(HashType.SHA256)));
                     Assert.True(validateHashCheck);
 
                     Trace.WriteLine(hashed);
@@ -134,7 +134,7 @@ namespace BCryptNet.UnitTests
         [Fact()]
         public void TestValidateAndReplaceWithWorkloadSmallerThanCurrentEndsWithSameWorkLoadAsOriginalHash()
         {
-            var hmacKey = Guid.Parse("BFD57646-9EC2-4ED2-A98D-1CE7107D2E38").ToString();
+            using var hmacKey = HmacKey.FromString(Guid.Parse("BFD57646-9EC2-4ED2-A98D-1CE7107D2E38").ToString());
 
             string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
             string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
@@ -154,7 +154,7 @@ namespace BCryptNet.UnitTests
         [Fact()]
         public void TestValidateAndReplaceWithForceAndWorkloadSmallerThanCurrentEndsWithRequestedWorkLoad()
         {
-            var hmacKey = Guid.Parse("BFD57646-9EC2-4ED2-A98D-1CE7107D2E38").ToString();
+            using var hmacKey = HmacKey.FromString(Guid.Parse("BFD57646-9EC2-4ED2-A98D-1CE7107D2E38").ToString());
 
             string currentKey = "~!@#$%^&*()      ~!@#$%^&*()PNBFRD";
             string salt = "$2a$12$WApznUOJfkEGSmYRfnkrPO";
@@ -176,7 +176,7 @@ namespace BCryptNet.UnitTests
         [InlineData("ππππππππ")]
         public void TestInternationalChars(string pw1)
         {
-            var hmacKey = Guid.NewGuid().ToString();
+            using var hmacKey = HmacKey.FromString(Guid.NewGuid().ToString());
             Trace.Write("BCrypt.HashPassword with international chars: ");
             string pw2 = "????????";
 
@@ -203,7 +203,7 @@ namespace BCryptNet.UnitTests
         public void TestNaughtyStringsHash(string pw1)
         {
             Trace.Write("BCrypt.HashPassword with naughty strings: ");
-            var hmacKey = Guid.NewGuid().ToString();
+            using var hmacKey = HmacKey.FromString(Guid.NewGuid().ToString());
 
             string h1 = BCryptExtendedV3.HashPassword(hmacKey, pw1, BCryptCore.GenerateSalt());
             Assert.True(BCryptExtendedV3.Verify(hmacKey, pw1, h1));
@@ -217,7 +217,7 @@ namespace BCryptNet.UnitTests
         [InlineData("password\x00 defgreallylongpassword")]
         public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworks(string password)
         {
-            var hmacKey = Guid.NewGuid().ToString();
+            using var hmacKey = HmacKey.FromString(Guid.NewGuid().ToString());
             var x = BCryptCore.GenerateSalt();
             string hash = BCryptExtendedV3.HashPassword(hmacKey, password, x);
 
@@ -231,7 +231,7 @@ namespace BCryptNet.UnitTests
         [InlineData("\0 defgreallylongpassword", "\0")]
         public void NullTerminationCausesBCryptToTerminateStringInSomeFrameworksSetB(string password, string leader)
         {
-            var hmacKey = Guid.NewGuid().ToString();
+            using var hmacKey = HmacKey.FromString(Guid.NewGuid().ToString());
             var x = BCryptCore.GenerateSalt();
             string hash = BCryptExtendedV3.HashPassword(hmacKey, password, x);
 
@@ -248,7 +248,7 @@ namespace BCryptNet.UnitTests
         [Fact]
         public void LeadingByteDoesntTruncateHashSHA()
         {
-            var hmacKey = Guid.Parse("5FDEBC5A-C3DD-4DAD-8DB1-26BB439EDD31").ToString();
+            using var hmacKey = HmacKey.FromString(Guid.Parse("5FDEBC5A-C3DD-4DAD-8DB1-26BB439EDD31").ToString());
             var b = new BCrypt();
             var s = BCrypt.GenerateSalt();
             var extractedSalt = s.Substring(7, 22);

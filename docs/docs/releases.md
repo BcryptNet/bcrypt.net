@@ -12,7 +12,9 @@ uid: releases
 - Renamed namespace to `BcryptNet` to fix the issue with the class and namespace clashing.
 - `LongPasswordHandling` and `HashType` overloads are replaced by a single `BCryptOptions` parameter (see below).
 - `BCryptExtendedV2` no longer creates un-wipeable heap copies of the password; V2/V3 pre-hash buffers are zeroed after use.
-- `BCryptExtendedV3` throws `ArgumentNullException` for a null HMAC key instead of silently using an empty key.
+- `BCryptExtendedV3` takes the HMAC key as an `HmacKey` instead of a `string`, so it can't be swapped with the password; null throws `ArgumentNullException` and empty keys are rejected.
+- `BCryptOptions.PreHash` is a `PreHash` (scheme + digest) instead of a `HashType`.
+- New `BCrypt.ValidateAndUpgradeHash` overload moves hashes between schemes (e.g. V2 to V3) and rotates HMAC keys.
 - Passwords over 72 bytes throw `PasswordTooLongException`, which derives from `ArgumentException` so existing handlers still catch it.
 - Legacy `$2$` hashes are now produced and verified correctly (59 characters, no revision letter); an empty `$2$` password hashes as a single NUL byte, as the original OpenBSD implementation did, instead of throwing.
 - Salts with invalid characters or a cost outside 4–31 throw `SaltParseException` on every target framework; .NET Framework and .NET Standard previously hashed invalid characters as zero bytes.
@@ -58,22 +60,27 @@ does not allocate, and `default(BCryptOptions)` means the library defaults. `Has
 | `BCrypt.HashPassword(pw, salt, LongPasswordHandling.Truncate)` | `BCrypt.HashPassword(pw, salt, new BCryptOptions(longPasswordHandling: LongPasswordHandling.Truncate))` |
 | `BCrypt.Verify(pw, hash, LongPasswordHandling.Truncate)` | `BCrypt.Verify(pw, hash, new BCryptOptions(longPasswordHandling: LongPasswordHandling.Truncate))` |
 | `BCrypt.ValidateAndUpgradeHash(cur, hash, newPw, workFactor: 12)` | `BCrypt.ValidateAndUpgradeHash(cur, hash, newPw, new BCryptOptions(12))` |
-| `BCryptExtendedV2.HashPassword(pw, 12, HashType.SHA512)` | `BCryptExtendedV2.HashPassword(pw, new BCryptOptions(12, preHash: HashType.SHA512))` |
-| `BCryptExtendedV2.Verify(pw, hash, HashType.SHA512)` | `BCryptExtendedV2.Verify(pw, hash, new BCryptOptions(preHash: HashType.SHA512))` |
-| `BCryptExtendedV3.HashPassword(key, pw, salt, HashType.SHA256)` | `BCryptExtendedV3.HashPassword(key, pw, salt, new BCryptOptions(preHash: HashType.SHA256))` |
-| `BCryptExtendedV2.ValidateAndUpgradeHash(cur, hash, newPw, HashType.SHA512)` | `BCryptExtendedV2.ValidateAndUpgradeHash(cur, hash, HashType.SHA384, newPw, new BCryptOptions(preHash: HashType.SHA512))` |
-| `BCryptExtendedV3.ValidateAndUpgradeHash(key, cur, hash, newPw)` | `BCryptExtendedV3.ValidateAndUpgradeHash(key, cur, hash, HashType.SHA384, newPw)` |
+| `BCryptExtendedV2.HashPassword(pw, 12, HashType.SHA512)` | `BCryptExtendedV2.HashPassword(pw, new BCryptOptions(12, preHash: PreHash.Sha2(HashType.SHA512)))` |
+| `BCryptExtendedV2.Verify(pw, hash, HashType.SHA512)` | `BCryptExtendedV2.Verify(pw, hash, new BCryptOptions(preHash: PreHash.Sha2(HashType.SHA512)))` |
+| `BCryptExtendedV3.HashPassword(key, pw, salt, HashType.SHA256)` | `BCryptExtendedV3.HashPassword(HmacKey.FromString(key), pw, salt, new BCryptOptions(preHash: PreHash.HmacSha3(HashType.SHA256)))` |
+| `BCryptExtendedV2.ValidateAndUpgradeHash(cur, hash, newPw, HashType.SHA512)` | `BCryptExtendedV2.ValidateAndUpgradeHash(cur, hash, HashType.SHA384, newPw, new BCryptOptions(preHash: PreHash.Sha2(HashType.SHA512)))` |
+| `BCryptExtendedV3.ValidateAndUpgradeHash(key, cur, hash, newPw)` | `BCryptExtendedV3.ValidateAndUpgradeHash(HmacKey.FromString(key), cur, hash, HashType.SHA384, newPw)` |
 
 
 Options can be built once and reused, or adjusted with `WithWorkFactor`, `WithLongPasswordHandling` and `WithPreHash`.
 An out-of-range work factor (including 0) now throws `ArgumentOutOfRangeException` when the options are constructed
 (previously `ValidateAndUpgradeHash` threw `SaltParseException`); omit it or pass `null` for the default. `PreHash` is rejected by the plain `BCrypt` class.
 
-`BCryptExtendedV2` and `BCryptExtendedV3` now reject `PreHash = HashType.None` with an `ArgumentException`; previously it
-silently produced a plain bcrypt hash (and for V3, ignored the HMAC key). Use `BCrypt` for plain bcrypt hashes.
+`BCryptExtendedV2` and `BCryptExtendedV3` only accept their own scheme (`PreHash.Sha2` / `PreHash.HmacSha3`) and reject anything
+else with an `ArgumentException`; previously `HashType.None` silently produced a plain bcrypt hash (and for V3, ignored the HMAC key).
+Use `BCrypt` for plain bcrypt hashes.
 To migrate an existing plain bcrypt hash to an extended one, pass `HashType.None` as the `currentKeyHashType` of
 `ValidateAndUpgradeHash`; the options' `LongPasswordHandling` is used to verify that hash, so pass
 `LongPasswordHandling.Truncate` if it was created with truncation.
+
+To move between pre-hash schemes (e.g. V2 to V3) or rotate the V3 HMAC key, use
+`BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, currentPreHash, newKey, options, currentHmacKey, newHmacKey)`;
+the target scheme is `options.PreHash`. See [Enhanced Entropy](xref:enhancedEntropy).
 
 ----
 

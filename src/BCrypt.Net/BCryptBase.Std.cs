@@ -51,11 +51,6 @@ public partial class BCryptCore
             throw new ArgumentException("Invalid salt: salt cannot be empty", nameof(salt));
         }
 
-        if (context.Kind == PreHashKind.None && hashType != HashType.None)
-        {
-            throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(context));
-        }
-
         // Determine the starting offset and validate the salt
         int startingOffset;
         char bcryptMinorRevision = (char)0;
@@ -131,7 +126,7 @@ public partial class BCryptCore
                     }
                     break;
                 default:
-                    if (context.Kind != PreHashKind.Sha2)
+                    if (context.Kind != PreHashScheme.Sha2)
                     {
                         throw new ArgumentException("Invalid HashType, You can't have an enhanced hash without an implementation of the key generator.", nameof(context));
                     }
@@ -178,6 +173,12 @@ public partial class BCryptCore
             ArrayPool<char>.Shared.Return(chars);
         }
     }
+
+    /// <summary>
+    /// Hashes <paramref name="text"/> with the salt from <paramref name="hash"/> and compares the result in constant time.
+    /// </summary>
+    internal static bool VerifyHash(ReadOnlySpan<char> text, ReadOnlySpan<char> hash, in HashContext context) =>
+        SecureEquals(SafeUTF8.GetBytes(hash.ToString()), SafeUTF8.GetBytes(CreatePasswordHash(text, hash, in context)));
 
     internal static string HashBytes(byte[] inputBytes, string extractedSalt, char bcryptMinorRevision, int workFactor)
     {

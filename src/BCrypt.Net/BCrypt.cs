@@ -17,8 +17,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OU
 IN THE SOFTWARE.
 */
 
-using System.Globalization;
-
 namespace BCryptNet;
 
 /// <summary>BCrypt implementation.</summary>
@@ -74,7 +72,7 @@ public sealed class BCrypt : BCryptCore
     /// <param name="currentKey">Current password / string</param>
     /// <param name="currentHash">Current hash to validate password against</param>
     /// <param name="newKey">New password</param>
-    /// <param name="options">Hashing options: <see cref="BCryptOptions.WorkFactor"/> sets the cost of the new hash (raised to match the current hash unless <paramref name="forceWorkFactor"/> is set), and <see cref="BCryptOptions.LongPasswordHandling"/> is applied when verifying the current password and hashing the new one. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="HashType.None"/>.</param>
+    /// <param name="options">Hashing options: <see cref="BCryptOptions.WorkFactor"/> sets the cost of the new hash (raised to match the current hash unless <paramref name="forceWorkFactor"/> is set), and <see cref="BCryptOptions.LongPasswordHandling"/> is applied when verifying the current password and hashing the new one. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="BCryptNet.PreHash.None"/>.</param>
     /// <param name="forceWorkFactor">By default, this method will not accept a work factor lower
     /// than the one set in the current hash and will set the new work-factor to match.</param>
     /// <exception cref="BcryptAuthenticationException">returned if the users hash and current pass doesn't validate</exception>
@@ -85,57 +83,51 @@ public sealed class BCrypt : BCryptCore
     public static string ValidateAndUpgradeHash(
         string currentKey, string currentHash, string newKey, BCryptOptions options = default, bool forceWorkFactor = false)
     {
-        if (currentKey == null)
-            throw new ArgumentNullException(nameof(currentKey));
+        HashContext context = HashContext.ForBCrypt(options);
+        return UpgradeHash(currentKey, currentHash, in context, newKey, in context, options.WorkFactor, forceWorkFactor);
+    }
 
-        if (newKey == null)
-            throw new ArgumentNullException(nameof(newKey));
-
-        if (string.IsNullOrEmpty(currentHash) || currentHash.Length != 60)
-            throw new ArgumentException("Invalid Hash", nameof(currentHash));
-
-        // Throw if invalid BCrypt Version
-        if (currentHash[0] != '$' || currentHash[1] != '2')
-            throw new SaltParseException("Invalid bcrypt version");
-
-        // Determine the starting offset and validate the salt
-        int startingOffset = 3;
-
-        if (currentHash[2] != '$')
-        {
-            char minor = currentHash[2];
-            if (minor != 'a' && minor != 'b' && minor != 'x' && minor != 'y' || currentHash[3] != '$')
-            {
-                throw new SaltParseException("Invalid bcrypt revision");
-            }
-
-            startingOffset = 4;
-        }
-
-        // Extract number of rounds
-        if (currentHash[startingOffset + 2] != '$')
-        {
-            throw new SaltParseException("Missing work factor");
-        }
-
-        // Extract details from salt
-        if (!int.TryParse(currentHash.Substring(startingOffset, 2), NumberStyles.None, CultureInfo.InvariantCulture, out int currentWorkFactor))
-        {
-            throw new SaltParseException("Missing work factor");
-        }
-
-        // Throw if validation fails (password isn't valid for hash)
-        if (!Verify(currentKey, currentHash, options))
-            throw new BcryptAuthenticationException("Current credentials could not be authenticated");
-
-        // Never downgrade work-factor (unless forced)
-        int workFactor = options.WorkFactor;
-        if (!forceWorkFactor && currentWorkFactor > workFactor)
-        {
-            workFactor = currentWorkFactor;
-        }
-
-        return HashPassword(newKey, GenerateSalt(workFactor), options);
+    /// <summary>
+    /// Validate an existing hash created with any pre-hash scheme and, if valid, return a new hash of
+    /// <paramref name="newKey"/> using the scheme in <paramref name="options"/>. Use this to move between schemes
+    /// (e.g. plain bcrypt or <see cref="BCryptExtendedV2"/> to HMAC-SHA3) or to rotate an HMAC key.
+    /// </summary>
+    /// <remarks>
+    /// Bcrypt hashes don't record their pre-hash scheme, so <paramref name="currentPreHash"/> must say how
+    /// <paramref name="currentHash"/> was created.
+    /// </remarks>
+    /// <param name="currentKey">Current password.</param>
+    /// <param name="currentHash">Current hash to validate the password against.</param>
+    /// <param name="currentPreHash">Pre-hash scheme <paramref name="currentHash"/> was created with.</param>
+    /// <param name="newKey">New password.</param>
+    /// <param name="options">Options for the new hash: <see cref="BCryptOptions.PreHash"/> is the target scheme (<c>null</c> means plain bcrypt);
+    /// <see cref="BCryptOptions.WorkFactor"/> sets its cost (raised to match the current hash unless <paramref name="forceWorkFactor"/> is set).
+    /// <see cref="BCryptOptions.LongPasswordHandling"/> applies to whichever side is plain bcrypt, and must match the policy the current hash was created with.</param>
+    /// <param name="currentHmacKey">HMAC key for <paramref name="currentPreHash"/>; required for <see cref="PreHashScheme.HmacSha3"/>, otherwise must be <c>null</c>.</param>
+    /// <param name="newHmacKey">HMAC key for the new hash; required when the target scheme is <see cref="PreHashScheme.HmacSha3"/>, otherwise must be <c>null</c>.
+    /// May differ from <paramref name="currentHmacKey"/> to rotate keys.</param>
+    /// <param name="forceWorkFactor">By default, this method will not accept a work factor lower
+    /// than the one set in the current hash and will set the new work-factor to match.</param>
+    /// <exception cref="BcryptAuthenticationException">returned if the users hash and current pass doesn't validate</exception>
+    /// <exception cref="SaltParseException">returned if the salt is invalid in any way</exception>
+    /// <exception cref="ArgumentException">returned if the hash is invalid, or an HMAC key is supplied to a scheme that doesn't use one</exception>
+    /// <exception cref="ArgumentNullException">returned if a password, or an HMAC key a scheme requires, is null</exception>
+    /// <exception cref="PlatformNotSupportedException">returned if either scheme isn't supported on this platform (see <see cref="PreHash.IsSupported"/>)</exception>
+    /// <returns>New hash of new password</returns>
+    public static string ValidateAndUpgradeHash(
+        string currentKey,
+        string currentHash,
+        PreHash currentPreHash,
+        string newKey,
+        BCryptOptions options = default,
+        HmacKey currentHmacKey = null,
+        HmacKey newHmacKey = null,
+        bool forceWorkFactor = false)
+    {
+        // Validate both schemes and keys before checking credentials
+        HashContext newContext = HashContext.Create(options.ResolvePreHash(PreHash.None), options.LongPasswordHandling, newHmacKey, nameof(newHmacKey));
+        HashContext currentContext = HashContext.Create(currentPreHash, options.LongPasswordHandling, currentHmacKey, nameof(currentHmacKey));
+        return UpgradeHash(currentKey, currentHash, in currentContext, newKey, in newContext, options.WorkFactor, forceWorkFactor);
     }
 
     /// <summary>
@@ -144,7 +136,7 @@ public sealed class BCrypt : BCryptCore
     /// </summary>
     /// <param name="text">The text to verify.</param>
     /// <param name="hash"> The previously hashed password.</param>
-    /// <param name="options">Hashing options used to recompute the hash: <see cref="BCryptOptions.LongPasswordHandling"/> must match the policy used when the hash was created; <see cref="BCryptOptions.WorkFactor"/> is ignored as it is read from the hash. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="HashType.None"/>.</param>
+    /// <param name="options">Hashing options used to recompute the hash: <see cref="BCryptOptions.LongPasswordHandling"/> must match the policy used when the hash was created; <see cref="BCryptOptions.WorkFactor"/> is ignored as it is read from the hash. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="BCryptNet.PreHash.None"/>.</param>
     /// <returns>true if the passwords match, false otherwise.</returns>
     /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
@@ -172,7 +164,7 @@ public sealed class BCrypt : BCryptCore
     ///  Hash a password using the OpenBSD BCrypt scheme and a salt generated by <see cref="BCryptCore.GenerateSalt"/> using the given <paramref name="options"/>.
     /// </summary>
     /// <param name="inputKey">The password to hash.</param>
-    /// <param name="options">Hashing options: <see cref="BCryptOptions.WorkFactor"/> sets the cost of the generated salt and <see cref="BCryptOptions.LongPasswordHandling"/> controls passwords exceeding the 72-byte bcrypt limit. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="HashType.None"/>.</param>
+    /// <param name="options">Hashing options: <see cref="BCryptOptions.WorkFactor"/> sets the cost of the generated salt and <see cref="BCryptOptions.LongPasswordHandling"/> controls passwords exceeding the 72-byte bcrypt limit. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="BCryptNet.PreHash.None"/>.</param>
     /// <returns>The hashed password.</returns>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static string HashPassword(string inputKey, BCryptOptions options) =>
@@ -186,7 +178,7 @@ public sealed class BCrypt : BCryptCore
     /// </remarks>
     /// <param name="inputKey">The password to hash.</param>
     /// <param name="salt">the salt to hash with (best generated using <see cref="BCryptCore.GenerateSalt(int,char)"/>); its work factor is used and <see cref="BCryptOptions.WorkFactor"/> is ignored.</param>
-    /// <param name="options">Hashing options: <see cref="BCryptOptions.LongPasswordHandling"/> controls passwords exceeding the 72-byte bcrypt limit; <see cref="BCryptOptions.WorkFactor"/> is ignored as the salt carries its own. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="HashType.None"/>.</param>
+    /// <param name="options">Hashing options: <see cref="BCryptOptions.LongPasswordHandling"/> controls passwords exceeding the 72-byte bcrypt limit; <see cref="BCryptOptions.WorkFactor"/> is ignored as the salt carries its own. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="BCryptNet.PreHash.None"/>.</param>
     /// <returns>The hashed password.</returns>
     /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
     public static string HashPassword(string inputKey, string salt, BCryptOptions options = default)
@@ -225,7 +217,7 @@ public sealed class BCrypt : BCryptCore
         /// <param name="salt">The salt to hash with; its work factor is used and <see cref="BCryptOptions.WorkFactor"/> is ignored.</param>
         /// <param name="outputBuffer">Buffer for the resulting hash; must be 60 characters.</param>
         /// <param name="outputBufferWritten">Number of characters written.</param>
-        /// <param name="options">Hashing options: <see cref="BCryptOptions.LongPasswordHandling"/> controls passwords exceeding the 72-byte bcrypt limit; <see cref="BCryptOptions.WorkFactor"/> is ignored as the salt carries its own. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="HashType.None"/>.</param>
+        /// <param name="options">Hashing options: <see cref="BCryptOptions.LongPasswordHandling"/> controls passwords exceeding the 72-byte bcrypt limit; <see cref="BCryptOptions.WorkFactor"/> is ignored as the salt carries its own. <see cref="BCryptOptions.PreHash"/> is not supported by plain bcrypt and must be <c>null</c> or <see cref="BCryptNet.PreHash.None"/>.</param>
         /// <exception cref="SaltParseException">Thrown when the salt could not be parsed.</exception>
         public static void HashPassword(
             ReadOnlySpan<char> inputKey, ReadOnlySpan<char> salt, Span<char> outputBuffer,

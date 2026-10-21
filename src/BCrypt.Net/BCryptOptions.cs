@@ -46,11 +46,12 @@ public readonly struct BCryptOptions : IEquatable<BCryptOptions>
     /// <param name="longPasswordHandling">Policy for passwords exceeding bcrypt's 72-byte limit.
     /// Pre-hashed (<see cref="BCryptExtendedV2"/> / V3) passwords are never subject to the limit, so there it only applies
     /// when <c>ValidateAndUpgradeHash</c> verifies a plain bcrypt hash being migrated.</param>
-    /// <param name="preHash">Pre-hash algorithm for the extended (V2/V3) schemes; <c>null</c> uses the class default.
-    /// Must be <c>null</c> or <see cref="HashType.None"/> for <see cref="BCrypt"/>, and must not be
-    /// <see cref="HashType.None"/> for the extended schemes.</param>
+    /// <param name="preHash">Pre-hash scheme; <c>null</c> uses the calling class's default (none for <see cref="BCrypt"/>,
+    /// <see cref="PreHash.Sha2"/> SHA384 for <see cref="BCryptExtendedV2"/>, <see cref="PreHash.HmacSha3"/> SHA384 for V3).
+    /// The typed classes only accept their own scheme; <see cref="BCrypt.ValidateAndUpgradeHash(string, string, PreHash, string, BCryptOptions, HmacKey, HmacKey, bool)"/>
+    /// accepts any.</param>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when any value is out of range.</exception>
-    public BCryptOptions(int? workFactor = null, LongPasswordHandling longPasswordHandling = LongPasswordHandling.Throw, HashType? preHash = null)
+    public BCryptOptions(int? workFactor = null, LongPasswordHandling longPasswordHandling = LongPasswordHandling.Throw, PreHash? preHash = null)
     {
         if (workFactor is < BCryptCore.MinRounds or > BCryptCore.MaxRounds)
         {
@@ -59,11 +60,6 @@ public readonly struct BCryptOptions : IEquatable<BCryptOptions>
         }
 
         BCryptCore.ValidateLongPasswordHandling(longPasswordHandling);
-
-        if (preHash.HasValue && preHash.Value is < HashType.None or > HashType.SHA512)
-        {
-            throw new ArgumentOutOfRangeException(nameof(preHash), preHash, null);
-        }
 
         _workFactor = workFactor ?? 0;
         LongPasswordHandling = longPasswordHandling;
@@ -88,9 +84,9 @@ public readonly struct BCryptOptions : IEquatable<BCryptOptions>
     public LongPasswordHandling LongPasswordHandling { get; }
 
     /// <summary>
-    /// Pre-hash algorithm for the extended schemes; <c>null</c> uses the class default.
+    /// Pre-hash scheme; <c>null</c> uses the calling class's default.
     /// </summary>
-    public HashType? PreHash { get; }
+    public PreHash? PreHash { get; }
 
     /// <summary>
     /// Returns a copy with the given work factor.
@@ -105,12 +101,12 @@ public readonly struct BCryptOptions : IEquatable<BCryptOptions>
     public BCryptOptions WithLongPasswordHandling(LongPasswordHandling longPasswordHandling) => new(ExplicitWorkFactor, longPasswordHandling, PreHash);
 
     /// <summary>
-    /// Returns a copy with the given pre-hash algorithm.
+    /// Returns a copy with the given pre-hash scheme.
     /// </summary>
-    /// <param name="preHash">Pre-hash algorithm; <c>null</c> uses the class default.</param>
-    public BCryptOptions WithPreHash(HashType? preHash) => new(ExplicitWorkFactor, LongPasswordHandling, preHash);
+    /// <param name="preHash">Pre-hash scheme; <c>null</c> uses the calling class's default.</param>
+    public BCryptOptions WithPreHash(PreHash? preHash) => new(ExplicitWorkFactor, LongPasswordHandling, preHash);
 
-    internal HashType ResolvePreHash(HashType classDefault) => PreHash ?? classDefault;
+    internal PreHash ResolvePreHash(PreHash classDefault) => PreHash ?? classDefault;
 
     /// <inheritdoc />
     public bool Equals(BCryptOptions other) =>
@@ -126,7 +122,7 @@ public readonly struct BCryptOptions : IEquatable<BCryptOptions>
         {
             int hash = WorkFactor;
             hash = (hash * 397) ^ (int)LongPasswordHandling;
-            return (hash * 397) ^ (PreHash.HasValue ? (int)PreHash.Value + 2 : 0);
+            return (hash * 397) ^ (PreHash.HasValue ? PreHash.Value.GetHashCode() + 1 : 0);
         }
     }
 

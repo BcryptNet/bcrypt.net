@@ -33,7 +33,7 @@ namespace BenchmarkCurrent
         public int CreatePasswordHash_Core(string key, string salt)
         {
             Span<char> outputBuffer = stackalloc char[60];
-            BCryptCore.CreatePasswordHash(key.AsSpan(), salt.AsSpan(), outputBuffer, out int written, new HashContext(LongPasswordHandling.Throw));
+            BCryptCore.CreatePasswordHash(key.AsSpan(), salt.AsSpan(), outputBuffer, out int written, HashContext.ForBCrypt(default));
             return written;
         }
     }

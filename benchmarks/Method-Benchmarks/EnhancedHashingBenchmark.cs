@@ -53,7 +53,7 @@ namespace BCryptNet.BenchMarks
             return BCryptExtendedV2.HashPassword(key, salt);
         }
 
-        private static readonly string Hmackey = Guid.NewGuid().ToString();
+        private static readonly HmacKey Hmackey = HmacKey.FromString(Guid.NewGuid().ToString());
 
 #if NETCOREAPP
         [Benchmark]
