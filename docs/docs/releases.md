@@ -4,84 +4,45 @@ uid: releases
 
 # Releases
 
+Supported releases:
+
+v4 and v5 will be supported for the foreseable future; with 4 recieving targeting releases and any necessary patches but no new features.
+
 ## v5.x
 
 ### _v5.0.0_ - Breaking change
 
-- Drops support for .net 2, 3.5, 5.0
-- Renamed namespace to `BcryptNet` to fix the issue with the class and namespace clashing.
-- `LongPasswordHandling` and `HashType` overloads are replaced by a single `BCryptOptions` parameter (see below).
-- `BCryptExtendedV2` no longer creates un-wipeable heap copies of the password; V2/V3 pre-hash buffers are zeroed after use.
-- `BCryptExtendedV3` takes the HMAC key as an `HmacKey` instead of a `string`, so it can't be swapped with the password; null throws `ArgumentNullException` and empty keys are rejected.
-- `BCryptOptions.PreHash` is a `PreHash` (scheme + digest) instead of a `HashType`.
-- New `BCrypt.ValidateAndUpgradeHash` overload moves hashes between schemes (e.g. V2 to V3) and rotates HMAC keys.
-- Passwords over 72 bytes throw `PasswordTooLongException`, which derives from `ArgumentException` so existing handlers still catch it.
-- Legacy `$2$` hashes are now produced and verified correctly (59 characters, no revision letter); an empty `$2$` password hashes as a single NUL byte, as the original OpenBSD implementation did, instead of throwing.
+See [Upgrading from v4 to v5](xref:upgradingToV5) for a step-by-step guide.
+
+Breaking changes:
+
+- Drops support for .net 2, 3.5, 5.0. Targets `netstandard2.0`, `netstandard2.1`, `net462`, `net472`, `net48`, `net8.0` and `net10.0`.
+- The assembly is strong-name signed, so the separate `BCrypt.Net-Next.StrongName` package is retired.
+- Renamed namespace from `BCrypt.Net` to `BCryptNet` to fix the issue with the class and namespace clashing.
+- Passwords over 72 bytes now throw `PasswordTooLongException` by default (it derives from `ArgumentException`, so existing handlers still catch it); v4 silently truncated them. Pass `LongPasswordHandling.Truncate` to keep the v4 behaviour.
+- Optional settings (work factor, long-password handling, pre-hash algorithm) are passed as a single `BCryptOptions` parameter instead of the v4 `bool enhancedEntropy` / `HashType` overloads.
+- `EnhancedHashPassword` / `EnhancedVerify` and the `enhancedEntropy` overloads move to `BCryptExtendedV2`; hashes are unchanged.
+- `ValidateAndReplacePassword` is renamed `ValidateAndUpgradeHash`.
+- `GenerateSalt` and the obsolete `HashString` are removed from the public API.
+- Enhanced Entropy V1 is removed.
 - Salts with invalid characters or a cost outside 4–31 throw `SaltParseException` on every target framework; .NET Framework and .NET Standard previously hashed invalid characters as zero bytes.
 - `HashParser` / `InterrogateHash` reject hashes whose length doesn't match their revision or whose cost is outside 4–31.
-- `BCryptPasswordHasher.VerifyHashedPassword` returns `Failed` for empty or unrecognised hashes instead of throwing.
-- `BCryptPasswordHasher` supports enhanced (V2/V3) bcrypt through `BCryptHasherOptions.PreHash`, and migrates existing hashes through `PreviousPreHashes`; see [ASP.NET Core Identity](xref:identity). `UseBcrypt` now validates the options at startup, and option changes apply without a restart.
+
+Fixes:
+
+- Legacy `$2$` hashes are now produced and verified correctly (59 characters, no revision letter); an empty `$2$` password hashes as a single NUL byte, as the original OpenBSD implementation did, instead of throwing.
+- Enhanced hashing no longer leaves un-wipeable heap copies of the password; pre-hash buffers are zeroed after use.
+
+New features:
+
+- Enhanced Entropy V3 (`BCryptExtendedV3`): pre-hashes with HMAC-SHA3 and a secret key. The key is passed as an `HmacKey` rather than a `string`, so it can't be swapped with the password; null throws `ArgumentNullException` and empty keys are rejected.
+- `BCrypt.ValidateAndUpgradeHash` overload that moves hashes between schemes (plain, V2, V3) and rotates HMAC keys.
+- `ReadOnlySpan<char>` overloads of `HashPassword` and `Verify`, and `BCryptSafeString` for `SecureString` input.
+- New package `BCrypt.Net.IdentityExtensions`: a bcrypt `IPasswordHasher<TUser>` for ASP.NET Core Identity. It verifies existing Identity hashes and re-hashes them on login, supports enhanced (V2/V3) hashes through `BCryptHasherOptions.PreHash`, and migrates hashes between schemes through `PreviousPreHashes`. Options are validated at startup and changes apply without a restart. See [ASP.NET Core Identity in v5](xref:identityExtensionsAdoption).
 
 ### Migrating to V5
 
-Enhanced Entropy V1 is removed in V5, if you are using this feature you will need to migrate to V2 or V3.
-
-#### Namespace Change
-
-The namespace has been changed to `BCryptNet` to avoid clashes with the class name.
-
-#### Enhanced Entropy V2
-
-The code has been split to avoid the endless growth of the main class and the signatures altered to more clearly show which version is being used.
-
-Before
-
-```csharp
-var enhancedHashPassword = BCrypt.EnhancedHashPassword(myPassword);
-var validatePassword = BCrypt.EnhancedVerify(myPassword, enhancedHashPassword);
-```
-
-After
-
-```csharp
-var enhancedHashPassword = BCryptExtendedV2.HashPassword(myPassword);
-var validatePassword = BCryptExtendedV2.Verify(myPassword, enhancedHashPassword);
-```
-
-#### BCryptOptions
-
-Per-call settings (work factor, long-password handling and pre-hash algorithm) are now passed as a
-`BCryptOptions` value instead of through separate overloads. It is an immutable struct, so passing it
-does not allocate, and `default(BCryptOptions)` means the library defaults. `HashPassword(password)` and
-`HashPassword(password, workFactor)` are unchanged. Hashes are byte-for-byte identical to v4.
-
-| Before | After |
-| --- | --- |
-| `BCrypt.HashPassword(pw, LongPasswordHandling.Truncate, 12)` | `BCrypt.HashPassword(pw, new BCryptOptions(12, LongPasswordHandling.Truncate))` |
-| `BCrypt.HashPassword(pw, salt, LongPasswordHandling.Truncate)` | `BCrypt.HashPassword(pw, salt, new BCryptOptions(longPasswordHandling: LongPasswordHandling.Truncate))` |
-| `BCrypt.Verify(pw, hash, LongPasswordHandling.Truncate)` | `BCrypt.Verify(pw, hash, new BCryptOptions(longPasswordHandling: LongPasswordHandling.Truncate))` |
-| `BCrypt.ValidateAndUpgradeHash(cur, hash, newPw, workFactor: 12)` | `BCrypt.ValidateAndUpgradeHash(cur, hash, newPw, new BCryptOptions(12))` |
-| `BCryptExtendedV2.HashPassword(pw, 12, HashType.SHA512)` | `BCryptExtendedV2.HashPassword(pw, new BCryptOptions(12, preHash: PreHash.Sha2(HashType.SHA512)))` |
-| `BCryptExtendedV2.Verify(pw, hash, HashType.SHA512)` | `BCryptExtendedV2.Verify(pw, hash, new BCryptOptions(preHash: PreHash.Sha2(HashType.SHA512)))` |
-| `BCryptExtendedV3.HashPassword(key, pw, salt, HashType.SHA256)` | `BCryptExtendedV3.HashPassword(HmacKey.FromString(key), pw, salt, new BCryptOptions(preHash: PreHash.HmacSha3(HashType.SHA256)))` |
-| `BCryptExtendedV2.ValidateAndUpgradeHash(cur, hash, newPw, HashType.SHA512)` | `BCryptExtendedV2.ValidateAndUpgradeHash(cur, hash, HashType.SHA384, newPw, new BCryptOptions(preHash: PreHash.Sha2(HashType.SHA512)))` |
-| `BCryptExtendedV3.ValidateAndUpgradeHash(key, cur, hash, newPw)` | `BCryptExtendedV3.ValidateAndUpgradeHash(HmacKey.FromString(key), cur, hash, HashType.SHA384, newPw)` |
-
-
-Options can be built once and reused, or adjusted with `WithWorkFactor`, `WithLongPasswordHandling` and `WithPreHash`.
-An out-of-range work factor (including 0) now throws `ArgumentOutOfRangeException` when the options are constructed
-(previously `ValidateAndUpgradeHash` threw `SaltParseException`); omit it or pass `null` for the default. `PreHash` is rejected by the plain `BCrypt` class.
-
-`BCryptExtendedV2` and `BCryptExtendedV3` only accept their own scheme (`PreHash.Sha2` / `PreHash.HmacSha3`) and reject anything
-else with an `ArgumentException`; previously `HashType.None` silently produced a plain bcrypt hash (and for V3, ignored the HMAC key).
-Use `BCrypt` for plain bcrypt hashes.
-To migrate an existing plain bcrypt hash to an extended one, pass `HashType.None` as the `currentKeyHashType` of
-`ValidateAndUpgradeHash`; the options' `LongPasswordHandling` is used to verify that hash, so pass
-`LongPasswordHandling.Truncate` if it was created with truncation.
-
-To move between pre-hash schemes (e.g. V2 to V3) or rotate the V3 HMAC key, use
-`BCrypt.ValidateAndUpgradeHash(currentKey, currentHash, currentPreHash, newKey, options, currentHmacKey, newHmacKey)`;
-the target scheme is `options.PreHash`. See [Enhanced Entropy](xref:enhancedEntropy).
+The migration notes are available here [Upgrading from v4 to v5](xref:upgradingToV5). ASP.NET Core Identity users should also read [ASP.NET Core Identity in v5](xref:identityExtensionsAdoption).
 
 ----
 

@@ -3,12 +3,16 @@ items:
     items:
       - name: Getting Started
         href: ../index.md
+      - name: Upgrading from v4 to v5
+        href: upgradingToV5.md
       - name: Building
         href: building.md
       - name: Enhanced Entropy
         href: enhancedEntropy.md
       - name: Enhanced Entropy - Password Shucking
         href: enhancedEntropyPasswordShucking.md
+      - name: ASP.NET Core Identity in v5
+        href: identityExtensionsAdoption.md
       - name: ASP.NET Core Identity
         href: identity.md
       - name: Salts / Salting
@@ -19,3 +23,5 @@ items:
         href: releases.md
       - name: Common Terms & Concepts
         href: commonTerms.md
+      - name: Common Topics
+        href: common-topics.md

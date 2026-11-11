@@ -6,6 +6,9 @@ uid: identity
 
 `BCrypt.Net.IdentityExtensions` replaces Identity's `IPasswordHasher<TUser>` with bcrypt.
 
+The package is new in v5. If you're replacing Identity's built-in hasher, or your own hasher built on BCrypt.Net v4, start
+with [ASP.NET Core Identity in v5](xref:identityExtensionsAdoption).
+
 ```csharp
 builder.Services.UseBcrypt<IdentityUser>();
 ```

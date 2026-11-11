@@ -29,6 +29,16 @@ It uses a variant of the Blowfish encryption algorithms keying schedule and intr
 Package: <https://www.nuget.org/packages/BCrypt.Net-Next/>
 [![NuGet](https://img.shields.io/nuget/v/BCrypt.Net-Next.svg?style=flat-square)](https://www.nuget.org/packages/BCrypt.Net-Next)
 
+ASP.NET Core Identity: <https://www.nuget.org/packages/BCrypt.Net.IdentityExtensions/> (new in v5). See
+[ASP.NET Core Identity in v5](https://bcryptnet.chrismckee.uk/docs/identityExtensionsAdoption.html).
+
+## Upgrading from v4
+
+v5 is a breaking release: the namespace is now `BCryptNet`, the enhanced-entropy methods have moved to
+`BCryptExtendedV2`, and passwords over 72 bytes throw `PasswordTooLongException` by default instead of being silently
+truncated. Hashes stored by v4 still verify. Read the
+[upgrade guide](https://bcryptnet.chrismckee.uk/docs/upgradingToV5.html) before upgrading.
+
 ## Quick Start
 
 **To Hash a password:**
@@ -58,4 +68,4 @@ These methods are supplied to maintain compatibility and for more advanced cross
 
 This implementation on hashing will generate a salt automatically for you with the work factor (2^number of rounds) set to 11 (which matches the default across most implementation and is currently viewed as a good level of security/risk).
 
-There are various examples in our [test-harness folder](https://github.com/BcryptNet/bcrypt.net/tree/main/testharnesses) and [unit-tests](https://github.com/BcryptNet/bcrypt.net/blob/main/tests/UnitTests/BCryptTests.cs)
+There are various examples in our [examples folder](https://github.com/BcryptNet/bcrypt.net/tree/main/examples) and [unit-tests](https://github.com/BcryptNet/bcrypt.net/blob/main/tests/UnitTests/BCryptTests.cs)

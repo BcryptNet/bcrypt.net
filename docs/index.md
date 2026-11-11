@@ -21,6 +21,17 @@ It uses a variant of the Blowfish encryption algorithms keying schedule and intr
 Package: <https://www.nuget.org/packages/BCrypt.Net-Next/>
 [![NuGet](https://img.shields.io/nuget/v/BCrypt.Net-Next.svg?style=flat-square)](https://www.nuget.org/packages/BCrypt.Net-Next)
 
+### Upgrading from v4
+
+v5 is a breaking release: the namespace is now `BCryptNet`, the enhanced-entropy methods have moved to
+`BCryptExtendedV2`, and passwords over 72 bytes throw by default. See
+[Upgrading from v4 to v5](xref:upgradingToV5).
+
+### ASP.NET Core Identity
+
+The new [`BCrypt.Net.IdentityExtensions`](https://www.nuget.org/packages/BCrypt.Net.IdentityExtensions/) package
+replaces Identity's password hasher with bcrypt. See [ASP.NET Core Identity in v5](xref:identityExtensionsAdoption).
+
 ## Quick Start
 
 ## File-scoped namespaces
